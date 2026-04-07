@@ -1,0 +1,100 @@
+import 'package:flutter/material.dart';
+import 'package:ojas_user/core/constants/app_colors.dart';
+import 'package:ojas_user/features/home/domain/models/product_model.dart';
+import 'package:ojas_user/features/home/presentation/widgets/product_card.dart';
+import 'package:ojas_user/features/home/presentation/widgets/section_title.dart';
+import 'package:ojas_user/core/widgets/centered_content.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class FlashDealsSection extends StatelessWidget {
+  const FlashDealsSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final flashProducts = ProductModel.getFlashDeals();
+
+    return Container(
+      color: AppColors.bgSecondaryLight,
+      child: CenteredContent(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 60),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  SectionTitle(title: 'Flash Deals', onSeeAll: () {}),
+                  const SizedBox(width: 24),
+                  _TimerWidget(),
+                  const Spacer(),
+                ],
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                height: 480,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: flashProducts.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 24),
+                  itemBuilder: (context, index) {
+                    return SizedBox(
+                      width: 300,
+                      child: ProductCard(
+                        product: flashProducts[index],
+                        onAddToCart: () {},
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TimerWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _TimeBox(label: '02'),
+        _TimerDivider(),
+        _TimeBox(label: '14'),
+        _TimerDivider(),
+        _TimeBox(label: '52'),
+      ],
+    );
+  }
+}
+
+class _TimeBox extends StatelessWidget {
+  final String label;
+  const _TimeBox({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: AppColors.accentOrange,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+}
+
+class _TimerDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 4),
+      child: Text(':', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+    );
+  }
+}
