@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/shell_screen.dart';
+import 'package:ojas_user/core/services/session_service.dart';
 import 'package:ojas_user/features/auth/domain/models/user_model.dart';
+import 'package:ojas_user/core/utils/responsive.dart';
 
 class ProfileScreen extends StatelessWidget {
   final UserModel user;
@@ -9,78 +11,104 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+
     return ShellScreen(
       child: Container(
-        color: const Color(0xFFF8FAFC), // Light uniform background
-        padding: const EdgeInsets.symmetric(vertical: 40),
+        color: const Color(0xFFF8FAFC),
+        padding: EdgeInsets.symmetric(vertical: isMobile ? 24 : 40, horizontal: isMobile ? 12 : 24),
         child: Center(
           child: SizedBox(
-            width: 1000,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top Header Section
-                InkWell(
-                  onTap: () => Navigator.of(context).pushReplacementNamed('/'),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.arrow_back, size: 16, color: Color(0xFF64748B)),
-                      const SizedBox(width: 8),
-                      Text('Back', style: GoogleFonts.inter(color: const Color(0xFF64748B), fontSize: 14)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'My Profile',
-                  style: GoogleFonts.inter(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF0F172A),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Manage your account information and preferences',
-                  style: GoogleFonts.inter(
-                    color: const Color(0xFF64748B),
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 32),
+            width: isMobile ? double.infinity : 1000,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Top Header Section
+                  _buildHeader(context),
+                  const SizedBox(height: 32),
 
-                // Main Content Layout
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Left Column (Profile Card)
-                    SizedBox(
-                      width: 280,
-                      child: _buildProfileCard(context),
+                  // Main Content Layout
+                  if (isMobile)
+                    Column(
+                      children: [
+                        _buildProfileCard(context),
+                        const SizedBox(height: 24),
+                        _buildPersonalInfoCard(isMobile),
+                        const SizedBox(height: 24),
+                        _buildAccountInfoCard(isMobile),
+                        const SizedBox(height: 24),
+                        _buildQuickActionsCard(isMobile),
+                      ],
+                    )
+                  else
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Left Column
+                        SizedBox(
+                          width: 280,
+                          child: _buildProfileCard(context),
+                        ),
+                        const SizedBox(width: 24),
+                        
+                        // Right Column
+                        Expanded(
+                          child: Column(
+                            children: [
+                              _buildPersonalInfoCard(isMobile),
+                              const SizedBox(height: 24),
+                              _buildAccountInfoCard(isMobile),
+                              const SizedBox(height: 24),
+                              _buildQuickActionsCard(isMobile),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 24),
-                    
-                    // Right Column (Info Lists)
-                    Expanded(
-                      child: Column(
-                        children: [
-                          _buildPersonalInfoCard(),
-                          const SizedBox(height: 24),
-                          _buildAccountInfoCard(),
-                          const SizedBox(height: 24),
-                          _buildQuickActionsCard(),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 60), // bottom padding
-              ],
+                  const SizedBox(height: 60),
+                ],
+              ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          onTap: () => Navigator.of(context).pushReplacementNamed('/'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.arrow_back, size: 16, color: Color(0xFF64748B)),
+              const SizedBox(width: 8),
+              Text('Back', style: GoogleFonts.inter(color: const Color(0xFF64748B), fontSize: 14)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          'My Profile',
+          style: GoogleFonts.inter(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF0F172A),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Manage your account information and preferences',
+          style: GoogleFonts.inter(
+            color: const Color(0xFF64748B),
+            fontSize: 14,
+          ),
+        ),
+      ],
     );
   }
 
@@ -146,7 +174,10 @@ class ProfileScreen extends StatelessWidget {
             width: double.infinity,
             height: 44,
             child: OutlinedButton(
-              onPressed: () => Navigator.of(context).pushReplacementNamed('/'),
+              onPressed: () {
+                SessionService.instance.setUser(null);
+                Navigator.of(context).pushReplacementNamed('/');
+              },
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Color(0xFFFCA5A5)),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -165,89 +196,125 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPersonalInfoCard() {
+  Widget _buildPersonalInfoCard(bool isMobile) {
+    final nameField = _buildInfoField('Full Name', Icons.person_outline, user.name);
+    final emailField = _buildInfoField('Email Address', Icons.mail_outline, user.email);
+    final phoneField = _buildInfoField('Phone Number', Icons.phone_outlined, user.mobile);
+    final accountTypeField = _buildInfoField('Account Type', Icons.shield_outlined, user.role.toUpperCase());
+
     return _buildSectionCard(
       title: 'Personal Information',
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildInfoField('Full Name', Icons.person_outline, user.name),
-                const SizedBox(height: 20),
-                _buildInfoField('Email Address', Icons.mail_outline, user.email),
-              ],
-            ),
+      isMobile: isMobile,
+      child: isMobile 
+        ? Column(
+            children: [
+              nameField,
+              const SizedBox(height: 16),
+              emailField,
+              const SizedBox(height: 16),
+              phoneField,
+              const SizedBox(height: 16),
+              accountTypeField,
+            ],
+          )
+        : Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    nameField,
+                    const SizedBox(height: 20),
+                    emailField,
+                  ],
+                ),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    phoneField,
+                    const SizedBox(height: 20),
+                    accountTypeField,
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 24),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildInfoField('Phone Number', Icons.phone_outlined, user.mobile),
-                const SizedBox(height: 20),
-                _buildInfoField('Account Type', Icons.shield_outlined, 'User'),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _buildAccountInfoCard() {
+  Widget _buildAccountInfoCard(bool isMobile) {
+    final memberSinceField = _buildInfoField('Member Since', Icons.calendar_today_outlined, 'November 8, 2025');
+    final accountStatusField = _buildInfoField('Account Status', Icons.shield_outlined, 'Unverified', valueColor: const Color(0xFFD97706));
+
     return _buildSectionCard(
       title: 'Account Information',
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildInfoField('Member Since', Icons.calendar_today_outlined, 'November 8, 2025'),
+      isMobile: isMobile,
+      child: isMobile 
+        ? Column(
+            children: [
+              memberSinceField,
+              const SizedBox(height: 16),
+              accountStatusField,
+            ],
+          )
+        : Row(
+            children: [
+              Expanded(child: memberSinceField),
+              const SizedBox(width: 24),
+              Expanded(child: accountStatusField),
+            ],
           ),
-          const SizedBox(width: 24),
-          Expanded(
-            child: _buildInfoField('Account Status', Icons.shield_outlined, 'Unverified', valueColor: const Color(0xFFD97706)),
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _buildQuickActionsCard() {
+  Widget _buildQuickActionsCard(bool isMobile) {
+    final ordersAction = _buildQuickActionItem(
+      icon: Icons.receipt_long_outlined,
+      iconBgColor: const Color(0xFFEFF6FF),
+      iconColor: const Color(0xFF3B82F6),
+      title: 'My Orders',
+      subtitle: 'View order history',
+      onTap: () {},
+    );
+    
+    final wishlistAction = _buildQuickActionItem(
+      icon: Icons.favorite_border_outlined,
+      iconBgColor: const Color(0xFFFCE7F3),
+      iconColor: const Color(0xFFEC4899),
+      title: 'Wishlist',
+      subtitle: 'Saved items',
+      onTap: () {},
+    );
+
     return _buildSectionCard(
       title: 'Quick Actions',
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildQuickActionItem(
-              icon: Icons.receipt_long_outlined,
-              iconBgColor: const Color(0xFFEFF6FF),
-              iconColor: const Color(0xFF3B82F6),
-              title: 'My Orders',
-              subtitle: 'View order history',
-              onTap: () {},
-            ),
+      isMobile: isMobile,
+      child: isMobile 
+        ? Column(
+            children: [
+              ordersAction,
+              const SizedBox(height: 16),
+              wishlistAction,
+            ],
+          )
+        : Row(
+            children: [
+              Expanded(child: ordersAction),
+              const SizedBox(width: 24),
+              Expanded(child: wishlistAction),
+            ],
           ),
-          const SizedBox(width: 24),
-          Expanded(
-            child: _buildQuickActionItem(
-              icon: Icons.favorite_border_outlined,
-              iconBgColor: const Color(0xFFFCE7F3),
-              iconColor: const Color(0xFFEC4899),
-              title: 'Wishlist',
-              subtitle: 'Saved items',
-              onTap: () {},
-            ),
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _buildSectionCard({required String title, required Widget child}) {
+  Widget _buildSectionCard({required String title, required Widget child, required bool isMobile}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(isMobile ? 20 : 32),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),

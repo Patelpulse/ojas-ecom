@@ -2,45 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
+import 'package:ojas_user/core/utils/responsive.dart';
 
 class AdsAndSubscribeSection extends StatelessWidget {
   const AdsAndSubscribeSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+
     return Container(
       width: double.infinity,
       color: AppColors.bgPrimaryLight,
-      padding: const EdgeInsets.symmetric(vertical: 60.0, horizontal: 24.0),
+      padding: EdgeInsets.symmetric(vertical: isMobile ? 32 : 60.0, horizontal: isMobile ? 12 : 24.0),
       child: CenteredContent(
+        horizontalPadding: isMobile ? 0 : 40,
         child: Column(
           children: [
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final isDesktop = constraints.maxWidth > 850;
-                
-                if (isDesktop) {
-                  return IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: const [
-                        Expanded(child: _OfferCard()),
-                        SizedBox(width: 24),
-                        Expanded(child: _SubscribeCard()),
-                      ],
-                    ),
-                  );
-                } else {
-                  return const Column(
-                    children: [
-                      _OfferCard(),
-                      SizedBox(height: 24),
-                      _SubscribeCard(),
-                    ],
-                  );
-                }
-              },
-            ),
+            if (isMobile)
+              Column(
+                children: [
+                  const _OfferCard(),
+                  const SizedBox(height: 24),
+                  const _SubscribeCard(),
+                ],
+              )
+            else
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: const [
+                    Expanded(child: _OfferCard()),
+                    const SizedBox(width: 24),
+                    Expanded(child: _SubscribeCard()),
+                  ],
+                ),
+              ),
             const SizedBox(height: 48),
             // Bottom guarantees row
             Wrap(
@@ -83,8 +80,10 @@ class _OfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+
     return Container(
-      padding: const EdgeInsets.all(40),
+      padding: EdgeInsets.all(isMobile ? 24 : 40),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
@@ -136,7 +135,7 @@ class _OfferCard extends StatelessWidget {
           RichText(
             text: TextSpan(
               style: GoogleFonts.outfit(
-                fontSize: 40,
+                fontSize: isMobile ? 28 : 40,
                 fontWeight: FontWeight.bold,
                 height: 1.2,
                 color: Colors.white,
@@ -158,61 +157,80 @@ class _OfferCard extends StatelessWidget {
               'Discover amazing deals on premium products. Limited time offer for new customers only!',
               style: GoogleFonts.inter(
                 color: Colors.white.withOpacity(0.9),
-                fontSize: 16,
+                fontSize: isMobile ? 14 : 16,
                 height: 1.5,
               ),
             ),
           ),
-          const SizedBox(height: 16),
           const SizedBox(height: 32),
-          Row(
-            children: [
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFFE91E63),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 0,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.flash_on, size: 18),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Claim Offer',
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward, size: 18),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 24),
-              Row(
-                children: [
-                  Icon(Icons.auto_awesome, color: Colors.white.withOpacity(0.8), size: 16),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Valid until Dec 31, 2024',
-                    style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+          if (isMobile)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildClaimButton(),
+                const SizedBox(height: 16),
+                _buildValidityText(),
+              ],
+            )
+          else
+            Row(
+              children: [
+                _buildClaimButton(),
+                const SizedBox(width: 24),
+                _buildValidityText(),
+              ],
+            ),
         ],
       ),
+    );
+  }
+
+  Widget _buildClaimButton() {
+    return ElevatedButton(
+      onPressed: () {},
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFFE91E63),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        elevation: 0,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.flash_on, size: 18),
+          const SizedBox(width: 8),
+          Text(
+            'Claim Offer',
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.arrow_forward, size: 18),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildValidityText() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.auto_awesome, color: Colors.white.withOpacity(0.8), size: 16),
+        const SizedBox(width: 6),
+        Text(
+          'Valid until Dec 31, 2024',
+          style: GoogleFonts.inter(
+            color: Colors.white.withOpacity(0.8),
+            fontSize: 12,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -222,8 +240,10 @@ class _SubscribeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+
     return Container(
-      padding: const EdgeInsets.all(40),
+      padding: EdgeInsets.all(isMobile ? 24 : 40),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -259,14 +279,14 @@ class _SubscribeCard extends StatelessWidget {
           Text(
             'Stay in the Loop',
             style: GoogleFonts.outfit(
-              fontSize: 28,
+              fontSize: isMobile ? 24 : 28,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            'Subscribe to our newsletter and be the first to know about exclusive\ndeals, new arrivals, and special promotions.',
+            'Subscribe to our newsletter and be the first to know about exclusive deals, new arrivals, and special promotions.',
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               color: AppColors.textSecondary,
@@ -290,8 +310,8 @@ class _SubscribeCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: TextField(
                       decoration: InputDecoration(
-                        hintText: 'Enter your email address',
-                        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                        hintText: 'Enter your email',
+                        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
                         border: InputBorder.none,
                       ),
                     ),
@@ -356,30 +376,44 @@ class _SubscribeCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildPerk(Colors.red.shade400, 'Exclusive discounts'),
-                    const SizedBox(height: 12),
-                    _buildPerk(Colors.green.shade400, 'New product alerts'),
-                  ],
+          if (isMobile)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildPerk(Colors.red.shade400, 'Exclusive discounts'),
+                const SizedBox(height: 10),
+                _buildPerk(Colors.green.shade400, 'New product alerts'),
+                const SizedBox(height: 10),
+                _buildPerk(Colors.blue.shade400, 'Early access to sales'),
+                const SizedBox(height: 10),
+                _buildPerk(Colors.purple.shade400, 'Weekly style tips'),
+              ],
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildPerk(Colors.red.shade400, 'Exclusive discounts'),
+                      const SizedBox(height: 12),
+                      _buildPerk(Colors.green.shade400, 'New product alerts'),
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildPerk(Colors.blue.shade400, 'Early access to sales'),
-                    const SizedBox(height: 12),
-                    _buildPerk(Colors.purple.shade400, 'Weekly style tips'),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildPerk(Colors.blue.shade400, 'Early access to sales'),
+                      const SizedBox(height: 12),
+                      _buildPerk(Colors.purple.shade400, 'Weekly style tips'),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );

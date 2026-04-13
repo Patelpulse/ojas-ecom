@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ojas_user/core/services/session_service.dart';
 import 'package:ojas_user/core/theme/app_theme.dart';
 import 'package:ojas_user/core/constants/app_constants.dart';
 import 'package:ojas_user/features/home/presentation/pages/home_page.dart';
@@ -15,9 +16,12 @@ import 'package:ojas_user/features/home/presentation/pages/orders_page.dart';
 import 'package:ojas_user/features/home/presentation/pages/returns_refunds_page.dart';
 import 'package:ojas_user/features/home/presentation/pages/terms_conditions_page.dart';
 import 'package:ojas_user/features/home/presentation/pages/privacy_policy_page.dart';
+import 'package:ojas_user/features/home/presentation/pages/contact_page.dart';
 import 'package:ojas_user/features/auth/domain/models/user_model.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SessionService.instance.initSession();
   runApp(const MyApp());
 }
 
@@ -45,14 +49,19 @@ class MyApp extends StatelessWidget {
         '/returns': (context) => const ReturnsRefundsPage(),
         '/terms': (context) => const TermsConditionsPage(),
         '/privacy': (context) => const PrivacyPolicyPage(),
-        'api/user/login': (context) => const AuthScreen(isInitialLogin: true),
-        'api/user/registration': (context) => const AuthScreen(isInitialLogin: false),
+        '/contact': (context) => const ContactPage(),
+        '/login': (context) => const AuthScreen(isInitialLogin: true),
+        '/register': (context) => const AuthScreen(isInitialLogin: false),
         '/welcome': (context) {
-          final user = ModalRoute.of(context)!.settings.arguments as UserModel;
+          final args = ModalRoute.of(context)!.settings.arguments;
+          final user = args is UserModel ? args : SessionService.instance.currentUser;
+          if (user == null) return const AuthScreen(isInitialLogin: true);
           return WelcomeScreen(user: user);
         },
         '/profile': (context) {
-          final user = ModalRoute.of(context)!.settings.arguments as UserModel;
+          final args = ModalRoute.of(context)!.settings.arguments;
+          final user = args is UserModel ? args : SessionService.instance.currentUser;
+          if (user == null) return const AuthScreen(isInitialLogin: true);
           return ProfileScreen(user: user);
         },
       },

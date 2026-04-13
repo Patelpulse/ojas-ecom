@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/features/home/presentation/widgets/just_for_you_card.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ojas_user/core/utils/responsive.dart';
 
 class JustForYouSection extends StatelessWidget {
   const JustForYouSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
     // Dummy Data for Just For You
     final items = [
       {
@@ -67,6 +69,7 @@ class JustForYouSection extends StatelessWidget {
     ];
 
     return CenteredContent(
+      horizontalPadding: isMobile ? 16 : 40,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 40.0),
         child: Column(
@@ -78,7 +81,7 @@ class JustForYouSection extends StatelessWidget {
                 Text(
                   'Just For You',
                   style: GoogleFonts.outfit(
-                    fontSize: 24,
+                    fontSize: isMobile ? 20 : 24,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
@@ -103,11 +106,11 @@ class JustForYouSection extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: items.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 5,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.72,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: isMobile ? 2 : 5,
+                crossAxisSpacing: isMobile ? 12 : 16,
+                mainAxisSpacing: isMobile ? 12 : 16,
+                childAspectRatio: isMobile ? 0.68 : 0.72,
               ),
               itemBuilder: (context, index) {
                 final item = items[index];

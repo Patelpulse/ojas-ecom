@@ -2,32 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/ojas_layout.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
+import 'package:ojas_user/core/utils/responsive.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+
     return OjasLayout(
       activeTitle: 'PRIVACY POLICY',
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 60),
+        padding: EdgeInsets.symmetric(vertical: isMobile ? 32 : 60),
         color: const Color(0xFFF8F9FA),
         child: CenteredContent(
+          horizontalPadding: isMobile ? 12 : 24,
           child: Column(
             children: [
               // 1. Header
-              _buildHeader(),
-              const SizedBox(height: 60),
+              _buildHeader(isMobile),
+              SizedBox(height: isMobile ? 32 : 60),
 
               // 2. Table of Contents
-              _buildTableOfContents(),
+              _buildTableOfContents(isMobile),
               const SizedBox(height: 48),
 
               // 3. Introduction
               _buildSectionCard(
                 'Introduction',
-                'At Ojas, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website, mobile application, and related services.\n\nBy using our services, you agree to the collection and use of information in accordance with this policy. If you do not agree with our policies and practices, please do not use our services.',
+                'At Ojas, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our services.',
+                isMobile,
               ),
               const SizedBox(height: 24),
 
@@ -35,10 +40,11 @@ class PrivacyPolicyPage extends StatelessWidget {
               _buildDetailedSectionCard(
                 'Information We Collect',
                 icon: Icons.storage_outlined,
+                isMobile: isMobile,
                 subsections: [
-                  _Subsection('Personal Information', 'We collect information you provide directly to us, such as when you create an account, make a purchase, subscribe to our newsletter, or contact us for support. This may include your name, email address, phone number, shipping address, and payment information.'),
-                  _Subsection('Automatically Collected Information', 'We automatically collect certain information about your device and how you interact with our services, including IP address, browser type, operating system, referring URLs, pages viewed, and the dates/times of visits.'),
-                  _Subsection('Cookies and Tracking Technologies', 'We use cookies, web beacons, and similar tracking technologies to collect information about your browsing activities and preferences to provide personalized experiences and improve our services.'),
+                  _Subsection('Personal Information', 'We collect information you provide directly to us, such as when you create an account, make a purchase, or contact us for support.'),
+                  _Subsection('Automatically Collected Information', 'We automatically collect certain information about your device and how you interact with our services.'),
+                  _Subsection('Cookies and Tracking', 'We use cookies and similar technologies to collect information about your browsing activities to improve our services.'),
                 ],
               ),
               const SizedBox(height: 24),
@@ -47,57 +53,44 @@ class PrivacyPolicyPage extends StatelessWidget {
               _buildDetailedSectionCard(
                 'How We Use Your Information',
                 icon: Icons.remove_red_eye_outlined,
+                isMobile: isMobile,
                 subsections: [
-                  _Subsection('Service Provision', 'We use your information to provide, maintain, and improve our services, process transactions, send order confirmations, and provide customer support.'),
-                  _Subsection('Communication', 'We may use your information to send you promotional materials, newsletters, and other communications that may be of interest to you. You can opt out of these communications at any time.'),
-                  _Subsection('Analytics and Improvements', 'We analyze usage patterns and feedback to understand how our services are used and to improve functionality, user experience, and develop new features.'),
+                  _Subsection('Service Provision', 'We use your information to provide, maintain, and improve our services, process transactions, and provide customer support.'),
+                  _Subsection('Communication', 'We may use your information to send you promotional materials and other communications.'),
                 ],
               ),
               const SizedBox(height: 24),
 
-              // 6. Information Sharing and Disclosure
+              // 6. Information Sharing
               _buildDetailedSectionCard(
-                'Information Sharing and Disclosure',
+                'Information Sharing',
                 icon: Icons.group_outlined,
+                isMobile: isMobile,
                 subsections: [
-                  _Subsection('Service Providers', 'We may share your information with third-party service providers who perform services on our behalf, such as payment processing, data analysis, email delivery, hosting services, and customer service.'),
-                  _Subsection('Business Transfers', 'In the event of a merger, acquisition, or sale of all or a portion of our assets, your information may be transferred as part of that transaction.'),
-                  _Subsection('Legal Requirements', 'We may disclose your information if required to do so by law or if we believe that such action is necessary to comply with legal processes, protect our rights, or ensure the safety of our users.'),
+                  _Subsection('Service Providers', 'We may share your information with third-party providers who perform services on our behalf.'),
+                  _Subsection('Legal Requirements', 'We may disclose your information if required by law or to protect our rights.'),
                 ],
               ),
               const SizedBox(height: 24),
 
-              // 7. Data Security
-              _buildDetailedSectionCard(
-                'Data Security',
-                icon: Icons.lock_outline,
-                subsections: [
-                  _Subsection('Security Measures', 'We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.'),
-                  _Subsection('Encryption', 'We use industry-standard encryption protocols to protect sensitive information during transmission and storage.'),
-                  _Subsection('Access Controls', 'Access to personal information is restricted to employees and contractors who need it to perform their job functions and are bound by confidentiality obligations.'),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // 8. Your Rights and Choices
+              // 7. Your Rights
               _buildDetailedSectionCard(
                 'Your Rights and Choices',
                 icon: Icons.security_outlined,
+                isMobile: isMobile,
                 subsections: [
-                  _Subsection('Account Information', 'You can update, correct, or delete your account information at any time by logging into your account settings or contacting us directly.'),
-                  _Subsection('Marketing Communications', 'You can opt out of receiving promotional emails by following the unsubscribe instructions in those emails or by updating your preferences in your account settings.'),
-                  _Subsection('Data Portability', 'You have the right to request a copy of your personal information in a structured, commonly used format.'),
-                  _Subsection('Data Deletion', 'You can request deletion of your personal information, subject to certain legal and business requirements.'),
+                  _Subsection('Account Information', 'You can update or delete your account information at any time in your settings.'),
+                  _Subsection('Marketing Opt-out', 'You can opt out of promotional emails by following unsubscribe instructions.'),
                 ],
               ),
               const SizedBox(height: 48),
 
-              // 9. Contact Us About Privacy
-              _buildPrivacyContact(),
+              // 8. Contact Us
+              _buildPrivacyContact(isMobile),
               const SizedBox(height: 48),
 
-              // 10. Related Information
-              _buildRelatedInformation(context),
+              // 9. Related Info
+              _buildRelatedInformation(context, isMobile),
             ],
           ),
         ),
@@ -105,22 +98,23 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isMobile) {
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFEBEE),
+          decoration: const BoxDecoration(
+            color: Color(0xFFFFEBEE),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.security, color: Color(0xFFF01B6B), size: 40),
+          child: Icon(Icons.security, color: const Color(0xFFF01B6B), size: isMobile ? 32 : 40),
         ),
         const SizedBox(height: 24),
         Text(
           'Privacy Policy',
+          textAlign: TextAlign.center,
           style: GoogleFonts.outfit(
-            fontSize: 48,
+            fontSize: isMobile ? 32 : 48,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF1E1B4B),
           ),
@@ -129,9 +123,9 @@ class PrivacyPolicyPage extends StatelessWidget {
         SizedBox(
           width: 700,
           child: Text(
-            'Your privacy is important to us. This policy explains how we collect, use, and protect your information.',
+            'Your privacy is important to us. This policy explains how we collect and protect your information.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 18, color: Colors.grey[600], height: 1.6),
+            style: GoogleFonts.inter(fontSize: isMobile ? 15 : 18, color: Colors.grey[600], height: 1.6),
           ),
         ),
         const SizedBox(height: 24),
@@ -143,9 +137,10 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTableOfContents() {
+  Widget _buildTableOfContents(bool isMobile) {
     return Container(
-      padding: const EdgeInsets.all(40),
+      width: double.infinity,
+      padding: EdgeInsets.all(isMobile ? 24 : 40),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -157,15 +152,14 @@ class PrivacyPolicyPage extends StatelessWidget {
           Text('Table of Contents', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
           const SizedBox(height: 32),
           Wrap(
-            spacing: 40,
-            runSpacing: 20,
+            spacing: 20,
+            runSpacing: 12,
             children: [
-              _tocItem(Icons.storage_outlined, 'Information We Collect'),
-              _tocItem(Icons.remove_red_eye_outlined, 'How We Use Your Information'),
-              _tocItem(Icons.group_outlined, 'Information Sharing and Disclosure'),
-              _tocItem(Icons.lock_outline, 'Data Security'),
-              _tocItem(Icons.security_outlined, 'Your Rights and Choices'),
-              _tocItem(Icons.language_outlined, 'International Data Transfers'),
+              _tocItem(Icons.storage_outlined, 'Information Collect', isMobile),
+              _tocItem(Icons.remove_red_eye_outlined, 'How We Use Info', isMobile),
+              _tocItem(Icons.group_outlined, 'Sharing Info', isMobile),
+              _tocItem(Icons.lock_outline, 'Data Security', isMobile),
+              _tocItem(Icons.security_outlined, 'Your Rights', isMobile),
             ],
           ),
         ],
@@ -173,9 +167,9 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
-  Widget _tocItem(IconData icon, String text) {
+  Widget _tocItem(IconData icon, String text, bool isMobile) {
     return Container(
-      width: 320,
+      width: isMobile ? double.infinity : 280,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
@@ -187,10 +181,10 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionCard(String title, String content) {
+  Widget _buildSectionCard(String title, String content, bool isMobile) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(40),
+      padding: EdgeInsets.all(isMobile ? 24 : 40),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -207,10 +201,10 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailedSectionCard(String title, {required IconData icon, required List<_Subsection> subsections}) {
+  Widget _buildDetailedSectionCard(String title, {required IconData icon, required List<_Subsection> subsections, required bool isMobile}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(40),
+      padding: EdgeInsets.all(isMobile ? 24 : 40),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -227,7 +221,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                 child: Icon(icon, color: const Color(0xFFF01B6B), size: 24),
               ),
               const SizedBox(width: 20),
-              Text(title, style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
+              Expanded(child: Text(title, style: GoogleFonts.outfit(fontSize: isMobile ? 20 : 24, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)))),
             ],
           ),
           const SizedBox(height: 32),
@@ -247,10 +241,10 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
-  Widget _buildPrivacyContact() {
+  Widget _buildPrivacyContact(bool isMobile) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(40),
+      padding: EdgeInsets.all(isMobile ? 24 : 40),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -265,26 +259,37 @@ class PrivacyPolicyPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'If you have any questions about this Privacy Policy or our privacy practices, please contact us using the information below:',
+            'If you have questions about our privacy practices, contact us below:',
             style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600], height: 1.6),
           ),
           const SizedBox(height: 48),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _contactSubCard(Icons.email_outlined, 'Email', 'privacy@ojas.com'),
-              _contactSubCard(Icons.phone_outlined, 'Phone', '+1 (555) 123-4567'),
-              _contactSubCard(Icons.location_on_outlined, 'Address', '123 Business Ave, Suite 100\nNew York, NY 10001'),
-            ],
-          ),
+          if (isMobile)
+            Column(
+              children: [
+                _contactSubCard(Icons.email_outlined, 'Email', 'privacy@ojas.com', isMobile),
+                const SizedBox(height: 16),
+                _contactSubCard(Icons.phone_outlined, 'Phone', '+1 (555) 123-4567', isMobile),
+                const SizedBox(height: 16),
+                _contactSubCard(Icons.location_on_outlined, 'Address', '123 Business Ave, NY 10001', isMobile),
+              ],
+            )
+          else
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _contactSubCard(Icons.email_outlined, 'Email', 'privacy@ojas.com', isMobile),
+                _contactSubCard(Icons.phone_outlined, 'Phone', '+1 (555) 123-4567', isMobile),
+                _contactSubCard(Icons.location_on_outlined, 'Address', '123 Business Ave, NY 10001', isMobile),
+              ],
+            ),
         ],
       ),
     );
   }
 
-  Widget _contactSubCard(IconData icon, String title, String value) {
+  Widget _contactSubCard(IconData icon, String title, String value, bool isMobile) {
     return Container(
-      width: 320,
+      width: isMobile ? double.infinity : 300,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: const Color(0xFFF8F9FA),
@@ -302,10 +307,10 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
-  Widget _buildRelatedInformation(BuildContext context) {
+  Widget _buildRelatedInformation(BuildContext context, bool isMobile) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 40),
+      padding: EdgeInsets.symmetric(vertical: isMobile ? 40 : 60, horizontal: isMobile ? 20 : 40),
       decoration: BoxDecoration(
         color: const Color(0xFFF01B6B),
         borderRadius: BorderRadius.circular(24),
@@ -314,11 +319,12 @@ class PrivacyPolicyPage extends StatelessWidget {
         children: [
           Text(
             'Related Information',
-            style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.outfit(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 16),
           Text(
-            'Learn more about our policies and how we protect you',
+            'Learn more about our policies',
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(fontSize: 18, color: Colors.white.withOpacity(0.9)),
           ),
@@ -328,9 +334,9 @@ class PrivacyPolicyPage extends StatelessWidget {
             runSpacing: 20,
             alignment: WrapAlignment.center,
             children: [
-              _relatedButton(Icons.email_outlined, 'Contact Us', onPressed: () {}),
-              _relatedButton(Icons.description_outlined, 'Terms & Conditions', onPressed: () => Navigator.pushNamed(context, '/terms')),
-              _relatedButton(Icons.refresh_outlined, 'Returns & Refunds', onPressed: () => Navigator.pushNamed(context, '/returns')),
+              _relatedButton(Icons.email_outlined, 'Contact', onPressed: () => Navigator.pushNamed(context, '/contact')),
+              _relatedButton(Icons.description_outlined, 'Terms', onPressed: () => Navigator.pushNamed(context, '/terms')),
+              _relatedButton(Icons.refresh_outlined, 'Returns', onPressed: () => Navigator.pushNamed(context, '/returns')),
             ],
           ),
         ],

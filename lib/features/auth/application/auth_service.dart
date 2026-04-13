@@ -37,6 +37,7 @@ class AuthService {
     required String password,
     required String gender,
     required String mobile,
+    String role = "user",
   }) async {
     try {
       final response = await http.post(
@@ -49,6 +50,7 @@ class AuthService {
           'password': password,
           'gender': gender.toLowerCase(),
           'mobile': mobile,
+          'role': role,
         }),
       );
 
@@ -63,6 +65,23 @@ class AuthService {
       }
     } catch (e) {
       return AuthResponse(success: false, message: 'Server error: $e');
+    }
+  }
+
+  Future<UserModel?> getCurrentUser() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$endpoint/profile'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['data'] != null ? UserModel.fromJson(data['data']) : null;
+      }
+      return null;
+    } catch (e) {
+      return null;
     }
   }
 }

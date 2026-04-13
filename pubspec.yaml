@@ -38,6 +38,7 @@ dependencies:
   http: ^1.6.0
   flutter_svg: ^2.2.4
   ionicons: ^0.2.2
+  file_picker: ^8.1.7
 
 dev_dependencies:
   flutter_test:

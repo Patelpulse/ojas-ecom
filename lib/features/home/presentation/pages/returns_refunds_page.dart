@@ -3,50 +3,54 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/ojas_layout.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
+import 'package:ojas_user/core/utils/responsive.dart';
 
 class ReturnsRefundsPage extends StatelessWidget {
   const ReturnsRefundsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+
     return OjasLayout(
       activeTitle: 'RETURNS & REFUNDS',
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 60),
+        padding: EdgeInsets.symmetric(vertical: isMobile ? 32 : 60),
         color: const Color(0xFFF8F9FA),
         child: CenteredContent(
+          horizontalPadding: isMobile ? 12 : 24,
           child: Column(
             children: [
               // 1. Header Section
-              _buildHeader(),
-              const SizedBox(height: 60),
+              _buildHeader(isMobile),
+              SizedBox(height: isMobile ? 32 : 60),
 
               // 2. Highlights
-              _buildHighlights_4(),
-              const SizedBox(height: 80),
+              _buildHighlights(isMobile),
+              SizedBox(height: isMobile ? 48 : 80),
 
               // 3. How to Return
-              _buildHowToReturn(),
-              const SizedBox(height: 80),
+              _buildHowToReturn(isMobile),
+              SizedBox(height: isMobile ? 48 : 80),
 
               // 4. Return Policies by Category
-              _buildPoliciesByCategory(),
-              const SizedBox(height: 80),
+              _buildPoliciesByCategory(isMobile),
+              SizedBox(height: isMobile ? 48 : 80),
 
               // 5. Refund Options
-              _buildRefundOptions(),
-              const SizedBox(height: 80),
+              _buildRefundOptions(isMobile),
+              SizedBox(height: isMobile ? 48 : 80),
 
               // 6. Non-Returnable & Important Notes
-              _buildNotesSection(),
-              const SizedBox(height: 80),
+              _buildNotesSection(isMobile),
+              SizedBox(height: isMobile ? 48 : 80),
 
               // 7. FAQ
-              _buildFAQ(),
-              const SizedBox(height: 80),
+              _buildFAQ(isMobile),
+              SizedBox(height: isMobile ? 48 : 80),
 
               // 8. Help Banner
-              _buildHelpBanner(),
+              _buildHelpBanner(isMobile),
             ],
           ),
         ),
@@ -54,22 +58,23 @@ class ReturnsRefundsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isMobile) {
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFEBEE),
+          decoration: const BoxDecoration(
+            color: Color(0xFFFFEBEE),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.refresh, color: Color(0xFFF01B6B), size: 40),
+          child: Icon(Icons.refresh, color: const Color(0xFFF01B6B), size: isMobile ? 32 : 40),
         ),
         const SizedBox(height: 24),
         Text(
           'Returns & Refunds',
+          textAlign: TextAlign.center,
           style: GoogleFonts.outfit(
-            fontSize: 48,
+            fontSize: isMobile ? 32 : 48,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF1E1B4B),
           ),
@@ -78,10 +83,10 @@ class ReturnsRefundsPage extends StatelessWidget {
         SizedBox(
           width: 700,
           child: Text(
-            'We want you to be completely satisfied with your purchase. If you\'re not happy, we\'ll make it right with our hassle-free return policy.',
+            'We want you to be completely satisfied with your purchase. If you\'re not happy, we\'ll make it right.',
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
-              fontSize: 18,
+              fontSize: isMobile ? 15 : 18,
               color: Colors.grey[600],
               height: 1.6,
             ),
@@ -91,22 +96,24 @@ class ReturnsRefundsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHighlights_4() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildHighlights(bool isMobile) {
+    return Wrap(
+      spacing: 20,
+      runSpacing: 20,
+      alignment: WrapAlignment.center,
       children: [
-        _highlightCard('60', 'Days to Return'),
-        _highlightCard('Free', 'Return Shipping'),
-        _highlightCard('3-5', 'Days for Refund'),
-        _highlightCard('100%', 'Money Back'),
+        _highlightCard('60', 'Days to Return', isMobile),
+        _highlightCard('Free', 'Return Shipping', isMobile),
+        _highlightCard('3-5', 'Days for Refund', isMobile),
+        _highlightCard('100%', 'Money Back', isMobile),
       ],
     );
   }
 
-  Widget _highlightCard(String title, String subtitle) {
+  Widget _highlightCard(String title, String subtitle, bool isMobile) {
     return Container(
-      width: 250,
-      padding: const EdgeInsets.symmetric(vertical: 32),
+      width: isMobile ? 160 : 250,
+      padding: EdgeInsets.symmetric(vertical: isMobile ? 24 : 32, horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -119,7 +126,7 @@ class ReturnsRefundsPage extends StatelessWidget {
           Text(
             title,
             style: GoogleFonts.outfit(
-              fontSize: 32,
+              fontSize: isMobile ? 24 : 32,
               fontWeight: FontWeight.bold,
               color: const Color(0xFFF01B6B),
             ),
@@ -127,16 +134,18 @@ class ReturnsRefundsPage extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             subtitle,
-            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600]),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildHowToReturn() {
+  Widget _buildHowToReturn(bool isMobile) {
     return Container(
-      padding: const EdgeInsets.all(48),
+      width: double.infinity,
+      padding: EdgeInsets.all(isMobile ? 24 : 48),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -148,81 +157,102 @@ class ReturnsRefundsPage extends StatelessWidget {
         children: [
           Text(
             'How to Return an Item',
-            style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.outfit(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)),
           ),
-          const SizedBox(height: 48),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _stepItem('1', Icons.inventory_2_outlined, 'Initiate Return', 'Log into your account and select the item you want to return'),
-              _stepItem('2', Icons.local_shipping_outlined, 'Print Label', 'Download and print the prepaid return shipping label'),
-              _stepItem('3', Icons.refresh_outlined, 'Pack & Ship', 'Package the item securely and drop it off at any shipping location'),
-              _stepItem('4', Icons.payments_outlined, 'Get Refund', 'Receive your refund within 3-5 business days after we receive the item'),
-            ],
-          ),
+          SizedBox(height: isMobile ? 32 : 48),
+          if (isMobile)
+            Column(
+              children: [
+                _stepItem('1', Icons.inventory_2_outlined, 'Initiate Return', 'Log in and select the item to return', isMobile),
+                _separator(isMobile),
+                _stepItem('2', Icons.local_shipping_outlined, 'Print Label', 'Print the prepaid shipping label', isMobile),
+                _separator(isMobile),
+                _stepItem('3', Icons.refresh_outlined, 'Pack & Ship', 'Deliver package to any shipping point', isMobile),
+                _separator(isMobile),
+                _stepItem('4', Icons.payments_outlined, 'Get Refund', 'Refunded within 3-5 business days', isMobile),
+              ],
+            )
+          else
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: _stepItem('1', Icons.inventory_2_outlined, 'Initiate Return', 'Log in and select the item to return', isMobile)),
+                Expanded(child: _stepItem('2', Icons.local_shipping_outlined, 'Print Label', 'Print the prepaid shipping label', isMobile)),
+                Expanded(child: _stepItem('3', Icons.refresh_outlined, 'Pack & Ship', 'Deliver package to any shipping point', isMobile)),
+                Expanded(child: _stepItem('4', Icons.payments_outlined, 'Get Refund', 'Refunded within 3-5 business days', isMobile)),
+              ],
+            ),
         ],
       ),
     );
   }
 
-  Widget _stepItem(String step, IconData icon, String title, String desc) {
-    return SizedBox(
-      width: 220,
-      child: Column(
-        children: [
-          Stack(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: const BoxDecoration(color: Color(0xFFFFEBEE), shape: BoxShape.circle),
-                child: Icon(icon, color: const Color(0xFFF01B6B), size: 32),
-              ),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: const BoxDecoration(color: Color(0xFFF01B6B), shape: BoxShape.circle),
-                  child: Text(step, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Text(title, style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
-          const SizedBox(height: 12),
-          Text(desc, textAlign: TextAlign.center, style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600], height: 1.5)),
-        ],
-      ),
+  Widget _separator(bool isMobile) {
+    return Container(
+      height: 30,
+      width: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      color: const Color(0xFFFFEBEE),
     );
   }
 
-  Widget _buildPoliciesByCategory() {
+  Widget _stepItem(String step, IconData icon, String title, String desc, bool isMobile) {
+    return Column(
+      children: [
+        Stack(
+          children: [
+            Container(
+              padding: EdgeInsets.all(isMobile ? 16 : 20),
+              decoration: const BoxDecoration(color: Color(0xFFFFEBEE), shape: BoxShape.circle),
+              child: Icon(icon, color: const Color(0xFFF01B6B), size: isMobile ? 24 : 32),
+            ),
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(color: Color(0xFFF01B6B), shape: BoxShape.circle),
+                child: Text(step, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Text(title, textAlign: TextAlign.center, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+        const SizedBox(height: 12),
+        Text(desc, textAlign: TextAlign.center, style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600], height: 1.5)),
+      ],
+    );
+  }
+
+  Widget _buildPoliciesByCategory(bool isMobile) {
     return Column(
       children: [
         Text(
-          'Return Policies by Category',
-          style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)),
+          'Return Policies',
+          style: GoogleFonts.outfit(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)),
         ),
-        const SizedBox(height: 48),
+        SizedBox(height: isMobile ? 32 : 48),
         Wrap(
           spacing: 24,
           runSpacing: 24,
           children: [
-            _policyCard(Icons.smartphone, 'Electronics', '30 days', '15%', 'Must be in original packaging with all accessories'),
-            _policyCard(Icons.checkroom, 'Clothing & Accessories', '60 days', 'None', 'Must have original tags and be unworn'),
-            _policyCard(Icons.home, 'Home & Garden', '45 days', '10%', 'Must be unused and in original condition'),
-            _policyCard(Icons.menu_book, 'Books & Media', '30 days', 'None', 'Must be in original condition'),
+            _policyCard(Icons.smartphone, 'Electronics', '30 days', '15%', 'Must be in original packaging', isMobile),
+            _policyCard(Icons.checkroom, 'Clothing', '60 days', 'None', 'Tags must be intact and unworn', isMobile),
+            _policyCard(Icons.home, 'Home & Garden', '45 days', '10%', 'Must be unused in original condition', isMobile),
+            _policyCard(Icons.menu_book, 'Books & Media', '30 days', 'None', 'Must be in original condition', isMobile),
           ],
         ),
       ],
     );
   }
 
-  Widget _policyCard(IconData icon, String category, String window, String fee, String conditions) {
+  Widget _policyCard(IconData icon, String category, String window, String fee, String conditions, bool isMobile) {
     return Container(
-      width: 530,
-      padding: const EdgeInsets.all(32),
+      width: isMobile ? double.infinity : 530,
+      padding: EdgeInsets.all(isMobile ? 20 : 32),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -235,7 +265,7 @@ class ReturnsRefundsPage extends StatelessWidget {
             children: [
               Icon(icon, color: Colors.blue[700], size: 24),
               const SizedBox(width: 12),
-              Text(category, style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
+              Expanded(child: Text(category, style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87))),
             ],
           ),
           const SizedBox(height: 20),
@@ -263,30 +293,42 @@ class ReturnsRefundsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildRefundOptions() {
+  Widget _buildRefundOptions(bool isMobile) {
     return Column(
       children: [
         Text(
           'Refund Options',
-          style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)),
+          style: GoogleFonts.outfit(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)),
         ),
-        const SizedBox(height: 48),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _refundOptionCard(Icons.credit_card, 'Original Payment Method', '3-5 business days', 'Refund will be processed back to your original payment method'),
-            _refundOptionCard(Icons.inventory_2_outlined, 'Store Credit', 'Instant', 'Receive store credit that can be used for future purchases'),
-            _refundOptionCard(Icons.refresh, 'Exchange', '5-7 business days', 'Exchange for a different size, color, or similar item'),
-          ],
-        ),
+        SizedBox(height: isMobile ? 32 : 48),
+        if (isMobile)
+          Column(
+            children: [
+              _refundOptionCard(Icons.credit_card, 'Original Payment', '3-5 Days', 'Refund to your original payment method', isMobile),
+              const SizedBox(height: 16),
+              _refundOptionCard(Icons.inventory_2_outlined, 'Store Credit', 'Instant', 'Instant credit for future purchases', isMobile),
+              const SizedBox(height: 16),
+              _refundOptionCard(Icons.refresh, 'Exchange', '5-7 Days', 'Exchange for a different size or color', isMobile),
+            ],
+          )
+        else
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(child: _refundOptionCard(Icons.credit_card, 'Original Payment', '3-5 Days', 'Refund to your original payment method', isMobile)),
+              const SizedBox(width: 20),
+              Expanded(child: _refundOptionCard(Icons.inventory_2_outlined, 'Store Credit', 'Instant', 'Instant credit for future purchases', isMobile)),
+              const SizedBox(width: 20),
+              Expanded(child: _refundOptionCard(Icons.refresh, 'Exchange', '5-7 Days', 'Exchange for a different size or color', isMobile)),
+            ],
+          ),
       ],
     );
   }
 
-  Widget _refundOptionCard(IconData icon, String title, String time, String desc) {
+  Widget _refundOptionCard(IconData icon, String title, String time, String desc, bool isMobile) {
     return Container(
-      width: 350,
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(isMobile ? 24 : 32),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -302,9 +344,9 @@ class ReturnsRefundsPage extends StatelessWidget {
             child: Icon(icon, color: const Color(0xFFF01B6B), size: 28),
           ),
           const SizedBox(height: 24),
-          Text(title, style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
+          Text(title, textAlign: TextAlign.center, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
           const SizedBox(height: 8),
-          Text(time, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFFF01B6B))),
+          Text(time, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: const Color(0xFFF01B6B))),
           const SizedBox(height: 16),
           Text(desc, textAlign: TextAlign.center, style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600], height: 1.5)),
         ],
@@ -312,59 +354,56 @@ class ReturnsRefundsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildNotesSection() {
-    return Row(
+  Widget _buildNotesSection(bool isMobile) {
+    return Flex(
+      direction: isMobile ? Axis.vertical : Axis.horizontal,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Non-Returnable Items
         Expanded(
+          flex: isMobile ? 0 : 1,
           child: Container(
-            padding: const EdgeInsets.all(40),
+            padding: EdgeInsets.all(isMobile ? 24 : 40),
             decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.cancel, color: Colors.red, size: 28),
+                    const Icon(Icons.cancel, color: Colors.red, size: 24),
                     const SizedBox(width: 16),
-                    Text('Non-Returnable Items', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
+                    Expanded(child: Text('Non-Returnable Items', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)))),
                   ],
                 ),
                 const SizedBox(height: 32),
-                Text('For health, safety, and quality reasons, the following items cannot be returned:', style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600], height: 1.6)),
-                const SizedBox(height: 24),
-                _noteItem(Icons.cancel_outlined, 'Personalized or customized items', Colors.red),
-                _noteItem(Icons.cancel_outlined, 'Perishable goods (food, flowers, etc.)', Colors.red),
-                _noteItem(Icons.cancel_outlined, 'Intimate or sanitary goods', Colors.red),
-                _noteItem(Icons.cancel_outlined, 'Hazardous materials', Colors.red),
+                _noteItem(Icons.cancel_outlined, 'Personalized items', Colors.red),
+                _noteItem(Icons.cancel_outlined, 'Perishable goods', Colors.red),
+                _noteItem(Icons.cancel_outlined, 'Intimate items', Colors.red),
                 _noteItem(Icons.cancel_outlined, 'Digital downloads', Colors.red),
-                _noteItem(Icons.cancel_outlined, 'Gift cards', Colors.red),
               ],
             ),
           ),
         ),
-        const SizedBox(width: 40),
+        SizedBox(width: isMobile ? 0 : 40, height: isMobile ? 24 : 0),
         // Important Notes
         Expanded(
+          flex: isMobile ? 0 : 1,
           child: Container(
-            padding: const EdgeInsets.all(40),
+            padding: EdgeInsets.all(isMobile ? 24 : 40),
             decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.info_outline, color: Colors.orange, size: 28),
+                    const Icon(Icons.info_outline, color: Colors.orange, size: 24),
                     const SizedBox(width: 16),
-                    Text('Important Notes', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
+                    Expanded(child: Text('Important Notes', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B)))),
                   ],
                 ),
                 const SizedBox(height: 32),
-                _noteItemWithDesc(Icons.check_circle_outline, 'Free Return Shipping', 'We provide prepaid return labels for all eligible returns.', Colors.green),
-                _noteItemWithDesc(Icons.check_circle_outline, 'Original Packaging', 'Items should be returned in their original packaging when possible.', Colors.green),
-                _noteItemWithDesc(Icons.check_circle_outline, 'Inspection Process', 'All returned items are inspected before refunds are processed.', Colors.green),
-                _noteItemWithDesc(Icons.access_time, 'Processing Time', 'Refunds are processed within 3-5 business days after we receive your return.', Colors.blue),
+                _noteItemWithDesc(Icons.check_circle_outline, 'Free Shipping', 'We provide prepaid labels for all eligible returns.', Colors.green),
+                _noteItemWithDesc(Icons.access_time, 'Processing', 'Refunds processed within 3-5 days after receipt.', Colors.blue),
               ],
             ),
           ),
@@ -392,13 +431,13 @@ class ReturnsRefundsPage extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 22),
+          Icon(icon, color: color, size: 20),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+                Text(title, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87)),
                 const SizedBox(height: 4),
                 Text(desc, style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600], height: 1.4)),
               ],
@@ -409,38 +448,46 @@ class ReturnsRefundsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildFAQ() {
+  Widget _buildFAQ(bool isMobile) {
     return Container(
-      padding: const EdgeInsets.all(48),
+      width: double.infinity,
+      padding: EdgeInsets.all(isMobile ? 24 : 48),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
       child: Column(
         children: [
-          Text('Frequently Asked Questions', style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
-          const SizedBox(height: 48),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    _faqItem('Can I return an item without the original packaging?', 'While we prefer items to be returned in original packaging, we understand this isn\'t always possible. Contact our customer service team for assistance.'),
-                    _faqItem('What if I received a damaged item?', 'If you received a damaged item, please contact us immediately with photos. We\'ll arrange for a replacement or full refund at no cost to you.'),
-                    _faqItem('Can I exchange an item for a different size or color?', 'Yes! You can exchange items for different sizes or colors. Simply initiate a return and place a new order, or contact customer service for assistance.'),
-                  ],
+          Text('FAQ', style: GoogleFonts.outfit(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
+          SizedBox(height: isMobile ? 32 : 48),
+          if (isMobile)
+            Column(
+              children: [
+                _faqItem('Damaged item?', 'Contact us with photos. We\'ll arrange a replacement or full refund.'),
+                _faqItem('Return shipping fee?', 'Free for all eligible returns. We provide prepaid labels.'),
+                _faqItem('Exchanges?', 'Yes! Initiate a return or contact support for assistance.'),
+              ],
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      _faqItem('Damaged item?', 'Contact us with photos. We\'ll arrange a replacement or full refund.'),
+                      _faqItem('Return shipping fee?', 'Free for all eligible returns. We provide prepaid labels.'),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 48),
-              Expanded(
-                child: Column(
-                  children: [
-                    _faqItem('How long does it take to process a refund?', 'Once we receive your returned item, refunds are typically processed within 3-5 business days. The time for the refund to appear in your account depends on your payment method.'),
-                    _faqItem('Do I need to pay for return shipping?', 'No, we provide free return shipping labels for all eligible returns. Simply print the label and drop off your package at any shipping location.'),
-                    _faqItem('Can I return items purchased with a discount or coupon?', 'Yes, you can return items purchased with discounts or coupons. The refund will be for the amount you actually paid after the discount was applied.'),
-                  ],
+                const SizedBox(width: 48),
+                Expanded(
+                  child: Column(
+                    children: [
+                      _faqItem('Exchanges?', 'Yes! Initiate a return or contact support for assistance.'),
+                      _faqItem('Refund window?', 'Processed within 3-5 business days after receipt.'),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );
@@ -448,7 +495,7 @@ class ReturnsRefundsPage extends StatelessWidget {
 
   Widget _faqItem(String question, String answer) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 32),
+      padding: const EdgeInsets.only(bottom: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -460,44 +507,51 @@ class ReturnsRefundsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHelpBanner() {
+  Widget _buildHelpBanner(bool isMobile) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 60),
+      padding: EdgeInsets.symmetric(vertical: isMobile ? 40 : 60, horizontal: 20),
       decoration: BoxDecoration(
         color: const Color(0xFFF01B6B),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
         children: [
-          Text('Need Help with a Return?', style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text('Need Help?', textAlign: TextAlign.center, style: GoogleFonts.outfit(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.bold, color: Colors.white)),
           const SizedBox(height: 16),
-          Text('Our customer service team is here to help you with any return or refund questions.', style: GoogleFonts.inter(fontSize: 18, color: Colors.white.withOpacity(0.9))),
+          Text('Our team is here to help with any questions.', textAlign: TextAlign.center, style: GoogleFonts.inter(fontSize: 16, color: Colors.white.withOpacity(0.9))),
           const SizedBox(height: 40),
-          Row(
+          Flex(
+            direction: isMobile ? Axis.vertical : Axis.horizontal,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFFF01B6B),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 0,
+              SizedBox(
+                width: isMobile ? double.infinity : null,
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFFF01B6B),
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 0,
+                  ),
+                  child: const Text('Start Return', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
-                child: const Text('Start a Return', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               ),
-              const SizedBox(width: 20),
-              OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white, width: 2),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              SizedBox(width: isMobile ? 0 : 20, height: isMobile ? 12 : 0),
+              SizedBox(
+                width: isMobile ? double.infinity : null,
+                child: OutlinedButton(
+                  onPressed: () {},
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.white, width: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Contact Support', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
-                child: const Text('Contact Support', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               ),
             ],
           ),

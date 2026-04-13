@@ -3,6 +3,7 @@ import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/features/home/domain/models/product_model.dart';
 import 'package:ojas_user/features/home/presentation/widgets/daily_deal_card.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ojas_user/core/utils/responsive.dart';
 
 class DailyDealsSection extends StatelessWidget {
   const DailyDealsSection({super.key});
@@ -10,8 +11,10 @@ class DailyDealsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dailyDeals = ProductModel.getDailyDeals();
+    final bool isMobile = Responsive.isMobile(context);
 
     return CenteredContent(
+      horizontalPadding: isMobile ? 16 : 40,
       child: Column(
         children: [
           const SizedBox(height: 40),
@@ -21,7 +24,7 @@ class DailyDealsSection extends StatelessWidget {
               Text(
                 'Daily Deals',
                 style: GoogleFonts.outfit(
-                  fontSize: 24,
+                  fontSize: isMobile ? 20 : 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -33,14 +36,23 @@ class DailyDealsSection extends StatelessWidget {
           ),
           const SizedBox(height: 32),
           
-          // Row of 2 Cards
-          Row(
-            children: [
-              Expanded(child: DailyDealCard(product: dailyDeals[0])),
-              const SizedBox(width: 24),
-              Expanded(child: DailyDealCard(product: dailyDeals[1])),
-            ],
-          ),
+          // Cards: Row on Desktop, Column on Mobile
+          if (isMobile)
+            Column(
+              children: [
+                DailyDealCard(product: dailyDeals[0]),
+                const SizedBox(height: 16),
+                DailyDealCard(product: dailyDeals[1]),
+              ],
+            )
+          else
+            Row(
+              children: [
+                Expanded(child: DailyDealCard(product: dailyDeals[0])),
+                const SizedBox(width: 24),
+                Expanded(child: DailyDealCard(product: dailyDeals[1])),
+              ],
+            ),
           
           const SizedBox(height: 32),
           // Pagination Dots

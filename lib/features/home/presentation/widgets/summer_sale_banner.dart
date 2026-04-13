@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ojas_user/core/utils/responsive.dart';
 
 class SummerSaleBanner extends StatelessWidget {
   const SummerSaleBanner({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+
     return CenteredContent(
+      horizontalPadding: isMobile ? 16 : 40,
       child: Container(
-        height: 280,
+        height: isMobile ? 200 : 280,
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -19,7 +23,7 @@ class SummerSaleBanner extends StatelessWidget {
           ),
         ),
         child: Container(
-          padding: const EdgeInsets.all(40),
+          padding: EdgeInsets.all(isMobile ? 20 : 40),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             gradient: LinearGradient(
@@ -54,12 +58,12 @@ class SummerSaleBanner extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Text(
-                'Summer Sale - Up to 50% Off\non Selected Items',
+                isMobile ? 'Summer Sale\nUp to 50% Off' : 'Summer Sale - Up to 50% Off\non Selected Items',
                 style: GoogleFonts.outfit(
                   color: Colors.white,
-                  fontSize: 36,
+                  fontSize: isMobile ? 24 : 36,
                   fontWeight: FontWeight.bold,
                   height: 1.2,
                 ),

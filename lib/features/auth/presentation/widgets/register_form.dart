@@ -49,6 +49,7 @@ class _RegisterFormState extends State<RegisterForm> {
         password: _passwordController.text.trim(),
         gender: "other", // Dummy default value to satisfy API if needed
         mobile: _mobileController.text.trim(),
+        role: "user",
       );
 
       setState(() => _isLoading = false);
@@ -143,7 +144,7 @@ class _RegisterFormState extends State<RegisterForm> {
           _buildFieldLabel('Email Address'),
           _buildTextField(
             controller: _emailController,
-            hintText: 'Email... (e.g. rohitsengar@gmail.com)',
+            hintText: 'Email... (e.g. demo@example.com)',
             icon: Icons.mail_outline,
             isFocusedFill: true, // as per the image
             validator: (v) => v!.isEmpty || !v.contains('@') ? 'Invalid email' : null,

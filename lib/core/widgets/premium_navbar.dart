@@ -128,7 +128,7 @@ class _TopUtilityBar extends StatelessWidget {
           _TopLink(
             icon: Icons.location_on_outlined, 
             text: 'Track Order',
-            onTap: () => Navigator.pushNamed(context, '/orders'),
+            onTap: () => Navigator.pushReplacementNamed(context, '/orders'),
           ),
           const SizedBox(width: 20),
           _TopLink(icon: Icons.phone_outlined, text: '+91 908754321'),
@@ -196,7 +196,7 @@ class _MainNavbar extends StatelessWidget {
           const SizedBox(width: 50),
           // Navigation Menu Items
           const _NavMenu(
-            items: ['HOME', 'FEATURES', 'DEAL', 'SHOP', 'BLOG'],
+            items: ['HOME', 'FEATURES', 'DEALS', 'SHOP', 'BLOG'],
           ),
           const Spacer(),
           // User Interactions
@@ -223,8 +223,12 @@ class _NavMenu extends StatelessWidget {
           final item = items[index];
           bool isActive = false;
           if (item == 'HOME' && currentRoute == '/') isActive = true;
-          if (item == 'LOGIN' && currentRoute == 'api/user/login') isActive = true;
-          if (item == 'REGISTER' && currentRoute == 'api/user/registration') isActive = true;
+          if (item == 'FEATURES' && currentRoute == '/features') isActive = true;
+          if (item == 'DEALS' && currentRoute == '/deals') isActive = true;
+          if (item == 'SHOP' && currentRoute == '/shop') isActive = true;
+          if (item == 'BLOG' && currentRoute == '/blog') isActive = true;
+          if (item == 'LOGIN' && currentRoute == '/login') isActive = true;
+          if (item == 'REGISTER' && currentRoute == '/register') isActive = true;
 
 
 
@@ -237,13 +241,19 @@ class _NavMenu extends StatelessWidget {
               onTap: () {
                 if (item == 'HOME') {
                   Navigator.of(context).pushReplacementNamed('/');
+                } else if (item == 'FEATURES') {
+                  Navigator.of(context).pushReplacementNamed('/features');
+                } else if (item == 'DEALS') {
+                  Navigator.of(context).pushReplacementNamed('/deals');
+                } else if (item == 'SHOP') {
+                  Navigator.of(context).pushReplacementNamed('/shop');
+                } else if (item == 'BLOG') {
+                  Navigator.of(context).pushReplacementNamed('/blog');
                 } else if (item == 'LOGIN') {
-                  Navigator.of(context).pushReplacementNamed('/user/login');
+                  Navigator.of(context).pushReplacementNamed('/login');
                 } else if (item == 'REGISTER') {
-                  Navigator.of(context).pushReplacementNamed('/user/registration');
+                  Navigator.of(context).pushReplacementNamed('/register');
                 }
-
-
               },
             ),
           );
@@ -382,7 +392,7 @@ class _UserActionSection extends StatelessWidget {
         // Auth Buttons
         TextButton(
           onPressed: () {
-            Navigator.of(context).pushReplacementNamed('/user/login');
+            Navigator.of(context).pushReplacementNamed('/login');
           },
           child: Text(
 
@@ -394,7 +404,7 @@ class _UserActionSection extends StatelessWidget {
         const SizedBox(width: 10),
         ElevatedButton(
           onPressed: () {
-            Navigator.of(context).pushReplacementNamed('/user/registration');
+            Navigator.of(context).pushReplacementNamed('/register');
           },
 
 

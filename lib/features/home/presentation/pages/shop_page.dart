@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/ojas_layout.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
+import 'package:ojas_user/core/utils/responsive.dart';
 
 class ShopPage extends StatefulWidget {
   const ShopPage({super.key});
@@ -78,38 +79,42 @@ class _ShopPageState extends State<ShopPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+    final bool isTablet = Responsive.isTablet(context);
+
     return OjasLayout(
       activeTitle: 'SHOP',
       child: Container(
         color: const Color(0xFFF8FAFC),
         child: CenteredContent(
-          horizontalPadding: 20,
+          horizontalPadding: isMobile ? 12 : 20,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 40),
+            padding: EdgeInsets.symmetric(vertical: isMobile ? 20 : 40),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Sidebar
-                _buildSidebar(),
-                
-                const SizedBox(width: 30),
+                // Sidebar - hidden on mobile
+                if (!isMobile) ...[
+                  _buildSidebar(),
+                  const SizedBox(width: 30),
+                ],
                 
                 // Main Content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTopBar(),
+                      _buildTopBar(isMobile),
                       const SizedBox(height: 20),
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: _shopProducts.length,
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 20,
-                          mainAxisSpacing: 20,
-                          mainAxisExtent: 360,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: isMobile ? 2 : (isTablet ? 2 : 3),
+                          crossAxisSpacing: isMobile ? 12 : 20,
+                          mainAxisSpacing: isMobile ? 12 : 20,
+                          mainAxisExtent: isMobile ? 320 : 360,
                         ),
                         itemBuilder: (context, index) {
                           return _ShopProductCard(product: _shopProducts[index]);
@@ -126,7 +131,7 @@ class _ShopPageState extends State<ShopPage> {
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(bool isMobile) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -134,57 +139,106 @@ class _ShopPageState extends State<ShopPage> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          Text(
-            '${_shopProducts.length} products found • Showing 1-${_shopProducts.length} of ${_shopProducts.length}',
-            style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF64748B)),
-          ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                  borderRadius: BorderRadius.circular(6),
+              if (!isMobile)
+                Text(
+                  '${_shopProducts.length} products found',
+                  style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF64748B)),
                 ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _sortBy,
-                    isDense: true,
-                    icon: const Icon(Icons.keyboard_arrow_down, size: 16, color: Color(0xFF64748B)),
-                    style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF334155)),
-                    items: ['Featured', 'Price: Low to High', 'Price: High to Low'].map((v) {
-                      return DropdownMenuItem(value: v, child: Text(v));
-                    }).toList(),
-                    onChanged: (v) => setState(() => _sortBy = v!),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF01B6B),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                padding: const EdgeInsets.all(6),
-                child: const Icon(Icons.grid_view, color: Colors.white, size: 18),
-              ),
-              const SizedBox(width: 6),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                padding: const EdgeInsets.all(6),
-                child: const Icon(Icons.view_list, color: Colors.grey, size: 18),
+              if (isMobile)
+                _buildFilterButton(),
+              Row(
+                children: [
+                  _buildSortDropdown(),
+                  if (!isMobile) ...[
+                    const SizedBox(width: 12),
+                    _buildViewToggles(),
+                  ],
+                ],
               ),
             ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFilterButton() {
+    return InkWell(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          builder: (context) => Container(
+            height: MediaQuery.of(context).size.height * 0.8,
+            padding: const EdgeInsets.all(20),
+            color: Colors.white,
+            child: SingleChildScrollView(child: _buildSidebar()),
+          ),
+        );
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.filter_list, size: 20, color: Color(0xFFF01B6B)),
+          const SizedBox(width: 8),
+          Text(
+            'Filters',
+            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFFF01B6B)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSortDropdown() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _sortBy,
+          isDense: true,
+          icon: const Icon(Icons.keyboard_arrow_down, size: 16, color: Color(0xFF64748B)),
+          style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF334155)),
+          items: ['Featured', 'Price: Low to High', 'Price: High to Low'].map((v) {
+            return DropdownMenuItem(value: v, child: Text(v));
+          }).toList(),
+          onChanged: (v) => setState(() => _sortBy = v!),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildViewToggles() {
+    return Row(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF01B6B),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          padding: const EdgeInsets.all(6),
+          child: const Icon(Icons.grid_view, color: Colors.white, size: 18),
+        ),
+        const SizedBox(width: 6),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          padding: const EdgeInsets.all(6),
+          child: const Icon(Icons.view_list, color: Colors.grey, size: 18),
+        ),
+      ],
     );
   }
 

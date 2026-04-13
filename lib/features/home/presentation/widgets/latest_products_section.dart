@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/features/home/presentation/widgets/latest_product_card.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ojas_user/core/utils/responsive.dart';
 
 class LatestProductsSection extends StatelessWidget {
   const LatestProductsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
     final items = [
       {
         'imageUrl': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
@@ -68,6 +70,7 @@ class LatestProductsSection extends StatelessWidget {
     ];
 
     return CenteredContent(
+      horizontalPadding: isMobile ? 16 : 40,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 40.0),
         child: Column(
@@ -77,7 +80,7 @@ class LatestProductsSection extends StatelessWidget {
             Text(
               'Latest Products',
               style: GoogleFonts.outfit(
-                fontSize: 24,
+                fontSize: isMobile ? 20 : 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
               ),

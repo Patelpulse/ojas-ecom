@@ -4,6 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:ojas_user/core/widgets/ojas_layout.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
+import 'package:ojas_user/core/utils/responsive.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:html' as html;
 
 class BecomeVendorPage extends StatefulWidget {
   const BecomeVendorPage({super.key});
@@ -13,457 +18,612 @@ class BecomeVendorPage extends StatefulWidget {
 }
 
 class _BecomeVendorPageState extends State<BecomeVendorPage> {
-  int _currentStep = 0; // 0: Personal Info, 1: Business Info, etc.
-  bool _isLogin = true; // Added toggle state
+  int _currentStep = 0;
+  bool _isLogin = true;
+  final Set<String> _selectedCategories = {};
+  String? _selectedFileName;
+  PlatformFile? _selectedFile;
+
+  // Login Controllers
+  final TextEditingController _loginEmailController = TextEditingController();
+  final TextEditingController _loginPasswordController = TextEditingController();
+
+  // Signup Controllers - Personal
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  // Signup Controllers - Business
+  final TextEditingController _businessNameController = TextEditingController();
+  String _businessType = 'Select type';
+  final TextEditingController _websiteController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _stateController = TextEditingController();
+  final TextEditingController _zipCodeController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+
+  // Signup Controllers - Products
+  final TextEditingController _avgOrderValueController = TextEditingController();
+  String _monthlyVolume = 'Select volume';
+  final TextEditingController _productDetailsController = TextEditingController();
+
+  // Signup Controllers - Documents
+  final TextEditingController _taxIdController = TextEditingController();
+  final TextEditingController _bankAccountController = TextEditingController();
+
+  bool _agreedToTerms = false;
+  bool _agreedToMarketing = false;
+  bool _obscureLoginPassword = true;
+  bool _obscureSignupPassword = true;
+
+  Future<void> _pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+      withData: true,
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedFile = result.files.single;
+        _selectedFileName = result.files.single.name;
+      });
+    }
+  }
+
+  Future<void> _submitApplication() async {
+    if (!_agreedToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please agree to the Terms & Conditions and Privacy Policy to proceed.'),
+          backgroundColor: Color(0xFFF01B6B),
+        ),
+      );
+      return;
+    }
+
+    // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator(color: Color(0xFFF01B6B))),
+    );
+
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse('http://72.61.172.182:5001/api/signup'));
+      
+      // Fields
+      request.fields['firstName'] = _firstNameController.text;
+      request.fields['lastName'] = _lastNameController.text;
+      request.fields['email'] = _emailController.text;
+      request.fields['phone'] = _phoneController.text;
+      request.fields['password'] = _passwordController.text;
+      request.fields['businessName'] = _businessNameController.text;
+      request.fields['businessType'] = _businessType;
+      request.fields['website'] = _websiteController.text;
+      request.fields['address'] = _addressController.text;
+      request.fields['city'] = _cityController.text;
+      request.fields['state'] = _stateController.text;
+      request.fields['zipCode'] = _zipCodeController.text;
+      request.fields['description'] = _descriptionController.text;
+      request.fields['categories'] = jsonEncode(_selectedCategories.toList());
+      request.fields['avgOrderValue'] = _avgOrderValueController.text;
+      request.fields['monthlyVolume'] = _monthlyVolume;
+      request.fields['productDetails'] = _productDetailsController.text;
+      request.fields['taxId'] = _taxIdController.text;
+      request.fields['bankAccount'] = _bankAccountController.text;
+
+      // File
+      if (_selectedFile != null && _selectedFile!.bytes != null) {
+        request.files.add(http.MultipartFile.fromBytes(
+          'license',
+          _selectedFile!.bytes!,
+          filename: _selectedFileName,
+        ));
+      }
+
+      var response = await request.send();
+      var responseData = await response.stream.bytesToString();
+      var data = jsonDecode(responseData);
+
+      Navigator.pop(context); // Remove loading
+
+      if (response.statusCode == 201) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Success'),
+            content: Text(data['message'] ?? 'Application submitted successfully!'),
+            actions: [
+              TextButton(onPressed: () {
+                Navigator.pop(context);
+                _toggleMode(true);
+              }, child: const Text('OK'))
+            ],
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Error submitting application')));
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
+
+  Future<void> _loginVendor() async {
+     // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator(color: Color(0xFFF01B6B))),
+    );
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://72.61.172.182:5001/api/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': _loginEmailController.text,
+          'password': _loginPasswordController.text,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+      Navigator.pop(context);
+
+      if (response.statusCode == 200) {
+        // Handle successful login - redirect to vendor panel
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login successful! Redirecting to Vendor Panel...')));
+        
+        final token = data['token'];
+        // Construct the vendor dashboard URL with the token
+        // In production, this would be your production URL
+        final vendorPanelUrl = 'http://localhost:3001/login?token=$token';
+        
+        Future.delayed(const Duration(seconds: 1), () {
+           html.window.location.href = vendorPanelUrl;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Login failed')));
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
 
   void _nextStep() {
-    if (_currentStep < 4) {
+    if (_currentStep == 4) {
+      _submitApplication();
+    } else {
       setState(() => _currentStep++);
     }
   }
 
   void _previousStep() {
-    if (_currentStep > 0) {
-      setState(() => _currentStep--);
-    }
+
+    if (_currentStep > 0) setState(() => _currentStep--);
   }
 
   void _toggleMode(bool login) {
     setState(() {
       _isLogin = login;
-      if (!login) _currentStep = 0; // Reset steps when switching
+      if (!login) _currentStep = 0;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+
     return OjasLayout(
       activeTitle: 'BECOME VENDOR',
-      child: CenteredContent(
-        child: Column(
-          children: [
-            const SizedBox(height: 80),
-            
-            // 1. Header Section
-            if (!_isLogin)
+      child: Container(
+        color: const Color(0xFFF8FAFC),
+        padding: EdgeInsets.symmetric(vertical: isMobile ? 32 : 80),
+        child: CenteredContent(
+          horizontalPadding: isMobile ? 12 : 24,
+          child: Column(
+            children: [
+              if (!_isLogin)
+                Text(
+                  'Become a vendor',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.outfit(
+                    fontSize: isMobile ? 32 : 48,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+              if (!_isLogin) SizedBox(height: isMobile ? 12 : 16),
               Text(
-                'Become a vendor',
-                style: GoogleFonts.outfit(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0F172A),
+                _isLogin 
+                    ? 'Access your vendor dashboard to manage your products, orders, and business analytics.'
+                    : 'Join thousands of successful vendors and grow your business with us.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: isMobile ? 15 : 18,
+                  color: const Color(0xFF475569),
+                  height: 1.5,
                 ),
               ),
-            if (!_isLogin) const SizedBox(height: 16),
-            Text(
-              _isLogin 
-                  ? 'Access your vendor dashboard to manage your products, orders, and business analytics.'
-                  : 'Join thousands of successful vendors on our platform and grow your business with us.\nStart selling to customers worldwide today!',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 18,
-                color: Colors.grey[600],
-                height: 1.5,
+              SizedBox(height: isMobile ? 32 : 48),
+              
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+                  ],
+                ),
+                child: Flex(
+                  direction: isMobile ? Axis.vertical : Axis.horizontal,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GestureDetector(
+                      onTap: () => _toggleMode(false),
+                      child: _ToggleButton(title: 'Become a Vendor', isActive: !_isLogin, fullWidth: isMobile),
+                    ),
+                    if (isMobile) const SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: () => _toggleMode(true),
+                      child: _ToggleButton(title: 'Login', isActive: _isLogin, fullWidth: isMobile),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 48),
-            
-            // 2. Toggle Buttons
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[200]!),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GestureDetector(
-                    onTap: () => _toggleMode(false),
-                    child: _ToggleButton(title: 'Become a Vendor', isActive: !_isLogin),
-                  ),
-                  GestureDetector(
-                    onTap: () => _toggleMode(true),
-                    child: _ToggleButton(title: 'Login', isActive: _isLogin),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 60),
+              SizedBox(height: isMobile ? 40 : 60),
 
-            // Main Dynamic Content
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: _isLogin ? _buildLoginForm() : _buildRegistrationFlow(),
-            ),
-            
-            const SizedBox(height: 100),
-          ],
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: _isLogin ? _buildLoginForm(isMobile) : _buildRegistrationFlow(isMobile),
+              ),
+              
+              SizedBox(height: isMobile ? 60 : 100),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildLoginForm() {
+  Widget _buildLoginForm(bool isMobile) {
     return Container(
-      width: 500,
-      padding: const EdgeInsets.all(48),
+      width: isMobile ? double.infinity : 500,
+      padding: EdgeInsets.all(isMobile ? 24 : 48),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 20, offset: const Offset(0, 10)),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           CircleAvatar(
-            radius: 40,
-            backgroundColor: const Color(0xFFFCE7F3), // Soft pink
-            child: const Icon(Icons.person_outline, size: 36, color: Color(0xFFE91E63)),
+            radius: isMobile ? 32 : 40,
+            backgroundColor: const Color(0xFFFCE7F3),
+            child: Icon(Icons.person_outline, size: isMobile ? 28 : 36, color: const Color(0xFFF01B6B)),
           ),
           const SizedBox(height: 24),
           Text(
             'Vendor Login',
-            style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Access your vendor dashboard',
-            style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF64748B)),
-          ),
-          const SizedBox(height: 48),
-
-          // Fields
-          _buildAuthFieldLabel('Email Address'),
-          _buildAuthTextField(
-            hintText: 'rohitsengar@gmail.com',
-            icon: Icons.mail_outline,
-            isFocusedFill: true,
-          ),
-          const SizedBox(height: 24),
-
-          _buildAuthFieldLabel('Password'),
-          _buildAuthTextField(
-            hintText: '••••••••••',
-            icon: Icons.lock_outline,
-            obscure: true,
-            suffixIcon: const Icon(Icons.visibility_outlined, color: Color(0xFF94A3B8), size: 18),
-            isFocusedFill: true,
+            style: GoogleFonts.outfit(fontSize: isMobile ? 24 : 28, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
           ),
           const SizedBox(height: 32),
-
-          // Button
+          _FormField(label: 'Email Address *', hintText: 'demo@example.com', controller: _loginEmailController),
+          const SizedBox(height: 20),
+          _FormField(
+            label: 'Password *', 
+            hintText: '••••••••', 
+            isPassword: true, 
+            isObscured: _obscureLoginPassword,
+            onToggleVisibility: () => setState(() => _obscureLoginPassword = !_obscureLoginPassword),
+            controller: _loginPasswordController
+          ),
+          const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
-            height: 48,
+            height: 52,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: _loginVendor,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE91E63),
+                backgroundColor: const Color(0xFFF01B6B),
                 foregroundColor: Colors.white,
-                elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Sign In to Dashboard', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.arrow_forward, size: 16),
-                ],
-              ),
+              child: Text('Sign In', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
             ),
           ),
-          const SizedBox(height: 40),
-          Divider(color: Colors.grey[200]),
-          const SizedBox(height: 32),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Don\'t have an account? ', style: GoogleFonts.inter(color: const Color(0xFF64748B), fontSize: 13)),
-              InkWell(
-                onTap: () => _toggleMode(false),
-                child: Text('Become a Vendor', style: GoogleFonts.inter(color: const Color(0xFFE91E63), fontSize: 13, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          InkWell(
-            onTap: () {},
-            child: Text('Forgot your password?', style: GoogleFonts.inter(color: const Color(0xFFE91E63), fontSize: 13)),
+          const SizedBox(height: 24),
+          TextButton(
+            onPressed: () => _toggleMode(false),
+            child: Text('New here? Become a Vendor', style: GoogleFonts.inter(color: const Color(0xFFF01B6B), fontWeight: FontWeight.w600)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAuthFieldLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          text,
-          style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 12, color: const Color(0xFF334155)),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAuthTextField({
-    required String hintText,
-    required IconData icon,
-    bool obscure = false,
-    Widget? suffixIcon,
-    bool isFocusedFill = false,
-  }) {
-    return TextFormField(
-      obscureText: obscure,
-      style: GoogleFonts.inter(color: const Color(0xFF334155), fontSize: 14),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: GoogleFonts.inter(color: const Color(0xFF0F172A), fontSize: 14), // Using darker hint to match mock
-        prefixIcon: Icon(icon, color: const Color(0xFF94A3B8), size: 18),
-        suffixIcon: suffixIcon,
-        filled: isFocusedFill,
-        fillColor: const Color(0xFFEEF2F6),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: isFocusedFill ? Colors.transparent : const Color(0xFFE2E8F0)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFE91E63)),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRegistrationFlow() {
+  Widget _buildRegistrationFlow(bool isMobile) {
     return Column(
       children: [
-        // 3. Benefits Grid
-        Row(
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          alignment: WrapAlignment.center,
           children: [
-            _BenefitCard(
-              icon: Icons.attach_money_rounded,
-              title: 'Competitive Commission',
-              description: 'Low fees with transparent pricing structure',
-            ),
-            _BenefitCard(
-              icon: Icons.public_rounded,
-              title: 'Global Reach',
-              description: 'Access to customers in 25+ countries',
-            ),
-            _BenefitCard(
-              icon: Icons.security_rounded,
-              title: 'Secure Payments',
-              description: 'Fast and secure payment processing',
-            ),
-            _BenefitCard(
-              icon: Icons.star_outline_rounded,
-              title: 'Marketing Support',
-              description: 'Promotional tools and marketing assistance',
-            ),
+            _BenefitCard(icon: Icons.attach_money, title: 'Commission', desc: 'Low fees', isMobile: isMobile),
+            _BenefitCard(icon: Icons.public, title: 'Global', desc: 'Reach 25+ countries', isMobile: isMobile),
+            _BenefitCard(icon: Icons.security, title: 'Secure', desc: 'Safe payments', isMobile: isMobile),
           ],
         ),
-        const SizedBox(height: 60),
-        
-        // 4. Progress bar section
+        SizedBox(height: isMobile ? 40 : 60),
         Container(
-          padding: const EdgeInsets.all(40),
+          padding: EdgeInsets.all(isMobile ? 20 : 40),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey[100]!),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.01), blurRadius: 20, offset: const Offset(0, 4)),
-            ],
+            border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
           child: Column(
             children: [
-              // Progress Steps
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _StepItem(icon: Icons.person, label: 'Personal Info', subLabel: 'Your personal details', isActive: _currentStep == 0, isCompleted: _currentStep > 0),
-                  _StepItem(icon: Icons.business, label: 'Business Info', subLabel: 'Business information', isActive: _currentStep == 1, isCompleted: _currentStep > 1),
-                  _StepItem(icon: Icons.inventory_2_outlined, label: 'Products', subLabel: 'Product details', isActive: _currentStep == 2, isCompleted: _currentStep > 2),
-                  _StepItem(icon: Icons.description_outlined, label: 'Documents', subLabel: 'Required documents', isActive: _currentStep == 3, isCompleted: _currentStep > 3),
-                  _StepItem(icon: Icons.check_circle_outline, label: 'Review', subLabel: 'Review & submit', isActive: _currentStep == 4),
-                ],
-              ),
-              const SizedBox(height: 60),
+              if (isMobile)
+                _MobileProgress(currentStep: _currentStep)
+              else
+                _DesktopProgress(currentStep: _currentStep),
+              SizedBox(height: isMobile ? 32 : 48),
               const Divider(),
-              const SizedBox(height: 60),
-              
-              // 5. Dynamic Form Section
-              if (_currentStep == 0) _buildPersonalInfoStep(),
-              if (_currentStep == 1) _buildBusinessInfoStep(),
-              if (_currentStep == 2) _buildProductsStep(),
-              if (_currentStep == 3) _buildDocumentsStep(),
-              if (_currentStep == 4) _buildReviewStep(),
-              
+              SizedBox(height: isMobile ? 32 : 48),
+              _buildStepContent(isMobile),
               const SizedBox(height: 48),
-
-              // 6. Navigation Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _NavButton(
-                    label: 'Previous', 
-                    onPressed: _currentStep > 0 ? _previousStep : null,
-                    isPrimary: false,
-                    icon: Icons.arrow_back,
-                  ),
-                  _NavButton(
-                    label: _currentStep == 4 ? 'Submit Application' : 'Next', 
-                    isSubmission: _currentStep == 4,
-                    onPressed: _currentStep < 4 
-                      ? _nextStep 
-                      : () {
-                          // Handle final submission here
-                          print('Application Submitted');
-                        },
-                    isPrimary: true,
+                  if (_currentStep > 0)
+                    _NavBtn(label: 'Back', icon: Icons.arrow_back, onPressed: _previousStep, isPrimary: false)
+                  else
+                    const SizedBox(),
+                  _NavBtn(
+                    label: _currentStep == 4 ? 'Submit Application' : 'Next',
                     icon: _currentStep == 4 ? Icons.check_circle_outline : Icons.arrow_forward,
+                    onPressed: _nextStep,
+                    isPrimary: true,
+                    color: _currentStep == 4 ? const Color(0xFF86EFAC) : const Color(0xFFF01B6B),
+                    textColor: _currentStep == 4 ? Colors.white : Colors.white,
                   ),
                 ],
               ),
             ],
           ),
         ),
-        const SizedBox(height: 100),
-        const _ReadyToStartSellingCard(),
       ],
     );
   }
 
-  Widget _buildProductsStep() {
+  Widget _buildStepContent(bool isMobile) {
+    switch (_currentStep) {
+      case 0: return _buildPersonalInfo(isMobile);
+      case 1: return _buildBusinessInfo(isMobile);
+      case 2: return _buildProductsInfo(isMobile);
+      case 3: return _buildDocumentsInfo(isMobile);
+      case 4: return _buildReviewInfo(isMobile);
+      default: return const Center(child: Text('Form Section Coming Soon'));
+    }
+  }
+
+  Widget _buildPersonalInfo(bool isMobile) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Product Information',
-          style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
+        Text('Personal Information', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(child: _FormField(label: 'First Name *', hintText: 'First Name', controller: _firstNameController)),
+            const SizedBox(width: 24),
+            Expanded(child: _FormField(label: 'Last Name *', hintText: 'Last Name', controller: _lastNameController)),
+          ],
         ),
-        const SizedBox(height: 32),
-        
-        Text(
-          'Product Categories * (Select all that apply)',
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(child: _FormField(label: 'Email Address *', hintText: 'Email Address', controller: _emailController)),
+            const SizedBox(width: 24),
+            Expanded(child: _FormField(label: 'Phone Number *', hintText: '+91 1234567890', controller: _phoneController)),
+          ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
+        _FormField(
+          label: 'Password *', 
+          hintText: 'Create a strong password', 
+          isPassword: true, 
+          isObscured: _obscureSignupPassword,
+          onToggleVisibility: () => setState(() => _obscureSignupPassword = !_obscureSignupPassword),
+          controller: _passwordController
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBusinessInfo(bool isMobile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Business Information', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(child: _FormField(label: 'Business Name *', hintText: 'Enter business name', controller: _businessNameController)),
+            const SizedBox(width: 24),
+            Expanded(child: _DropdownField(
+              label: 'Business Type *', 
+              items: const ['Select type', 'Individual', 'Partnership', 'LLC', 'Corporation', 'Other'],
+              value: _businessType,
+              onChanged: (val) => setState(() => _businessType = val!),
+            )),
+          ],
+        ),
+        const SizedBox(height: 24),
+        _FormField(label: 'Business Website (Optional)', hintText: 'https://www.example.com', controller: _websiteController),
+        const SizedBox(height: 24),
+        _FormField(label: 'Business Address *', hintText: 'Enter street address', controller: _addressController),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(child: _FormField(label: 'City *', hintText: 'City', controller: _cityController)),
+            const SizedBox(width: 16),
+            Expanded(child: _FormField(label: 'State *', hintText: 'State', controller: _stateController)),
+            const SizedBox(width: 16),
+            Expanded(child: _FormField(label: 'Zip Code *', hintText: 'Zip Code', controller: _zipCodeController)),
+          ],
+        ),
+        const SizedBox(height: 24),
+        _FormField(label: 'Business Description', hintText: 'Briefly describe your business...', maxLines: 3, controller: _descriptionController),
+      ],
+    );
+  }
+
+  Widget _buildProductsInfo(bool isMobile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Product Information', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 24),
+        Text('Product Categories * (Select all that apply)', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF0F172A))),
+        const SizedBox(height: 12),
         Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-          ),
-          child: GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            childAspectRatio: 6,
-            children: const [
-              _CheckboxItem(label: 'Electronics'),
-              _CheckboxItem(label: 'Fashion & Clothing'),
-              _CheckboxItem(label: 'Home & Garden'),
-              _CheckboxItem(label: 'Beauty & Personal Care'),
-              _CheckboxItem(label: 'Sports & Outdoors'),
-              _CheckboxItem(label: 'Books & Media'),
-              _CheckboxItem(label: 'Toys & Games'),
-              _CheckboxItem(label: 'Automotive'),
-              _CheckboxItem(label: 'Health & Wellness'),
-              _CheckboxItem(label: 'Food & Beverages'),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(border: Border.all(color: const Color(0xFFE2E8F0)), borderRadius: BorderRadius.circular(8)),
+          child: Column(
+            children: [
+              _buildCategoryGrid([
+                'Electronics',
+                'Fashion & Clothing',
+                'Home & Garden',
+                'Beauty & Personal Care',
+                'Sports & Outdoors',
+                'Books & Media',
+                'Toys & Games',
+                'Automotive',
+                'Health & Wellness',
+                'Food & Beverages',
+              ], isMobile),
             ],
           ),
         ),
-        const SizedBox(height: 32),
-        
-        const Row(
-          children: [
-            Expanded(
-              child: _FormField(
-                label: 'Average Order Value (₹)',
-                hintText: 'e.g., ₹500-1000 or ₹2500',
-                subText: 'Enter amount in rupees or select from suggestions',
-              ),
-            ),
-            SizedBox(width: 32),
-            Expanded(
-              child: _FormField(
-                label: 'Expected Monthly Volume',
-                hintText: 'Select volume',
-                isDropdown: true,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 32),
-        
-        const _FormField(
-          label: 'Product Types & Details',
-          hintText: 'Describe the types of products you plan to sell...',
-          isTextArea: true,
-        ),
+        const SizedBox(height: 24),
+        if (isMobile) ...[
+          _FormField(label: 'Average Order Value (₹)', hintText: '₹500-1000', controller: _avgOrderValueController),
+          const SizedBox(height: 24),
+          _DropdownField(
+            label: 'Expected Monthly Volume', 
+            items: const ['Select volume', '1-10 orders', '11-50 orders', '51-100 orders', '101-500 orders', '500+ orders'],
+            value: _monthlyVolume,
+            onChanged: (val) => setState(() => _monthlyVolume = val!),
+          ),
+        ] else 
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: _FormField(label: 'Average Order Value (₹)', hintText: '₹500-1000', controller: _avgOrderValueController)),
+              const SizedBox(width: 24),
+              Expanded(child: _DropdownField(
+                label: 'Expected Monthly Volume', 
+                items: const ['Select volume', '1-10 orders', '11-50 orders', '51-100 orders', '101-500 orders', '500+ orders'],
+                value: _monthlyVolume,
+                onChanged: (val) => setState(() => _monthlyVolume = val!),
+              )),
+            ],
+          ),
+        const SizedBox(height: 24),
+        _FormField(label: 'Product Types & Details', hintText: 'Describe details...', maxLines: 4, controller: _productDetailsController),
       ],
     );
   }
 
-  Widget _buildDocumentsStep() {
+  Widget _buildCategoryGrid(List<String> categories, bool isMobile) {
+    if (isMobile) {
+      return Column(
+        children: categories.map((cat) => _CheckboxItem(
+          label: cat,
+          value: _selectedCategories.contains(cat),
+          onChanged: (val) {
+            setState(() {
+              if (val == true) {
+                _selectedCategories.add(cat);
+              } else {
+                _selectedCategories.remove(cat);
+              }
+            });
+          },
+        )).toList(),
+      );
+    }
+
+    List<Widget> rows = [];
+    for (int i = 0; i < categories.length; i += 2) {
+      rows.add(Row(
+        children: [
+          Expanded(child: _buildCheckbox(categories[i])),
+          if (i + 1 < categories.length)
+            Expanded(child: _buildCheckbox(categories[i + 1])),
+        ],
+      ));
+    }
+    return Column(children: rows);
+  }
+
+  Widget _buildCheckbox(String label) {
+    return _CheckboxItem(
+      label: label,
+      value: _selectedCategories.contains(label),
+      onChanged: (val) {
+        setState(() {
+          if (val == true) {
+            _selectedCategories.add(label);
+          } else {
+            _selectedCategories.remove(label);
+          }
+        });
+      },
+    );
+  }
+
+  Widget _buildDocumentsInfo(bool isMobile) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Required Documents',
-          style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
-        ),
-        const SizedBox(height: 32),
-        
-        Text(
-          'Business License/Registration *',
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
-        ),
-        const SizedBox(height: 12),
-        const _FileUploadField(
-          hintText: 'Upload your business license or registration document',
+        Text('Required Documents', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 24),
+        _DashedUploadBox(
+          label: 'Business License/Registration *',
+          hint: _selectedFileName ?? 'Upload your business license or registration document',
+          onTap: _pickFile,
         ),
         const SizedBox(height: 24),
-        
-        const Row(
-          children: [
-            Expanded(
-              child: _FormField(
-                label: 'Tax ID/EIN *',
-                hintText: 'XX-XXXXXXX',
-              ),
-            ),
-            SizedBox(width: 32),
-            Expanded(
-              child: _FormField(
-                label: 'Bank Account Number *',
-                hintText: 'Enter full bank account number',
-              ),
-            ),
-          ],
-        ),
+        if (isMobile) ...[
+          _FormField(label: 'Tax ID/EIN *', hintText: 'XX-XXXXXXX', controller: _taxIdController),
+          const SizedBox(height: 24),
+          _FormField(label: 'Bank Account Number *', hintText: 'Enter full bank account number', controller: _bankAccountController),
+        ] else
+          Row(
+            children: [
+              Expanded(child: _FormField(label: 'Tax ID/EIN *', hintText: 'XX-XXXXXXX', controller: _taxIdController)),
+              const SizedBox(width: 24),
+              Expanded(child: _FormField(label: 'Bank Account Number *', hintText: 'Enter full bank account number', controller: _bankAccountController)),
+            ],
+          ),
         const SizedBox(height: 32),
-        
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -471,458 +631,147 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: const Color(0xFFDBEAFE)),
           ),
-          child: RichText(
-            text: TextSpan(
-              style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF1E40AF), height: 1.5),
-              children: const [
-                TextSpan(text: 'Note: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                TextSpan(text: 'All documents will be securely stored and used only for verification purposes. We support PDF, JPG, JPEG, and PNG formats up to 10MB.'),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildReviewStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Review Your Application',
-          style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
-        ),
-        const SizedBox(height: 48),
-        
-        _BulletReviewSection(
-          title: 'Personal Information',
-          subtitle: 'sdfsd sd • rohitsengar@gmail.com • sdefsdef',
-        ),
-        const SizedBox(height: 32),
-        
-        _BulletReviewSection(
-          title: 'Business Information',
-          subtitle: 'hotel • Partnership • jaipur, Uttar Pradesh',
-        ),
-        const SizedBox(height: 32),
-        
-        _BulletReviewSection(
-          title: 'Product Categories',
-          subtitle: 'Electronics, Fashion & Clothing',
-        ),
-        const SizedBox(height: 60),
-        
-        Row(
-          children: [
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: const Color(0xFF94A3B8)),
-              ),
-            ),
-            const SizedBox(width: 16),
-            RichText(
-              text: TextSpan(
-                style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569)),
-                children: [
-                  const TextSpan(text: 'I agree to the '),
-                  TextSpan(
-                    text: 'Terms & Conditions',
-                    style: GoogleFonts.inter(color: const Color(0xFFF01B6B), fontWeight: FontWeight.w500),
-                  ),
-                  const TextSpan(text: ' and '),
-                  TextSpan(
-                    text: 'Privacy Policy',
-                    style: GoogleFonts.inter(color: const Color(0xFFF01B6B), fontWeight: FontWeight.w500),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        Row(
-          children: [
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: const Color(0xFF94A3B8)),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Text(
-              'I consent to receive marketing communications and updates about vendor opportunities',
-              style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569)),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPersonalInfoStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Personal Information',
-          style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
-        ),
-        const SizedBox(height: 32),
-        const Row(
-          children: [
-            Expanded(child: _FormField(label: 'First Name *', hintText: 'Your first name')),
-            SizedBox(width: 32),
-            Expanded(child: _FormField(label: 'Last Name *', hintText: 'Your last name')),
-          ],
-        ),
-        const SizedBox(height: 24),
-        const Row(
-          children: [
-            Expanded(child: _FormField(label: 'Email Address *', hintText: 'rohitsengar@gmail.com')),
-            SizedBox(width: 32),
-            Expanded(child: _FormField(label: 'Phone Number *', hintText: '+1 (555) 123-4567')),
-          ],
-        ),
-        const SizedBox(height: 24),
-        const Row(
-          children: [
-            Expanded(child: _FormField(label: 'Password *', hintText: '*********', isPassword: true)),
-            SizedBox(width: 32),
-            Spacer(),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBusinessInfoStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Business Information',
-          style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
-        ),
-        const SizedBox(height: 32),
-        const _FormField(label: 'Business Name *', hintText: 'Your business name'),
-        const SizedBox(height: 24),
-        const Row(
-          children: [
-            Expanded(child: _FormField(label: 'Business Type *', hintText: 'Select business type', isDropdown: true)),
-            SizedBox(width: 32),
-            Expanded(child: _FormField(label: 'Website', hintText: 'https://yourbusiness.com')),
-          ],
-        ),
-        const SizedBox(height: 24),
-        const _FormField(label: 'Business Address *', hintText: 'Street address'),
-        const SizedBox(height: 24),
-        const Row(
-          children: [
-            Expanded(child: _FormField(label: 'City *', hintText: 'ROhit@#602')),
-            SizedBox(width: 32),
-            Expanded(child: _FormField(label: 'State/Province *', hintText: 'State/Province')),
-          ],
-        ),
-        const SizedBox(height: 24),
-        const Row(
-          children: [
-            Expanded(child: _FormField(label: 'Zip Code', hintText: 'Zip Code')),
-            SizedBox(width: 32),
-            Spacer(),
-          ],
-        ),
-        const SizedBox(height: 24),
-        const _FormField(label: 'Business Description *', hintText: 'Tell us about your business...', isTextArea: true),
-      ],
-    );
-  }
-}
-
-class _CheckboxItem extends StatelessWidget {
-  final String label;
-  final bool value;
-  const _CheckboxItem({required this.label, this.value = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 20,
-          height: 20,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: const Color(0xFFCBD5E1)),
-            color: value ? const Color(0xFFF01B6B) : Colors.white,
-          ),
-          child: value ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
-        ),
-        const SizedBox(width: 12),
-        Text(label, style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569))),
-      ],
-    );
-  }
-}
-
-class _ReadyToStartSellingCard extends StatelessWidget {
-  const _ReadyToStartSellingCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 40),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF01B6B),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Text(
-            'Ready to Start Selling?',
-            style: GoogleFonts.outfit(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Join our community of successful vendors and start growing your business today!',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 18,
-              color: Colors.white.withOpacity(0.9),
-            ),
-          ),
-          const SizedBox(height: 48),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _FeatureItem(title: '2-3 Days', subtitle: 'Application Review'),
-              _FeatureItem(title: '24/7', subtitle: 'Vendor Support'),
-              _FeatureItem(title: 'No Setup', subtitle: 'Fees to Start'),
+              const Icon(Icons.info_outline, color: Color(0xFF3B82F6), size: 18),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Note: All documents will be securely stored and used only for verification purposes. We support PDF, JPG, JPEG, and PNG formats up to 10MB.',
+                  style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF1E40AF), height: 1.5),
+                ),
+              ),
             ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
-}
 
-class _FileUploadField extends StatelessWidget {
-  final String hintText;
-  const _FileUploadField({required this.hintText});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 40),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0), style: BorderStyle.none),
-      ),
-      child: CustomPaint(
-        painter: _DashedBorderPainter(),
-        child: Column(
+  Widget _buildReviewInfo(bool isMobile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Review Your Application', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 32),
+        
+        _buildReviewSection(
+          title: 'Personal Information',
+          content: '${_firstNameController.text} ${_lastNameController.text} • ${_emailController.text} • ${_phoneController.text}',
+        ),
+        const SizedBox(height: 24),
+        _buildReviewSection(
+          title: 'Business Information',
+          content: '${_businessNameController.text} • $_businessType • ${_cityController.text}, ${_stateController.text}',
+        ),
+        const SizedBox(height: 24),
+        _buildReviewSection(
+          title: 'Product Categories',
+          content: _selectedCategories.isEmpty ? 'None selected' : _selectedCategories.join(', '),
+        ),
+        
+        const SizedBox(height: 40),
+        
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.file_upload_outlined, size: 48, color: Color(0xFF94A3B8)),
-            const SizedBox(height: 16),
-            Text(
-              hintText,
-              style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF64748B)),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+            SizedBox(
+              height: 24,
+              width: 24,
+              child: Checkbox(
+                value: _agreedToTerms,
+                onChanged: (v) => setState(() => _agreedToTerms = v ?? false),
+                activeColor: const Color(0xFFF01B6B),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
               ),
-              child: Text(
-                'Choose File',
-                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => _agreedToTerms = !_agreedToTerms),
+                child: RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569)),
+                    children: [
+                      const TextSpan(text: 'I agree to the '),
+                      TextSpan(
+                        text: 'Terms & Conditions',
+                        style: GoogleFonts.inter(color: const Color(0xFFF01B6B), fontWeight: FontWeight.w600),
+                      ),
+                      const TextSpan(text: ' and '),
+                      TextSpan(
+                        text: 'Privacy Policy',
+                        style: GoogleFonts.inter(color: const Color(0xFFF01B6B), fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = const Color(0xFFCBD5E1)
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
-
-    final double dashWidth = 8;
-    final double dashSpace = 4;
-    final Radius radius = const Radius.circular(12);
-
-    final RRect rrect = RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, size.width, size.height), radius);
-    final Path path = Path()..addRRect(rrect);
-
-    for (final PathMetric metric in path.computeMetrics()) {
-      double distance = 0;
-      while (distance < metric.length) {
-        canvas.drawPath(metric.extractPath(distance, distance + dashWidth), paint);
-        distance += dashWidth + dashSpace;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
-class _FeatureItem extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  const _FeatureItem({required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          title,
-          style: GoogleFonts.outfit(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          subtitle,
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            color: Colors.white.withOpacity(0.8),
-          ),
+        const SizedBox(height: 16),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 24,
+              width: 24,
+              child: Checkbox(
+                value: _agreedToMarketing,
+                onChanged: (v) => setState(() => _agreedToMarketing = v ?? false),
+                activeColor: const Color(0xFFF01B6B),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => _agreedToMarketing = !_agreedToMarketing),
+                child: Text(
+                  'I consent to receive marketing communications and updates about vendor opportunities',
+                  style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569)),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
-}
 
-
-class _BulletReviewSection extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  const _BulletReviewSection({required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildReviewSection({required String title, required String content}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-        ),
+        Text(title, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
         const SizedBox(height: 8),
-        Text(
-          subtitle,
-          style: GoogleFonts.inter(fontSize: 15, color: const Color(0xFF64748B)),
-        ),
+        Text(content, style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF64748B), height: 1.5)),
       ],
     );
   }
 }
-
-class _NavButton extends StatelessWidget {
-  final String label;
-  final VoidCallback? onPressed;
-  final bool isPrimary;
-  final IconData icon;
-  final bool isSubmission;
-
-  const _NavButton({
-    required this.label,
-    required this.onPressed,
-    required this.isPrimary,
-    required this.icon,
-    this.isSubmission = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (!isPrimary) {
-      return OutlinedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 18),
-        label: Text(label),
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          side: const BorderSide(color: Color(0xFFE2E8F0)),
-          foregroundColor: const Color(0xFF64748B),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          disabledForegroundColor: Colors.grey[300],
-        ),
-      );
-    }
-    
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: onPressed == null 
-          ? const Color(0xFFCBD5E1) 
-          : isSubmission 
-            ? const Color(0xFF86D29D) 
-            : const Color(0xFFF01B6B),
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        elevation: 0,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 12),
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        ],
-      ),
-    );
-  }
-}
-
-
-
 
 class _ToggleButton extends StatelessWidget {
   final String title;
   final bool isActive;
-  const _ToggleButton({required this.title, required this.isActive});
+  final bool fullWidth;
+  const _ToggleButton({required this.title, required this.isActive, this.fullWidth = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      width: fullWidth ? double.infinity : 200,
+      padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
         color: isActive ? const Color(0xFFF01B6B) : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
       ),
+      alignment: Alignment.center,
       child: Text(
         title,
-        style: GoogleFonts.inter(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: isActive ? Colors.white : Colors.grey[600],
-        ),
+        style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: isActive ? Colors.white : const Color(0xFF64748B)),
       ),
     );
   }
@@ -931,97 +780,299 @@ class _ToggleButton extends StatelessWidget {
 class _BenefitCard extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String description;
-  const _BenefitCard({required this.icon, required this.title, required this.description});
+  final String desc;
+  final bool isMobile;
+  const _BenefitCard({required this.icon, required this.title, required this.desc, required this.isMobile});
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12),
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF01B6B).withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: const Color(0xFFF01B6B), size: 28),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              description,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600], height: 1.5),
-            ),
-          ],
-        ),
+    return Container(
+      width: isMobile ? double.infinity : 220,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: const Color(0xFFF01B6B), size: 32),
+          const SizedBox(height: 16),
+          Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16)),
+          const SizedBox(height: 8),
+          Text(desc, textAlign: TextAlign.center, style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF64748B))),
+        ],
       ),
     );
   }
 }
 
-class _StepItem extends StatelessWidget {
+class _DesktopProgress extends StatelessWidget {
+  final int currentStep;
+  const _DesktopProgress({required this.currentStep});
+
+  static const steps = [
+    {'icon': Icons.person_outline, 'title': 'Personal Info', 'desc': 'Your personal details'},
+    {'icon': Icons.domain, 'title': 'Business Info', 'desc': 'Business information'},
+    {'icon': Icons.inventory_2_outlined, 'title': 'Products', 'desc': 'Product details'},
+    {'icon': Icons.description_outlined, 'title': 'Documents', 'desc': 'Required documents'},
+    {'icon': Icons.check_circle_outline, 'title': 'Review', 'desc': 'Review & submit'},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: List.generate(5, (index) => _StepIcon(
+        index: index, 
+        active: currentStep >= index,
+        icon: steps[index]['icon'] as IconData,
+        title: steps[index]['title'] as String,
+        desc: steps[index]['desc'] as String,
+      )),
+    );
+  }
+}
+
+class _MobileProgress extends StatelessWidget {
+  final int currentStep;
+  const _MobileProgress({required this.currentStep});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(5, (index) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: CircleAvatar(radius: 4, backgroundColor: currentStep >= index ? const Color(0xFFF01B6B) : const Color(0xFFE2E8F0)),
+      )),
+    );
+  }
+}
+
+class _StepIcon extends StatelessWidget {
+  final int index;
+  final bool active;
   final IconData icon;
-  final String label;
-  final String subLabel;
-  final bool isActive;
-  final bool isCompleted;
-  const _StepItem({
-    required this.icon, 
-    required this.label, 
-    required this.subLabel, 
-    this.isActive = false,
-    this.isCompleted = false,
-  });
+  final String title;
+  final String desc;
+  
+  const _StepIcon({required this.index, required this.active, required this.icon, required this.title, required this.desc});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isCompleted 
-                ? const Color(0xFF22C55E) // Green for completed
-                : isActive 
-                    ? const Color(0xFFF01B6B) // Pink for active
-                    : Colors.grey[100],
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            isCompleted ? Icons.check : icon, 
-            color: (isCompleted || isActive) ? Colors.white : Colors.grey[400], 
-            size: 24,
-          ),
+        CircleAvatar(
+          radius: 24,
+          backgroundColor: active ? const Color(0xFFF01B6B) : const Color(0xFFF1F5F9),
+          child: Icon(icon, color: active ? Colors.white : const Color(0xFF64748B), size: 24),
         ),
-        const SizedBox(height: 16),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 14, 
-            fontWeight: FontWeight.bold, 
-            color: isActive ? const Color(0xFFF01B6B) : isCompleted ? const Color(0xFF22C55E) : Colors.black87,
-          ),
-        ),
+        const SizedBox(height: 12),
+        Text(title, style: GoogleFonts.inter(fontSize: 14, color: active ? const Color(0xFFF01B6B) : const Color(0xFF0F172A), fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(
-          subLabel,
-          style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[400]),
+        Text(desc, style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF64748B))),
+      ],
+    );
+  }
+}
+
+class _DashedUploadBox extends StatelessWidget {
+  final String label;
+  final String hint;
+  final VoidCallback onTap;
+  const _DashedUploadBox({required this.label, required this.hint, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF0F172A))),
+        const SizedBox(height: 12),
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: double.infinity,
+            height: 240,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFFFDFDFD),
+            ),
+            child: CustomPaint(
+              painter: _DashPainter(),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                   Icon(Icons.cloud_upload_outlined, size: 54, color: _hintColor()),
+                  const SizedBox(height: 20),
+                  Text(hint, style: GoogleFonts.inter(fontSize: 14, color: _hintColor(), fontWeight: _selectedFileName() ? FontWeight.bold : FontWeight.normal)),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: onTap,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF0F172A),
+                      side: const BorderSide(color: Color(0xFFE2E8F0)),
+                      elevation: 0,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    ),
+                    child: Text(_selectedFileName() ? 'Change File' : 'Choose File', style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14)),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ],
+    );
+  }
+
+  Color _hintColor() {
+    return _selectedFileName() ? const Color(0xFFF01B6B) : const Color(0xFF64748B);
+  }
+
+  bool _selectedFileName() {
+    return !hint.contains('Upload your business license');
+  }
+}
+
+class _DashPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFCBD5E1)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    const dashWidth = 8.0;
+    const dashSpace = 6.0;
+    final path = Path()
+      ..addRRect(RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, size.width, size.height), const Radius.circular(12)));
+
+    for (final metric in path.computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        canvas.drawPath(
+          metric.extractPath(distance, distance + dashWidth),
+          paint,
+        );
+        distance += dashWidth + dashSpace;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _DropdownField extends StatelessWidget {
+  final String label;
+  final List<String> items;
+  final String? value;
+  final ValueChanged<String?>? onChanged;
+  const _DropdownField({required this.label, required this.items, this.value, this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF0F172A))),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: value ?? items.first,
+          icon: const Icon(Icons.expand_more, color: Color(0xFF64748B)),
+          items: items.map((e) => DropdownMenuItem(
+            value: e, 
+            child: Text(e, style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF1E293B), fontWeight: FontWeight.w500))
+          )).toList(),
+          onChanged: onChanged,
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFF01B6B), width: 1.5)),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CheckboxItem extends StatelessWidget {
+  final String label;
+  final bool value;
+  final ValueChanged<bool?> onChanged;
+  const _CheckboxItem({required this.label, required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Checkbox(
+          value: value,
+          onChanged: onChanged,
+          activeColor: const Color(0xFF3B82F6),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        ),
+        Expanded(child: Text(label, style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569)), overflow: TextOverflow.ellipsis)),
+      ],
+    );
+  }
+}
+
+class _DocumentUploadField extends StatelessWidget {
+  final String title;
+  final String desc;
+  const _DocumentUploadField({required this.title, required this.desc});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFE2E8F0))),
+            child: const Icon(Icons.cloud_upload_outlined, color: Color(0xFF64748B)),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF0F172A))),
+                const SizedBox(height: 4),
+                Text(desc, style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF64748B))),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          ElevatedButton(
+            onPressed: (){},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFF0F172A),
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: const BorderSide(color: Color(0xFFE2E8F0))),
+            ),
+            child: Text('Browse', style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500)),
+          )
+        ],
+      ),
     );
   }
 }
@@ -1030,16 +1081,18 @@ class _FormField extends StatelessWidget {
   final String label;
   final String hintText;
   final bool isPassword;
-  final bool isDropdown;
-  final bool isTextArea;
-  final String? subText;
+  final bool isObscured;
+  final VoidCallback? onToggleVisibility;
+  final int maxLines;
+  final TextEditingController? controller;
   const _FormField({
     required this.label, 
     required this.hintText, 
-    this.isPassword = false,
-    this.isDropdown = false,
-    this.isTextArea = false,
-    this.subText,
+    this.isPassword = false, 
+    this.isObscured = true,
+    this.onToggleVisibility,
+    this.maxLines = 1, 
+    this.controller
   });
 
   @override
@@ -1047,64 +1100,71 @@ class _FormField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text(
-              label.replaceAll(' *', ''),
-              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
-            ),
-            if (label.contains('*'))
-              const Text(' *', style: TextStyle(color: Colors.red, fontSize: 14)),
-          ],
+        Text(label, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF0F172A))),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          obscureText: isPassword && isObscured,
+          maxLines: maxLines,
+          style: GoogleFonts.inter(color: const Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.w500),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 14),
+            suffixIcon: isPassword 
+              ? IconButton(
+                  icon: Icon(isObscured ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: const Color(0xFF64748B), size: 20),
+                  onPressed: onToggleVisibility,
+                )
+              : null,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFF01B6B), width: 1.5)),
+          ),
         ),
-        const SizedBox(height: 10),
-        _buildField(),
-        if (subText != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            subText!,
-            style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[500]),
-          ),
-        ],
       ],
-    );
-  }
-
-  Widget _buildField() {
-    return Container(
-      constraints: BoxConstraints(
-        minHeight: isTextArea ? 120 : 60,
-      ),
-      alignment: isTextArea ? Alignment.topLeft : Alignment.centerLeft,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: isDropdown 
-        ? Row(
-            children: [
-              Expanded(
-                child: Text(
-                  hintText,
-                  style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 16),
-                ),
-              ),
-              const Icon(Icons.keyboard_arrow_down, color: Colors.black54),
-            ],
-          )
-        : TextField(
-            obscureText: isPassword,
-            maxLines: isTextArea ? 4 : 1,
-            decoration: InputDecoration(
-              hintText: hintText,
-              border: InputBorder.none,
-              hintStyle: GoogleFonts.inter(color: Colors.grey[400], fontSize: 16),
-            ),
-          ),
     );
   }
 }
 
+class _NavBtn extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+  final bool isPrimary;
+  final Color? color;
+  final Color? textColor;
 
+  const _NavBtn({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+    required this.isPrimary,
+    this.color,
+    this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bgColor = color ?? (isPrimary ? const Color(0xFFF01B6B) : Colors.white);
+    final fgColor = textColor ?? (isPrimary ? Colors.white : const Color(0xFF0F172A));
+
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18),
+      label: Text(label),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: bgColor,
+        foregroundColor: fgColor,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: isPrimary ? Colors.transparent : const Color(0xFFE2E8F0)),
+        ),
+      ),
+    );
+  }
+}

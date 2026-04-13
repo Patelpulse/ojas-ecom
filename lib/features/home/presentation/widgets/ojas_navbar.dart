@@ -1,49 +1,109 @@
 import 'package:flutter/material.dart';
-import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
+import 'package:ojas_user/core/utils/responsive.dart';
+import 'package:ojas_user/core/services/session_service.dart';
+import 'package:ojas_user/features/auth/domain/models/user_model.dart';
 
 class OjasNavbar extends StatelessWidget implements PreferredSizeWidget {
   final String activeTitle;
-  const OjasNavbar({super.key, this.activeTitle = 'HOME'});
+  const OjasNavbar({Key? key, this.activeTitle = 'HOME'}) : super(key: key);
 
   @override
   Size get preferredSize => const Size.fromHeight(180);
 
   @override
   Widget build(BuildContext context) {
+    if (Responsive.isMobile(context)) {
+      return _MobileNavbar(activeTitle: activeTitle);
+    }
+
     return Column(
-      children: [
-        // 1. Top Info Bar
-        Container(
-          height: 40,
-          color: AppColors.primaryIndigo.withOpacity(0.95),
-          child: const CenteredContent(
-            horizontalPadding: 20,
-            child: _TopInfoBarContent(),
+        children: [
+          // 1. Top Info Bar
+          Container(
+            height: 40,
+            color: AppColors.primaryIndigo.withOpacity(0.95),
+            child: const CenteredContent(
+              horizontalPadding: 20,
+              child: _TopInfoBarContent(),
+            ),
           ),
-        ),
-        
-        // 2. Main Navigation Bar
-        Container(
-          height: 70,
-          color: AppColors.primaryIndigo,
-          child: CenteredContent(
-            horizontalPadding: 20,
-            child: _MainNavBarContent(activeTitle: activeTitle),
+          
+          // 2. Main Navigation Bar
+          Container(
+            height: 70,
+            color: AppColors.primaryIndigo,
+            child: CenteredContent(
+              horizontalPadding: 20,
+              child: _MainNavBarContent(activeTitle: activeTitle),
+            ),
           ),
-        ),
-        
-        // 3. Search & Vendor Bar
-        Container(
-          height: 70,
-          color: AppColors.primaryIndigo.withOpacity(0.98),
-          child: const CenteredContent(
-            horizontalPadding: 20,
-            child: _SearchBarRowContent(),
+          
+          // 3. Search & Vendor Bar
+          Container(
+            height: 70,
+            color: AppColors.primaryIndigo.withOpacity(0.98),
+            child: const CenteredContent(
+              horizontalPadding: 20,
+              child: _SearchBarRowContent(),
+            ),
           ),
-        ),
-      ],
+        ],
+    );
+  }
+}
+
+class _MobileNavbar extends StatelessWidget {
+  final String activeTitle;
+  const _MobileNavbar({required this.activeTitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 70,
+      decoration: BoxDecoration(
+        color: AppColors.primaryIndigo,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.menu, color: Colors.white),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+          Text(
+            'OJAS',
+            style: GoogleFonts.outfit(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              letterSpacing: 1.5,
+            ),
+          ),
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white, size: 22),
+                onPressed: () => Scaffold.of(context).openEndDrawer(),
+              ),
+              IconButton(
+                icon: const Icon(Icons.person_outline, color: Colors.white, size: 22),
+                onPressed: () => Navigator.pushNamed(context, '/login'),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -138,16 +198,17 @@ class _MainNavBarContent extends StatelessWidget {
         const SizedBox(width: 60),
         
         // Menu Items
-        _NavItem(title: 'HOME', isActive: activeTitle == 'HOME', onTap: () => Navigator.pushNamed(context, '/')),
-        _NavItem(title: 'FEATURES', isActive: activeTitle == 'FEATURES', onTap: () => Navigator.pushNamed(context, '/features')),
-        _NavItem(title: 'DEALS', isActive: activeTitle == 'DEALS', onTap: () => Navigator.pushNamed(context, '/deals')),
-        _NavItem(title: 'SHOP', isActive: activeTitle == 'SHOP', onTap: () => Navigator.pushNamed(context, '/shop')),
-        _NavItem(title: 'BLOG', isActive: activeTitle == 'BLOG', onTap: () => Navigator.pushNamed(context, '/blog')),
+        _NavItem(key: const ValueKey('nav_home'), title: 'HOME', isActive: activeTitle == 'HOME', onTap: () => Navigator.pushNamed(context, '/')),
+        _NavItem(key: const ValueKey('nav_features'), title: 'FEATURES', isActive: activeTitle == 'FEATURES', onTap: () => Navigator.pushNamed(context, '/features')),
+        _NavItem(key: const ValueKey('nav_deals'), title: 'DEALS', isActive: activeTitle == 'DEALS', onTap: () => Navigator.pushNamed(context, '/deals')),
+        _NavItem(key: const ValueKey('nav_shop'), title: 'SHOP', isActive: activeTitle == 'SHOP', onTap: () => Navigator.pushNamed(context, '/shop')),
+        _NavItem(key: const ValueKey('nav_blog'), title: 'BLOG', isActive: activeTitle == 'BLOG', onTap: () => Navigator.pushNamed(context, '/blog')),
         
         const Spacer(),
         
         // Actions
         _IconAction(
+          key: const ValueKey('nav_wishlist'),
           icon: Icons.favorite_border, 
           label: 'Wishlist', 
           count: '0', 
@@ -170,10 +231,74 @@ class _MainNavBarContent extends StatelessWidget {
         ),
         
         const SizedBox(width: 24),
-        const _AuthLink(title: 'Login'),
-        const SizedBox(width: 16),
-        _RegisterButton(),
+        
+        ValueListenableBuilder<UserModel?>(
+          valueListenable: SessionService.instance.userNotifier,
+          builder: (context, user, _) {
+            if (user != null) {
+              return _UserInfo(user: user);
+            }
+            return Row(
+              children: [
+                const _AuthLink(key: ValueKey('nav_login'), title: 'Login'),
+                const SizedBox(width: 16),
+                _RegisterButton(key: const ValueKey('nav_register')),
+              ],
+            );
+          },
+        ),
       ],
+    );
+  }
+}
+
+class _UserInfo extends StatelessWidget {
+  final UserModel user;
+  const _UserInfo({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => Navigator.pushNamed(context, '/profile', arguments: user),
+      borderRadius: BorderRadius.circular(8),
+      child: Row(
+        children: [
+          Container(
+            height: 38,
+            width: 38,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Icon(Icons.person, color: Colors.white, size: 20),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                user.name,
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                user.role.toUpperCase(),
+                style: GoogleFonts.inter(
+                  color: Colors.white70,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -248,7 +373,7 @@ class _NavItem extends StatelessWidget {
   final String title;
   final bool isActive;
   final VoidCallback? onTap;
-  const _NavItem({required this.title, this.isActive = false, this.onTap});
+  const _NavItem({Key? key, required this.title, this.isActive = false, this.onTap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -289,11 +414,12 @@ class _IconAction extends StatelessWidget {
   final VoidCallback? onTap;
   
   const _IconAction({
+    Key? key,
     required this.icon, 
     required this.label, 
     required this.count,
     this.onTap,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -319,12 +445,12 @@ class _IconAction extends StatelessWidget {
 
 class _AuthLink extends StatelessWidget {
   final String title;
-  const _AuthLink({required this.title});
+  const _AuthLink({Key? key, required this.title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => Navigator.pushNamed(context, 'api/user/login'),
+      onTap: () => Navigator.pushNamed(context, '/login'),
       borderRadius: BorderRadius.circular(4),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -338,10 +464,11 @@ class _AuthLink extends StatelessWidget {
 }
 
 class _RegisterButton extends StatelessWidget {
+  const _RegisterButton({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => Navigator.pushNamed(context, 'api/user/registration'),
+      onTap: () => Navigator.pushNamed(context, '/register'),
       borderRadius: BorderRadius.circular(4),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

@@ -4,6 +4,7 @@ import 'package:ojas_user/features/home/presentation/widgets/featured_header.dar
 import 'package:ojas_user/features/home/presentation/widgets/featured_product_card.dart';
 import 'package:ojas_user/features/home/presentation/widgets/why_choose_section.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
+import 'package:ojas_user/core/utils/responsive.dart';
 
 
 class FeaturesPage extends StatelessWidget {
@@ -11,54 +12,49 @@ class FeaturesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+    final bool isTablet = Responsive.isTablet(context);
+
     return OjasLayout(
       activeTitle: 'FEATURES',
       child: CenteredContent(
-        horizontalPadding: 20,
+        horizontalPadding: isMobile ? 12 : 20,
         child: Column(
           children: [
-            const FeaturedHeader(productCount: 6),
-            const SizedBox(height: 48),
+            FeaturedHeader(productCount: _featuredProducts.length),
+            SizedBox(height: isMobile ? 24 : 48),
             
             // Product Grid
-            LayoutBuilder(
-              builder: (context, constraints) {
-                int crossAxisCount = 3;
-                if (constraints.maxWidth < 700) crossAxisCount = 1;
-                else if (constraints.maxWidth < 1100) crossAxisCount = 2;
-                
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: 30,
-                    mainAxisSpacing: 30,
-                    childAspectRatio: 0.6, // Adjusted to prevent bottom overflow
-                  ),
-                  itemCount: _featuredProducts.length,
-                  itemBuilder: (context, index) {
-                    final product = _featuredProducts[index];
-                    return FeaturedProductCard(
-                      name: product['name'],
-                      imageUrl: product['imageUrl'],
-                      price: product['price'],
-                      oldPrice: product['oldPrice'],
-                      discount: product['discount'],
-                      brand: product['brand'],
-                      category: product['category'],
-                      rating: product['rating'],
-                      ratingCount: product['ratingCount'],
-                      description: product['description'],
-                      badge: product['badge'],
-                      badgeColor: product['badgeColor'],
-                    );
-                  },
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: isMobile ? 1 : (isTablet ? 2 : 3),
+                crossAxisSpacing: isMobile ? 16 : 30,
+                mainAxisSpacing: isMobile ? 16 : 30,
+                childAspectRatio: isMobile ? 0.8 : 0.6,
+              ),
+              itemCount: _featuredProducts.length,
+              itemBuilder: (context, index) {
+                final product = _featuredProducts[index];
+                return FeaturedProductCard(
+                  name: product['name'],
+                  imageUrl: product['imageUrl'],
+                  price: product['price'],
+                  oldPrice: product['oldPrice'],
+                  discount: product['discount'],
+                  brand: product['brand'],
+                  category: product['category'],
+                  rating: product['rating'],
+                  ratingCount: product['ratingCount'],
+                  description: product['description'],
+                  badge: product['badge'],
+                  badgeColor: product['badgeColor'],
                 );
               },
             ),
             
-            const SizedBox(height: 60),
+            SizedBox(height: isMobile ? 40 : 60),
 
             // 5. Why Choose Section
             const WhyChooseSection(),

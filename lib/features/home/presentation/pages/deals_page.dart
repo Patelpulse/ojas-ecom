@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/ojas_layout.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
+import 'package:ojas_user/core/utils/responsive.dart';
 
 class DealsPage extends StatefulWidget {
   const DealsPage({super.key});
@@ -91,118 +92,307 @@ class _DealsPageState extends State<DealsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+    final bool isTablet = Responsive.isTablet(context);
+
     return OjasLayout(
       activeTitle: 'DEALS',
       child: Container(
-        color: const Color(0xFFF1F4F8),
-        child: CenteredContent(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 60),
+        color: const Color(0xFFF8FAFC),
+        child: Column(
+          children: [
+            CenteredContent(
+              horizontalPadding: isMobile ? 12 : 24,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: isMobile ? 32 : 60),
 
-              // Header
-              Center(
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.bolt_rounded, color: Color(0xFFEAB308), size: 32),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Hot Deals & Offers',
-                          style: GoogleFonts.outfit(
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF0F172A),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      "Don't miss out on these amazing deals! Limited time offers with incredible savings.",
-                      style: GoogleFonts.inter(fontSize: 15, color: const Color(0xFF64748B)),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // Filter & Sort Bar
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${_deals.length} deals found',
-                      style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569)),
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: _sortBy,
-                              isDense: true,
-                              style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF334155)),
-                              items: ['Highest Discount', 'Lowest Price', 'Highest Price', 'Newest'].map((v) {
-                                return DropdownMenuItem(value: v, child: Text(v));
-                              }).toList(),
-                              onChanged: (v) => setState(() => _sortBy = v!),
+                  // Header
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.bolt_rounded, color: Color(0xFFEAB308), size: 36),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Hot Deals & Offers',
+                            style: GoogleFonts.outfit(
+                              fontSize: isMobile ? 28 : 42,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF0F172A),
                             ),
                           ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        "Don't miss out on these amazing deals! Limited time offers with incredible savings.",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: isMobile ? 14 : 16, 
+                          color: const Color(0xFF64748B),
+                          height: 1.5,
                         ),
-                        const SizedBox(width: 12),
-                        _ViewToggleBtn(
-                          icon: Icons.grid_view_rounded,
-                          isActive: _isGridView,
-                          onTap: () => setState(() => _isGridView = true),
-                        ),
-                        const SizedBox(width: 4),
-                        _ViewToggleBtn(
-                          icon: Icons.view_list_rounded,
-                          isActive: !_isGridView,
-                          onTap: () => setState(() => _isGridView = false),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 48),
+
+                  // Filter & Sort Bar
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
                       ],
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
                     ),
-                  ],
-                ),
+                    child: isMobile 
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              '${_deals.length} deals found',
+                              style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569), fontWeight: FontWeight.w500),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildSortBar(),
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${_deals.length} deals found',
+                              style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569), fontWeight: FontWeight.w500),
+                            ),
+                            _buildSortBar(),
+                          ],
+                        ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Product Grid or Empty State
+                  if (_deals.isEmpty)
+                    _buildEmptyState()
+                  else
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: isMobile ? 1 : (isTablet ? 2 : 3),
+                        crossAxisSpacing: 24,
+                        mainAxisSpacing: 24,
+                        mainAxisExtent: isMobile ? 440 : 450,
+                      ),
+                      itemCount: _deals.length,
+                      itemBuilder: (context, index) => _DealCard(product: _deals[index]),
+                    ),
+
+                  const SizedBox(height: 80),
+                ],
               ),
+            ),
+            
+            // Red Newsletter Section
+            const _NeverMissDealSection(),
+            const SizedBox(height: 60),
+          ],
+        ),
+      ),
+    );
+  }
 
-              const SizedBox(height: 28),
-
-              // Product Grid
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
-                  mainAxisExtent: 420,
-                ),
-                itemCount: _deals.length,
-                itemBuilder: (context, index) => _DealCard(product: _deals[index]),
-              ),
-
-              const SizedBox(height: 80),
-            ],
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF1F5F9),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.local_offer_outlined, 
+              size: 64, 
+              color: Color(0xFF94A3B8),
+            ),
           ),
+          const SizedBox(height: 24),
+          Text(
+            'No deals found',
+            style: GoogleFonts.outfit(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF1E293B),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try selecting a different deal type',
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              color: const Color(0xFF64748B),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSortBar() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 180,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _sortBy,
+              isExpanded: true,
+              isDense: true,
+              style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF334155)),
+              items: ['Highest Discount', 'Lowest Price', 'Highest Price', 'Newest'].map((v) {
+                return DropdownMenuItem(value: v, child: Text(v));
+              }).toList(),
+              onChanged: (v) => setState(() => _sortBy = v!),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        _ViewToggleBtn(
+          icon: Icons.grid_view_rounded,
+          isActive: _isGridView,
+          onTap: () => setState(() => _isGridView = true),
+        ),
+        const SizedBox(width: 4),
+        _ViewToggleBtn(
+          icon: Icons.view_list_rounded,
+          isActive: !_isGridView,
+          onTap: () => setState(() => _isGridView = false),
+        ),
+      ],
+    );
+  }
+}
+
+class _NeverMissDealSection extends StatelessWidget {
+  const _NeverMissDealSection();
+
+  @override
+  Widget build(BuildContext context) {
+    bool isMobile = Responsive.isMobile(context);
+    
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 40),
+      padding: EdgeInsets.symmetric(vertical: 60, horizontal: isMobile ? 24 : 60),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF01B6B), 
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFF01B6B).withOpacity(0.3),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            'Never Miss a Deal!',
+            style: GoogleFonts.outfit(
+              fontSize: isMobile ? 28 : 36,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Get notified about flash sales, exclusive offers, and limited-time deals before anyone else.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: isMobile ? 14 : 16,
+              color: Colors.white.withOpacity(0.9),
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 40),
+          if (isMobile)
+            Column(
+              children: [
+                _buildEmailInput(),
+                const SizedBox(height: 16),
+                _buildAlertButton(fullWidth: true),
+              ],
+            )
+          else
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(width: 400, child: _buildEmailInput()),
+                const SizedBox(width: 16),
+                _buildAlertButton(),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmailInput() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
+      ),
+      child: TextField(
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          hintText: 'Enter your email',
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+          border: InputBorder.none,
+          icon: Icon(Icons.mail_outline, color: Colors.white.withOpacity(0.6)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAlertButton({bool fullWidth = false}) {
+    return SizedBox(
+      width: fullWidth ? double.infinity : null,
+      height: 56,
+      child: ElevatedButton.icon(
+        onPressed: () {},
+        icon: const Icon(Icons.flash_on, size: 18),
+        label: const Text('Get Alerts', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: const Color(0xFFF01B6B),
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 0,
         ),
       ),
     );

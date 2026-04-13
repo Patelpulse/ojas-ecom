@@ -1,52 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
+import 'package:ojas_user/core/utils/responsive.dart';
 
 class OjasFooter extends StatelessWidget {
   const OjasFooter({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+
     return Container(
-      color: const Color(0xFFF5F6F8), // Soft light gray background
-      padding: const EdgeInsets.only(top: 60, bottom: 40),
+      color: const Color(0xFFF5F6F8),
+      padding: EdgeInsets.only(top: isMobile ? 40 : 60, bottom: 40),
       child: CenteredContent(
+        horizontalPadding: isMobile ? 16 : 40,
         child: Column(
           children: [
-            // TOP ROW: 4 Columns
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            // TOP ROW: Responsive Grid
+            Wrap(
+              spacing: 40,
+              runSpacing: 40,
               children: [
                 // Col 1: Branding
-                Expanded(
-                  flex: 2,
+                SizedBox(
+                  width: isMobile ? double.infinity : 300,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text('O', style: TextStyle(color: Color(0xFFF01B6B), fontWeight: FontWeight.bold, fontSize: 18)),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'OJAS',
-                            style: GoogleFonts.outfit(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
+                      _buildLogo(),
                       const SizedBox(height: 20),
                       Text(
-                        'Your trusted marketplace for quality products from verified vendors worldwide. Discover amazing deals and exceptional service with every purchase.',
+                        'Your trusted marketplace for quality products from verified vendors worldwide. Discover amazing deals and exceptional service.',
                         style: GoogleFonts.inter(
                           color: Colors.grey[700],
                           height: 1.6,
@@ -65,11 +50,10 @@ class OjasFooter extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 40),
                 
                 // Col 2: Quick Links
-                Expanded(
-                  flex: 1,
+                SizedBox(
+                  width: isMobile ? (MediaQuery.of(context).size.width - 72) / 2 : 180,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -78,43 +62,29 @@ class OjasFooter extends StatelessWidget {
                       _footerLink(context, 'About Us'),
                       _footerLink(context, 'Shop', route: '/shop'),
                       _footerLink(context, 'Offers', route: '/deals'),
-                      _footerLink(context, 'Contact'),
                       const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.storefront, color: Colors.deepOrange, size: 16),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Become Vendor',
-                            style: GoogleFonts.inter(
-                              color: Colors.deepOrange,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
+                      _vendorBadge(),
                     ],
                   ),
                 ),
                 
                 // Col 3: Customer Service
-                Expanded(
-                  flex: 1,
+                SizedBox(
+                  width: isMobile ? (MediaQuery.of(context).size.width - 72) / 2 : 180,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _columnTitle('CUSTOMER SERVICE'),
                       _footerLink(context, 'Returns & Refunds', route: '/returns'),
                       _footerLink(context, 'Track Orders', route: '/orders'),
-                      _footerLink(context, 'Help Center'),
+                      _footerLink(context, 'Help Center', route: '/contact'),
                     ],
                   ),
                 ),
                 
-                // Col 4: Get In Touch & Legal
-                Expanded(
-                  flex: 1,
+                // Col 4: Get In Touch
+                SizedBox(
+                  width: isMobile ? double.infinity : 220,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -122,11 +92,10 @@ class OjasFooter extends StatelessWidget {
                       _contactInfo(Icons.phone_outlined, '+91 9087654321'),
                       _contactInfo(Icons.email_outlined, 'support@ojas.com'),
                       _contactInfo(Icons.location_on_outlined, 'Ghaziabad, Uttar Pradesh'),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 24),
                       _columnTitle('LEGAL'),
                       _footerLink(context, 'Terms & Conditions', route: '/terms'),
                       _footerLink(context, 'Privacy Policy', route: '/privacy'),
-                      _footerLink(context, 'Cookie Policy'),
                     ],
                   ),
                 ),
@@ -139,76 +108,100 @@ class OjasFooter extends StatelessWidget {
             
             // MIDDLE ROW: Copyright
             Text(
-              '© 2026 OJAS. All rights reserved. | Made with ❤️ for amazing customers',
+              '© 2026 OJAS. All rights reserved.',
+              textAlign: TextAlign.center,
               style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 12),
             ),
             
             const SizedBox(height: 48),
             
             // BOTTOM ROW: Brands
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(5, (index) {
-                // Mocking the boat / shop smart cards
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 24,
+              runSpacing: 24,
+              children: List.generate(isMobile ? 3 : 5, (index) {
                 bool isBoat = index % 2 == 0;
-                return Container(
-                  width: 140,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(0),
-                  ),
-                  child: Center(
-                    child: isBoat
-                        ? RichText(
-                            text: TextSpan(
-                              style: TextStyle(fontSize: 32, fontWeight: FontWeight.normal, color: Colors.black87),
-                              children: [
-                                const TextSpan(text: 'bo'),
-                                TextSpan(text: 'A', style: TextStyle(color: Colors.red[600], fontWeight: FontWeight.bold)),
-                                const TextSpan(text: 't'),
-                              ],
-                            ),
-                          )
-                        : Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.shopping_cart, color: Colors.black87, size: 24),
-                                  const SizedBox(width: 4),
-                                  Column(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          _dot(Colors.deepOrange),
-                                          _dot(Colors.pink),
-                                          _dot(Colors.blue),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          _dot(Colors.green),
-                                          _dot(Colors.purple),
-                                          _dot(Colors.amber),
-                                        ],
-                                      )
-                                    ],
-                                  )
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text('SHOP SMART', style: GoogleFonts.outfit(fontWeight: FontWeight.w900, color: Colors.pink, fontSize: 13, letterSpacing: -0.5)),
-                              const Text('E-COMMERCE', style: TextStyle(fontSize: 6, color: Colors.grey, letterSpacing: 1)),
-                            ],
-                          ),
-                  ),
-                );
+                return _brandCard(isBoat);
               }),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildLogo() {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: const Text('O', style: TextStyle(color: Color(0xFFF01B6B), fontWeight: FontWeight.bold, fontSize: 18)),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          'OJAS',
+          style: GoogleFonts.outfit(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _vendorBadge() {
+    return Row(
+      children: [
+        const Icon(Icons.storefront, color: Colors.deepOrange, size: 16),
+        const SizedBox(width: 8),
+        Text(
+          'Become Vendor',
+          style: GoogleFonts.inter(
+            color: Colors.deepOrange,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _brandCard(bool isBoat) {
+    return Container(
+      width: 140,
+      height: 80,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4),
+        ],
+      ),
+      child: Center(
+        child: isBoat
+            ? RichText(
+                text: TextSpan(
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.normal, color: Colors.black87),
+                  children: [
+                    const TextSpan(text: 'bo'),
+                    TextSpan(text: 'A', style: TextStyle(color: Colors.red[600], fontWeight: FontWeight.bold)),
+                    const TextSpan(text: 't'),
+                  ],
+                ),
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.shopping_cart, color: Colors.black87, size: 20),
+                  Text('SHOP SMART', style: GoogleFonts.outfit(fontWeight: FontWeight.w900, color: Colors.pink, fontSize: 11)),
+                ],
+              ),
       ),
     );
   }

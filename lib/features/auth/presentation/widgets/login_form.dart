@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:ojas_user/features/auth/application/auth_service.dart';
+import 'package:ojas_user/core/services/session_service.dart';
 
 class LoginForm extends StatefulWidget {
   final VoidCallback onToggle;
@@ -33,9 +34,7 @@ class _LoginFormState extends State<LoginForm> {
 
       if (response.success) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Login successful!')),
-          );
+          SessionService.instance.setUser(response.user);
           Navigator.of(context).pushReplacementNamed('/welcome', arguments: response.user);
         }
       } else {
