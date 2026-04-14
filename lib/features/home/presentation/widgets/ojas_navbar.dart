@@ -5,6 +5,7 @@ import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
 import 'package:ojas_user/core/services/session_service.dart';
 import 'package:ojas_user/features/auth/domain/models/user_model.dart';
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
 
 class OjasNavbar extends StatelessWidget implements PreferredSizeWidget {
   final String activeTitle;
@@ -217,17 +218,25 @@ class _MainNavBarContent extends StatelessWidget {
         const SizedBox(width: 24),
         
         // Cart Button
-        ElevatedButton.icon(
-          onPressed: () => Scaffold.of(context).openEndDrawer(),
-
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryBlue,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-          icon: const Icon(Icons.shopping_cart_outlined, size: 18),
-          label: const Text('My Cart', style: TextStyle(fontWeight: FontWeight.bold)),
+        ListenableBuilder(
+          listenable: CartController.instance,
+          builder: (context, _) {
+            return ElevatedButton.icon(
+              onPressed: () => Scaffold.of(context).openEndDrawer(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              icon: Badge(
+                label: Text(CartController.instance.itemCount.toString()),
+                isLabelVisible: CartController.instance.itemCount > 0,
+                child: const Icon(Icons.shopping_cart_outlined, size: 18),
+              ),
+              label: const Text('My Cart', style: TextStyle(fontWeight: FontWeight.bold)),
+            );
+          },
         ),
         
         const SizedBox(width: 24),

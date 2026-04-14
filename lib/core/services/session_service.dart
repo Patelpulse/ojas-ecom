@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ojas_user/features/auth/domain/models/user_model.dart';
 import 'package:ojas_user/features/auth/application/auth_service.dart';
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
 
 class SessionService extends ChangeNotifier {
   static final SessionService _instance = SessionService._internal();
@@ -25,6 +26,10 @@ class SessionService extends ChangeNotifier {
       final authService = AuthService();
       final user = await authService.getCurrentUser();
       userNotifier.value = user;
+      
+      if (user != null) {
+        await CartController.instance.loadCart();
+      }
     } catch (e) {
       userNotifier.value = null;
     } finally {

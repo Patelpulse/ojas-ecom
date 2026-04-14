@@ -5,6 +5,7 @@ import 'package:ojas_user/features/home/presentation/widgets/product_card.dart';
 import 'package:ojas_user/features/home/presentation/widgets/section_title.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
 
 class FlashDealsSection extends StatelessWidget {
   const FlashDealsSection({super.key});
@@ -36,11 +37,23 @@ class FlashDealsSection extends StatelessWidget {
                   itemCount: flashProducts.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 24),
                   itemBuilder: (context, index) {
+                    final product = flashProducts[index];
                     return SizedBox(
                       width: 300,
                       child: ProductCard(
-                        product: flashProducts[index],
-                        onAddToCart: () {},
+                        product: product,
+                        onAddToCart: () async {
+                          final success = await CartController.instance.addToCart(product.id);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(success ? 'Added to cart' : 'Failed to add to cart. Please login.'),
+                                backgroundColor: success ? Colors.green : Colors.red,
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          }
+                        },
                       ),
                     );
                   },

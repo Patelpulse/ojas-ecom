@@ -1,5 +1,8 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:ojas_user/features/auth/application/auth_service.dart';
 
 class RegisterForm extends StatefulWidget {
@@ -22,6 +25,26 @@ class _RegisterFormState extends State<RegisterForm> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _agreedToTerms = false;
+  XFile? _image;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 75,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _image = pickedFile;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error picking image: $e");
+    }
+  }
 
   final AuthService _authService = AuthService();
 
@@ -50,6 +73,7 @@ class _RegisterFormState extends State<RegisterForm> {
         gender: "other", // Dummy default value to satisfy API if needed
         mobile: _mobileController.text.trim(),
         role: "user",
+        image: _image,
       );
 
       setState(() => _isLoading = false);
@@ -68,6 +92,14 @@ class _RegisterFormState extends State<RegisterForm> {
           );
         }
       }
+    }
+  }
+
+  ImageProvider _getImageProvider() {
+    if (kIsWeb) {
+      return NetworkImage(_image!.path);
+    } else {
+      return FileImage(File(_image!.path));
     }
   }
 
@@ -96,37 +128,47 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
           const SizedBox(height: 16),
           
-          // Avatar Upload Circle
-          SizedBox(
-            width: 60,
-            height: 60,
-            child: Stack(
-              children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFFE2E8F0), width: 2),
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.person_outline, size: 30, color: Color(0xFF94A3B8)),
-                  ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFE91E63),
+          GestureDetector(
+            onTap: _pickImage,
+            child: SizedBox(
+              width: 80,
+              height: 80,
+              child: Stack(
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
                       shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xFFE2E8F0), width: 2),
+                      image: _image != null
+                          ? DecorationImage(
+                              image: _getImageProvider(),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
-                    child: const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 14),
+                    child: _image == null
+                        ? const Center(
+                            child: Icon(Icons.person_outline, size: 40, color: Color(0xFF94A3B8)),
+                          )
+                        : null,
                   ),
-                ),
-              ],
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE91E63),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 16),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 16),
