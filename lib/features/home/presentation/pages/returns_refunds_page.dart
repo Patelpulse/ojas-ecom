@@ -4,6 +4,9 @@ import 'package:ojas_user/core/widgets/ojas_layout.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
+import 'package:ojas_user/core/controllers/settings_controller.dart';
+import 'package:provider/provider.dart';
+import 'package:ojas_user/core/models/app_settings.dart';
 
 class ReturnsRefundsPage extends StatelessWidget {
   const ReturnsRefundsPage({super.key});
@@ -11,6 +14,8 @@ class ReturnsRefundsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isMobile = Responsive.isMobile(context);
+    final settings = context.watch<SettingsController>().settings;
+    final String customContent = settings.returnRefundPolicy;
 
     return OjasLayout(
       activeTitle: 'RETURNS & REFUNDS',
@@ -24,6 +29,27 @@ class ReturnsRefundsPage extends StatelessWidget {
               // 1. Header Section
               _buildHeader(isMobile),
               SizedBox(height: isMobile ? 32 : 60),
+
+              // Dynamic content from admin
+              if (customContent.trim().isNotEmpty) ...[
+                _buildSectionCard(
+                  'Policy Update',
+                  customContent,
+                  isMobile,
+                ),
+                const SizedBox(height: 48),
+                const Divider(),
+                const SizedBox(height: 48),
+                Text(
+                  'General Returns & Refunds Info',
+                  style: GoogleFonts.outfit(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1E1B4B),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
 
               // 2. Highlights
               _buildHighlights(isMobile),
@@ -50,7 +76,7 @@ class ReturnsRefundsPage extends StatelessWidget {
               SizedBox(height: isMobile ? 48 : 80),
 
               // 8. Help Banner
-              _buildHelpBanner(isMobile),
+              _buildHelpBanner(isMobile, settings),
             ],
           ),
         ),
@@ -507,7 +533,7 @@ class ReturnsRefundsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHelpBanner(bool isMobile) {
+  Widget _buildHelpBanner(bool isMobile, AppSettings settings) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: isMobile ? 40 : 60, horizontal: 20),
@@ -555,6 +581,26 @@ class ReturnsRefundsPage extends StatelessWidget {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionCard(String title, String content, bool isMobile) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isMobile ? 24 : 40),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
+          const SizedBox(height: 24),
+          Text(content, style: GoogleFonts.inter(fontSize: 16, color: Colors.grey[700], height: 1.6)),
         ],
       ),
     );

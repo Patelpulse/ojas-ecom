@@ -4,6 +4,7 @@ import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
 import 'package:ojas_user/core/services/session_service.dart';
+import 'package:ojas_user/core/controllers/settings_controller.dart';
 import 'package:ojas_user/features/auth/domain/models/user_model.dart';
 import 'package:ojas_user/features/cart/application/cart_controller.dart';
 
@@ -83,7 +84,7 @@ class _MobileNavbar extends StatelessWidget {
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
           Text(
-            'OJAS',
+            SettingsController.instance.settings.marketplaceName,
             style: GoogleFonts.outfit(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -146,7 +147,7 @@ class _TopInfoBarContent extends StatelessWidget {
               onTap: () => Navigator.pushNamed(context, '/orders'),
             ),
             const SizedBox(width: 24),
-            const _TopInfoItem(icon: Icons.phone_outlined, label: '+91 9087654321'),
+            _TopInfoItem(icon: Icons.phone_outlined, label: SettingsController.instance.settings.supportPhone),
           ],
         ),
       ],
@@ -188,7 +189,7 @@ class _MainNavBarContent extends StatelessWidget {
       children: [
         // Logo
         Text(
-          'OJAS',
+          SettingsController.instance.settings.marketplaceName,
           style: GoogleFonts.outfit(
             fontSize: 28,
             fontWeight: FontWeight.bold,
