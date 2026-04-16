@@ -3,6 +3,7 @@ import 'package:ojas_user/features/home/domain/models/product_model.dart';
 import 'package:ojas_user/features/home/presentation/widgets/product_card.dart';
 import 'package:ojas_user/features/home/presentation/widgets/section_title.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
 
 class FeaturedDealsSection extends StatelessWidget {
   const FeaturedDealsSection({super.key});
@@ -25,7 +26,17 @@ class FeaturedDealsSection extends StatelessWidget {
                     margin: const EdgeInsets.only(right: 24),
                     child: ProductCard(
                       product: product,
-                      onAddToCart: () {},
+                      onAddToCart: () async {
+                        final success = await CartController.instance.addToCart(product.id);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(success ? '${product.name} added to cart!' : 'Failed. Please login.'),
+                            backgroundColor: success ? Colors.green : Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 2),
+                          ));
+                        }
+                      },
                     ),
                   ),
                 );

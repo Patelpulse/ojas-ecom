@@ -6,6 +6,7 @@ import 'package:ojas_user/features/home/presentation/widgets/service_card.dart';
 import 'package:ojas_user/features/home/presentation/widgets/category_filter.dart';
 import 'package:ojas_user/features/home/presentation/widgets/trending_promo_banner.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
 
 class TrendingItemsSection extends StatelessWidget {
   const TrendingItemsSection({super.key});
@@ -167,7 +168,21 @@ class TrendingItemsSection extends StatelessWidget {
               childAspectRatio: isMobile ? 0.65 : 0.62,
             ),
             itemBuilder: (context, index) {
-              return ProductCard(product: products[index % products.length]);
+              final product = products[index % products.length];
+              return ProductCard(
+                product: product,
+                onAddToCart: () async {
+                  final success = await CartController.instance.addToCart(product.id);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(success ? '${product.name} added to cart!' : 'Failed to add. Please login.'),
+                      backgroundColor: success ? Colors.green : Colors.red,
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 2),
+                    ));
+                  }
+                },
+              );
             },
           ),
           SizedBox(height: isMobile ? 32 : 60),

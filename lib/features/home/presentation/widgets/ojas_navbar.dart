@@ -246,7 +246,7 @@ class _MainNavBarContent extends StatelessWidget {
           valueListenable: SessionService.instance.userNotifier,
           builder: (context, user, _) {
             if (user != null) {
-              return _UserInfo(user: user);
+              return _UserInfo(user: user, isActive: activeTitle == 'PROFILE');
             }
             return Row(
               children: [
@@ -264,50 +264,61 @@ class _MainNavBarContent extends StatelessWidget {
 
 class _UserInfo extends StatelessWidget {
   final UserModel user;
-  const _UserInfo({required this.user});
+  final bool isActive;
+  const _UserInfo({required this.user, this.isActive = false});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => Navigator.pushNamed(context, '/profile', arguments: user),
       borderRadius: BorderRadius.circular(8),
-      child: Row(
-        children: [
-          Container(
-            height: 38,
-            width: 38,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Icon(Icons.person, color: Colors.white, size: 20),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                user.name,
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Row(
+          children: [
+            Container(
+              height: 38,
+              width: 38,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.blue.withOpacity(0.5), width: 2),
               ),
-              Text(
-                user.role.toUpperCase(),
-                style: GoogleFonts.inter(
-                  color: Colors.white70,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                ),
+              child: ClipOval(
+                child: user.photo != null && user.photo!.isNotEmpty
+                  ? Image.network(
+                      user.photo!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.white, size: 20),
+                    )
+                  : const Icon(Icons.person, color: Colors.white, size: 20),
               ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(width: 12),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user.name,
+                  style: GoogleFonts.inter(
+                    color: isActive ? AppColors.accentOrange : Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  user.role.toUpperCase(),
+                  style: GoogleFonts.inter(
+                    color: isActive ? AppColors.accentOrange.withOpacity(0.8) : Colors.white70,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

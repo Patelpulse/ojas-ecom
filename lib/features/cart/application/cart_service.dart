@@ -1,17 +1,15 @@
 import 'dart:convert';
-import 'dart:html' as html; // Web-only
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:ojas_user/core/constants/app_constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ojas_user/core/services/api_service.dart';
 
 class CartService {
-  static const String endpoint = AppConstants.apiBaseUrlUser;
+  String get endpoint => ApiService.userBaseUrl;
 
   Future<String?> _getToken() async {
-    if (kIsWeb) {
-      return html.window.localStorage['token'];
-    }
-    return null;
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('user_auth_token');
   }
 
   Future<bool> addToCart(String productId, {int quantity = 1}) async {
@@ -33,7 +31,7 @@ class CartService {
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Add to cart error: $e');
+      debugPrint('Add to cart error: $e');
       return false;
     }
   }
@@ -57,8 +55,55 @@ class CartService {
       }
       return [];
     } catch (e) {
-      print('Get cart error: $e');
+      debugPrint('Get cart error: $e');
       return [];
+    }
+  }
+
+  Future<bool> removeFromCart(String productId) async {
+    try {
+      final token = await _getToken();
+      if (token == null) return false;
+
+      final response = await http.post(
+        Uri.parse('$endpoint/cart/remove'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({'productId': productId}),
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Remove from cart error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> checkout(Map<String, dynamic> shippingAddress) async {
+    try {
+      final token = await _getToken();
+      if (token == null) return false;
+
+      final response = await http.post(
+        Uri.parse('${ApiService.baseUrl}/order/create'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({
+          'shippingAddress': shippingAddress,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+         return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Checkout error: $e');
+      return false;
     }
   }
 }

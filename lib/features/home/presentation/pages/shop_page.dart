@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/ojas_layout.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
+import 'package:ojas_user/core/controllers/home_controller.dart';
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
+import 'package:provider/provider.dart';
 
 class ShopPage extends StatefulWidget {
   const ShopPage({super.key});
@@ -19,111 +22,106 @@ class _ShopPageState extends State<ShopPage> {
   bool _inStockOnly = false;
   String _sortBy = 'Featured';
 
-  // Dummy data exactly matching the provided image
-  final List<Map<String, dynamic>> _shopProducts = [
-    {
-      'id': '1',
-      'name': 'test',
-      'vendor': 'RUDRAM',
-      'price': 99.0,
-      'oldPrice': 100.0,
-      'discount': 1,
-      'imageUrl': 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    },
-    {
-      'id': '2',
-      'name': 'Aerofit Spin Bike AF-780 (Yellow/Black) – 12 kg High Iner...',
-      'vendor': 'Unknown Brand',
-      'price': 34499.0,
-      'oldPrice': 42999.0,
-      'discount': 25,
-      'imageUrl': 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    },
-    {
-      'id': '3',
-      'name': 'Storio Soft Toy Unicorn Plushie – Soft Cuddly Toy for Kids',
-      'vendor': 'Unknown Brand',
-      'price': 358.0,
-      'oldPrice': 500.0,
-      'discount': 68,
-      'imageUrl': 'https://images.unsplash.com/photo-1559454403-b8fb88521f11?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    },
-    {
-      'id': '4',
-      'name': 'How to Win Friends and Influence People',
-      'vendor': 'Unknown Brand',
-      'price': 396.0,
-      'oldPrice': 700.0,
-      'discount': 77,
-      'imageUrl': 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    },
-    {
-      'id': '5',
-      'name': 'Black Color Laptop',
-      'vendor': 'Yogesh',
-      'price': 52999.0,
-      'oldPrice': 70000.0,
-      'discount': 32,
-      'imageUrl': 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    },
-    {
-      'id': '6',
-      'name': 'Luxury Gold Plated Smartwatch',
-      'vendor': 'RUDRAM',
-      'price': 499.99,
-      'oldPrice': 699.99,
-      'discount': 40,
-      'imageUrl': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    },
-  ];
+  List<dynamic> get _shopProducts {
+    var list = HomeController.instance.products.toList();
+    
+    // 1. Filtering by Category
+    if (_selectedCategory != 'All') {
+      list = list.where((p) => (p['category'] ?? p['subCategory'] ?? '') == _selectedCategory).toList();
+    }
+
+    // 2. Sorting
+    switch (_sortBy) {
+      case 'Price: Low to High':
+        list.sort((a, b) {
+          final double pa = (a['discountPrice'] != null && a['discountPrice'] > 0 ? a['discountPrice'] : (a['price'] ?? 0)).toDouble();
+          final double pb = (b['discountPrice'] != null && b['discountPrice'] > 0 ? b['discountPrice'] : (b['price'] ?? 0)).toDouble();
+          return pa.compareTo(pb);
+        });
+        break;
+      case 'Price: High to Low':
+        list.sort((a, b) {
+          final double pa = (a['discountPrice'] != null && a['discountPrice'] > 0 ? a['discountPrice'] : (a['price'] ?? 0)).toDouble();
+          final double pb = (b['discountPrice'] != null && b['discountPrice'] > 0 ? b['discountPrice'] : (b['price'] ?? 0)).toDouble();
+          return pb.compareTo(pa);
+        });
+        break;
+      case 'Featured':
+      default:
+        // Sort by ID (Newest first)
+        list.sort((a, b) => (b['_id'] ?? '').toString().compareTo((a['_id'] ?? '').toString()));
+        break;
+    }
+    
+    return list;
+  }
 
   @override
   Widget build(BuildContext context) {
     final bool isMobile = Responsive.isMobile(context);
     final bool isTablet = Responsive.isTablet(context);
 
-    return OjasLayout(
-      activeTitle: 'SHOP',
-      child: Container(
-        color: const Color(0xFFF8FAFC),
-        child: CenteredContent(
-          horizontalPadding: isMobile ? 12 : 20,
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: isMobile ? 20 : 40),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Sidebar - hidden on mobile
-                if (!isMobile) ...[
-                  _buildSidebar(),
-                  const SizedBox(width: 30),
-                ],
-                
-                // Main Content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildTopBar(isMobile),
-                      const SizedBox(height: 20),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _shopProducts.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: isMobile ? 2 : (isTablet ? 2 : 3),
-                          crossAxisSpacing: isMobile ? 12 : 20,
-                          mainAxisSpacing: isMobile ? 12 : 20,
-                          mainAxisExtent: isMobile ? 320 : 360,
-                        ),
-                        itemBuilder: (context, index) {
-                          return _ShopProductCard(product: _shopProducts[index]);
-                        },
-                      ),
-                    ],
+    return ListenableBuilder(
+      listenable: HomeController.instance,
+      builder: (context, _) => OjasLayout(
+        activeTitle: 'SHOP',
+        child: Container(
+          color: const Color(0xFFF8FAFC),
+          child: CenteredContent(
+            horizontalPadding: isMobile ? 12 : 20,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: isMobile ? 20 : 40),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Sidebar - hidden on mobile
+                  if (!isMobile) ...[
+                    _buildSidebar(),
+                    const SizedBox(width: 30),
+                  ],
+                  
+                  // Main Content
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTopBar(isMobile),
+                        const SizedBox(height: 20),
+                        if (HomeController.instance.isLoading)
+                          const Center(child: Padding(padding: EdgeInsets.all(100), child: CircularProgressIndicator())),
+                        if (!HomeController.instance.isLoading && _shopProducts.isEmpty)
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(100),
+                              child: Column(
+                                children: [
+                                  const Icon(Icons.inventory_2_outlined, size: 60, color: Color(0xFFCBD5E1)),
+                                  const SizedBox(height: 16),
+                                  Text('No products found', style: GoogleFonts.outfit(fontSize: 18, color: const Color(0xFF64748B))),
+                                ],
+                              ),
+                            ),
+                          ),
+                        if (!HomeController.instance.isLoading && _shopProducts.isNotEmpty)
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _shopProducts.length,
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: isMobile ? 2 : (isTablet ? 2 : 3),
+                              crossAxisSpacing: isMobile ? 12 : 20,
+                              mainAxisSpacing: isMobile ? 12 : 20,
+                              mainAxisExtent: isMobile ? 320 : 360,
+                            ),
+                            itemBuilder: (context, index) {
+                              return _ShopProductCard(product: _shopProducts[index]);
+                            },
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -197,19 +195,35 @@ class _ShopPageState extends State<ShopPage> {
 
   Widget _buildSortDropdown() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        borderRadius: BorderRadius.circular(6),
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _sortBy,
           isDense: true,
-          icon: const Icon(Icons.keyboard_arrow_down, size: 16, color: Color(0xFF64748B)),
-          style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF334155)),
+          dropdownColor: Colors.white,
+          icon: const Icon(Icons.tune_rounded, size: 16, color: Color(0xFF64748B)),
+          style: GoogleFonts.inter(
+            fontSize: 13, 
+            color: const Color(0xFF1E293B),
+            fontWeight: FontWeight.w500,
+          ),
           items: ['Featured', 'Price: Low to High', 'Price: High to Low'].map((v) {
-            return DropdownMenuItem(value: v, child: Text(v));
+            return DropdownMenuItem(
+              value: v, 
+              child: Text(v, style: GoogleFonts.inter(color: const Color(0xFF1E293B))),
+            );
           }).toList(),
           onChanged: (v) => setState(() => _sortBy = v!),
         ),
@@ -284,11 +298,15 @@ class _ShopPageState extends State<ShopPage> {
           const SizedBox(height: 24),
           
           _sidebarTitle('Categories'),
-          _radioGroup(['All', 'Industrial Parts & Tools', 'Health & Fitness', 'Toys & Games', 'Books & Stationery', 'Gadgets'], _selectedCategory, (v) => setState(() => _selectedCategory = v!)),
+          _radioGroup(
+            ['All', ...HomeController.instance.categories.map((c) => (c['name'] ?? '').toString()).where((n) => n.isNotEmpty)], 
+            _selectedCategory, 
+            (v) => setState(() => _selectedCategory = v!)
+          ),
           
           const SizedBox(height: 24),
           _sidebarTitle('Brands'),
-          _radioGroup(['All', 'RUDRAM', 'Unknown Brand', 'Yogesh'], _selectedBrand, (v) => setState(() => _selectedBrand = v!)),
+          _radioGroup(['All', 'Official Store', 'Premium'], _selectedBrand, (v) => setState(() => _selectedBrand = v!)),
           
           const SizedBox(height: 24),
           _sidebarTitle('Price Range'),
@@ -401,12 +419,22 @@ class _ShopPageState extends State<ShopPage> {
 }
 
 class _ShopProductCard extends StatelessWidget {
-  final Map<String, dynamic> product;
+  final dynamic product;
 
   const _ShopProductCard({required this.product});
 
   @override
   Widget build(BuildContext context) {
+    final String id = product['_id'] ?? '';
+    final String name = product['name'] ?? 'Product';
+    final String vendor = product['brand'] ?? 'Official Store';
+    final double price = (product['discountPrice'] != null && product['discountPrice'] > 0 
+        ? product['discountPrice'] 
+        : (product['price'] ?? 0)).toDouble();
+    final double oldPrice = (product['price'] ?? 0).toDouble();
+    final int discount = oldPrice > 0 && oldPrice > price ? (((oldPrice - price) / oldPrice) * 100).toInt() : 0;
+    final String imageUrl = product['image'] ?? 'https://via.placeholder.com/300';
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -429,14 +457,18 @@ class _ShopProductCard extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Image.network(
-                        product['imageUrl'],
+                        imageUrl,
                         fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: const Color(0xFFF1F5F9),
+                          child: const Center(child: Icon(Icons.image_not_supported_outlined, color: Color(0xFFCBD5E1))),
+                        ),
                       ),
                     ),
                   ),
                 ),
                 // Discount Badge
-                if (product['discount'] > 0)
+                if (discount > 0)
                   Positioned(
                     top: 12, left: 12,
                     child: Container(
@@ -446,7 +478,7 @@ class _ShopProductCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        '-${product['discount']}%',
+                        '-$discount%',
                         style: GoogleFonts.inter(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -456,9 +488,21 @@ class _ShopProductCard extends StatelessWidget {
                   top: 12, right: 12,
                   child: Column(
                     children: [
-                      _actionButton(Icons.favorite_border),
+                      _actionButton(Icons.favorite_border, () {}),
                       const SizedBox(height: 8),
-                      _actionButton(Icons.shopping_cart_outlined),
+                      _actionButton(Icons.shopping_cart_outlined, () async {
+                        final success = await CartController.instance.addToCart(id);
+                         if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(success ? '$name added to cart' : 'Failed to add to cart. Please login first.'),
+                              backgroundColor: success ? Colors.green : Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      }),
                     ],
                   ),
                 ),
@@ -473,12 +517,12 @@ class _ShopProductCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    product['vendor'],
+                    vendor,
                     style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    product['name'],
+                    name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1E293B), height: 1.4),
@@ -487,14 +531,16 @@ class _ShopProductCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        '₹${product['price'].toInt()}',
+                        '₹${price.toInt()}',
                         style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '₹${product['oldPrice'].toInt()}',
-                        style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF94A3B8), decoration: TextDecoration.lineThrough),
-                      ),
+                      if (discount > 0) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          '₹${oldPrice.toInt()}',
+                          style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF94A3B8), decoration: TextDecoration.lineThrough),
+                        ),
+                      ],
                     ],
                   ),
                 ],
@@ -506,16 +552,19 @@ class _ShopProductCard extends StatelessWidget {
     );
   }
 
-  Widget _actionButton(IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: const [BoxShadow(color: Color(0x1A000000), offset: Offset(0, 2), blurRadius: 4)],
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+  Widget _actionButton(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: const [BoxShadow(color: Color(0x1A000000), offset: Offset(0, 2), blurRadius: 4)],
+          border: Border.all(color: const Color(0xFFF1F5F9)),
+        ),
+        child: Icon(icon, size: 14, color: const Color(0xFF475569)),
       ),
-      child: Icon(icon, size: 14, color: const Color(0xFF475569)),
     );
   }
 }

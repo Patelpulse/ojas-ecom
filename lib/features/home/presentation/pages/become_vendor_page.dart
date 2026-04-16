@@ -984,6 +984,7 @@ class _DropdownField extends StatelessWidget {
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: value ?? items.first,
+          dropdownColor: Colors.white,
           icon: const Icon(Icons.expand_more, color: Color(0xFF64748B)),
           items: items.map((e) => DropdownMenuItem(
             value: e, 

@@ -3,11 +3,12 @@ import 'package:ojas_user/core/widgets/ojas_layout.dart';
 
 class ShellScreen extends StatelessWidget {
   final Widget child;
-  const ShellScreen({super.key, required this.child});
+  final String activeTitle;
+  const ShellScreen({super.key, required this.child, this.activeTitle = 'HOME'});
 
   @override
   Widget build(BuildContext context) {
-    return OjasLayout(child: child);
+    return OjasLayout(child: child, activeTitle: activeTitle);
   }
 }
 

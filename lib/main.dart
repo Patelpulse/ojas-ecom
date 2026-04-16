@@ -34,8 +34,24 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Force redirect to home page on initial load/refresh
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _navigatorKey.currentState?.pushReplacementNamed('/');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,48 +65,49 @@ class MyApp extends StatelessWidget {
           SettingsController.instance,
           HomeController.instance,
         ]),
-      builder: (context, _) {
-        final settings = SettingsController.instance.settings;
-        
-        final routes = {
-          '/': (context) => const HomePage(),
-          '/features': (context) => const FeaturesPage(),
-          '/deals': (context) => const DealsPage(),
-          '/shop': (context) => const ShopPage(),
-          '/become-vendor': (context) => const BecomeVendorPage(),
-          '/wishlist': (context) => const WishlistPage(),
-          '/blog': (context) => const BlogPage(),
-          '/orders': (context) => const OrdersPage(),
-          '/returns': (context) => const ReturnsRefundsPage(),
-          '/terms': (context) => const TermsConditionsPage(),
-          '/privacy': (context) => const PrivacyPolicyPage(),
-          '/contact': (context) => const ContactPage(),
-          '/login': (context) => const AuthScreen(isInitialLogin: true),
-          '/register': (context) => const AuthScreen(isInitialLogin: false),
-          '/welcome': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments;
-            final user = args is UserModel ? args : SessionService.instance.currentUser;
-            if (user == null) return const AuthScreen(isInitialLogin: true);
-            return WelcomeScreen(user: user);
-          },
-          '/profile': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments;
-            final user = args is UserModel ? args : SessionService.instance.currentUser;
-            if (user == null) return const AuthScreen(isInitialLogin: true);
-            return ProfileScreen(user: user);
-          },
-        };
+        builder: (context, _) {
+          final settings = SettingsController.instance.settings;
+          
+          final routes = {
+            '/': (context) => const HomePage(),
+            '/features': (context) => const FeaturesPage(),
+            '/deals': (context) => const DealsPage(),
+            '/shop': (context) => const ShopPage(),
+            '/become-vendor': (context) => const BecomeVendorPage(),
+            '/wishlist': (context) => const WishlistPage(),
+            '/blog': (context) => const BlogPage(),
+            '/orders': (context) => const OrdersPage(),
+            '/returns': (context) => const ReturnsRefundsPage(),
+            '/terms': (context) => const TermsConditionsPage(),
+            '/privacy': (context) => const PrivacyPolicyPage(),
+            '/contact': (context) => const ContactPage(),
+            '/login': (context) => const AuthScreen(isInitialLogin: true),
+            '/register': (context) => const AuthScreen(isInitialLogin: false),
+            '/welcome': (context) {
+              final args = ModalRoute.of(context)!.settings.arguments;
+              final user = args is UserModel ? args : SessionService.instance.currentUser;
+              if (user == null) return const AuthScreen(isInitialLogin: true);
+              return WelcomeScreen(user: user);
+            },
+            '/profile': (context) {
+              final args = ModalRoute.of(context)!.settings.arguments;
+              final user = args is UserModel ? args : SessionService.instance.currentUser;
+              if (user == null) return const AuthScreen(isInitialLogin: true);
+              return ProfileScreen(user: user);
+            },
+          };
 
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: settings.marketplaceName,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.dark, // Keep it premium dark
-          initialRoute: '/',
-          routes: routes,
-        );
-      },
+          return MaterialApp(
+            navigatorKey: _navigatorKey,
+            debugShowCheckedModeBanner: false,
+            title: settings.marketplaceName,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: ThemeMode.dark,
+            initialRoute: '/',
+            routes: routes,
+          );
+        },
       ),
     );
   }

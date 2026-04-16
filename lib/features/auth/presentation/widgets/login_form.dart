@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:ojas_user/features/auth/application/auth_service.dart';
 import 'package:ojas_user/core/services/session_service.dart';
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
 
 class LoginForm extends StatefulWidget {
   final VoidCallback onToggle;
@@ -35,6 +36,7 @@ class _LoginFormState extends State<LoginForm> {
       if (response.success) {
         if (mounted) {
           SessionService.instance.setUser(response.user);
+          await CartController.instance.loadCart();
           Navigator.of(context).pushReplacementNamed('/welcome', arguments: response.user);
         }
       } else {
@@ -145,13 +147,6 @@ class _LoginFormState extends State<LoginForm> {
             icon: Ionicons.logo_google,
             text: 'Sign in with Google',
             color: Colors.redAccent,
-            onPressed: () {},
-          ),
-          const SizedBox(height: 12),
-          _SocialLoginButton(
-            icon: Ionicons.logo_facebook,
-            text: 'Sign in with Facebook',
-            color: const Color(0xFF1877F2),
             onPressed: () {},
           ),
           

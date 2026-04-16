@@ -1,28 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
-
-class CartItem {
-  final String id;
-  final String name;
-  final String brand;
-  final double price;
-  final double oldPrice;
-  final int discount;
-  final String imageUrl;
-  int quantity;
-
-  CartItem({
-    required this.id,
-    required this.name,
-    required this.brand,
-    required this.price,
-    required this.oldPrice,
-    required this.discount,
-    required this.imageUrl,
-    this.quantity = 1,
-  });
-}
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
 
 class CartDrawer extends StatefulWidget {
   const CartDrawer({super.key});
@@ -32,187 +11,200 @@ class CartDrawer extends StatefulWidget {
 }
 
 class _CartDrawerState extends State<CartDrawer> {
-  final List<CartItem> _dummyItems = [
-    CartItem(
-      id: '1',
-      name: 'Aerofit Spin Bike AF-780 (Yellow/Black) \u2013 12 kg High Inertia...',
-      brand: 'Patel Pulse V.',
-      price: 34499,
-      oldPrice: 42999,
-      discount: 20,
-      imageUrl: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400',
-    ),
-    CartItem(
-      id: '2',
-      name: 'Black Color Laptop',
-      brand: 'Yogesh',
-      price: 52999,
-      oldPrice: 70000,
-      discount: 24,
-      imageUrl: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    double subtotal = 0;
-    double savings = 0;
-    for (var item in _dummyItems) {
-      subtotal += item.price * item.quantity;
-      savings += (item.oldPrice - item.price) * item.quantity;
-    }
-    const double tax = 6999.84;
-    final double total = subtotal + tax;
+    final controller = CartController.instance;
 
     return Drawer(
       width: 450,
       backgroundColor: Colors.white,
-      child: Column(
-        children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF01B6B),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 24),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Shopping Cart',
-                        style: GoogleFonts.outfit(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      Text(
-                        '${_dummyItems.length} items',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.grey),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          
-          // Cart Items List
-          Expanded(
-            child: _dummyItems.isEmpty 
-              ? _buildEmptyState(context)
-              : ListView.separated(
-                  padding: const EdgeInsets.all(24),
-                  itemCount: _dummyItems.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 16),
-                  itemBuilder: (context, index) {
-                    return _buildCartItem(_dummyItems[index]);
-                  },
-                ),
-          ),
+      child: ListenableBuilder(
+        listenable: controller,
+        builder: (context, _) {
+          if (controller.isLoading) {
+            return const Center(child: CircularProgressIndicator(color: Color(0xFFF01B6B)));
+          }
 
-          if (_dummyItems.isNotEmpty) ...[
-            const Divider(height: 1),
-            // Checkout Summary
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                children: [
-                  _buildSummaryRow('Subtotal', '\u20b9${subtotal.toStringAsFixed(2)}'),
-                  const SizedBox(height: 12),
-                  _buildSummaryRow(
-                    'You saved', 
-                    '-\u20b9${savings.toStringAsFixed(2)}', 
-                    valueColor: const Color(0xFF2E7D32),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildSummaryRow('Shipping', 'FREE', valueColor: const Color(0xFF2E7D32)),
-                  const SizedBox(height: 12),
-                  _buildSummaryRow(
-                    'Tax', 
-                    '\u20b9${tax.toStringAsFixed(2)}', 
-                    valueColor: Colors.grey[300]!,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
-                    child: Divider(height: 1),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Total',
-                        style: GoogleFonts.outfit(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+          final items = controller.items;
+
+          return Column(
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF01B6B),
+                        shape: BoxShape.circle,
                       ),
-                      Text(
-                        '\u20b9${total.toStringAsFixed(2)}',
-                        style: GoogleFonts.hind(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFFB71C1C), // Maroon-ish red as in image
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFF01B6B),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 24),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Proceed to Checkout',
-                            style: GoogleFonts.inter(
-                              fontSize: 18,
+                            'Shopping Cart',
+                            style: GoogleFonts.outfit(
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward_rounded, size: 20),
+                          Text(
+                            '${items.length} items',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: Colors.grey[500],
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                  ),
-                ],
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.grey),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ],
+              const Divider(height: 1),
+              
+              // Cart Items List
+              Expanded(
+                child: items.isEmpty 
+                  ? _buildEmptyState(context)
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(24),
+                      itemCount: items.length,
+                      separatorBuilder: (context, index) => const SizedBox(height: 16),
+                      itemBuilder: (context, index) {
+                        return _buildCartItem(items[index]);
+                      },
+                    ),
+              ),
+
+              if (items.isNotEmpty) ...[
+                const Divider(height: 1),
+                // Checkout Summary
+                Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    children: [
+                      _buildSummaryRow('Subtotal', '\u20b9${controller.subtotal.toStringAsFixed(2)}'),
+                      const SizedBox(height: 12),
+                      if (controller.savings > 0)
+                        _buildSummaryRow(
+                          'You saved', 
+                          '-\u20b9${controller.savings.toStringAsFixed(2)}', 
+                          valueColor: const Color(0xFF2E7D32),
+                        ),
+                      const SizedBox(height: 12),
+                      _buildSummaryRow('Shipping', 'FREE', valueColor: const Color(0xFF2E7D32)),
+                      const SizedBox(height: 12),
+                      _buildSummaryRow(
+                        'Tax', 
+                        '\u20b9${controller.tax.toStringAsFixed(2)}', 
+                        valueColor: Colors.grey[400]!,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.0),
+                        child: Divider(height: 1),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Total',
+                            style: GoogleFonts.outfit(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            '\u20b9${controller.totalAmount.toStringAsFixed(2)}',
+                            style: GoogleFonts.hind(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFFB71C1C),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final success = await controller.checkout(
+                              shippingAddress: {
+                                'street': 'Main Street 123',
+                                'city': 'Indore',
+                                'state': 'MP',
+                                'zipCode': '452001',
+                              },
+                            );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(success ? 'Order placed successfully! Vendors notified.' : 'Failed to place order.'),
+                                  backgroundColor: success ? Colors.green : Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              if (success) Navigator.pop(context);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFF01B6B),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 0,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Proceed to Checkout',
+                                style: GoogleFonts.inter(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.arrow_forward_rounded, size: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildCartItem(CartItem item) {
+  Widget _buildCartItem(dynamic item) {
+    final product = item['product'];
+    if (product == null) return const SizedBox();
+
+    final String name = product['name'] ?? 'Product';
+    final double price = (product['discountPrice'] ?? product['price'] ?? 0).toDouble();
+    final double oldPrice = (product['price'] ?? 0).toDouble();
+    final int discount = oldPrice > 0 && oldPrice > price ? (((oldPrice - price) / oldPrice) * 100).toInt() : 0;
+    final String imageUrl = product['image'] ?? 'https://via.placeholder.com/150';
+    final int quantity = item['quantity'] ?? 1;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -229,31 +221,32 @@ class _CartDrawerState extends State<CartDrawer> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  item.imageUrl,
+                  imageUrl,
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
                 ),
               ),
-              Positioned(
-                top: 0,
-                left: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFB1B4F),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '${item.discount}%',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
+              if (discount > 0)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFB1B4F),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '$discount%',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
           const SizedBox(width: 16),
@@ -263,7 +256,7 @@ class _CartDrawerState extends State<CartDrawer> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.name,
+                  name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
@@ -272,34 +265,28 @@ class _CartDrawerState extends State<CartDrawer> {
                     color: Colors.black87,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  item.brand,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                  ),
-                ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
                     Text(
-                      '\u20b9${item.price.toInt()}',
+                      '\u20b9${price.toInt()}',
                       style: GoogleFonts.hind(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '\u20b9${item.oldPrice.toInt()}',
-                      style: GoogleFonts.hind(
-                        fontSize: 14,
-                        color: Colors.grey[400],
-                        decoration: TextDecoration.lineThrough,
+                    if (oldPrice > price) ...[
+                      const SizedBox(width: 8),
+                      Text(
+                        '\u20b9${oldPrice.toInt()}',
+                        style: GoogleFonts.hind(
+                          fontSize: 14,
+                          color: Colors.grey[400],
+                          decoration: TextDecoration.lineThrough,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -314,19 +301,19 @@ class _CartDrawerState extends State<CartDrawer> {
                       child: Row(
                         children: [
                           _quantityButton(Icons.remove, () {
-                            if (item.quantity > 1) {
-                              setState(() => item.quantity--);
+                            if (quantity > 1) {
+                              CartController.instance.addToCart(product['_id'], quantity: -1);
                             }
                           }),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             child: Text(
-                              '${item.quantity}',
+                              '$quantity',
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
                           _quantityButton(Icons.add, () {
-                            setState(() => item.quantity++);
+                            CartController.instance.addToCart(product['_id'], quantity: 1);
                           }),
                         ],
                       ),
@@ -335,9 +322,7 @@ class _CartDrawerState extends State<CartDrawer> {
                     IconButton(
                       icon: const Icon(Icons.delete_outline, color: Color(0xFFFB1B4F), size: 20),
                       onPressed: () {
-                        setState(() {
-                          _dummyItems.removeWhere((i) => i.id == item.id);
-                        });
+                        CartController.instance.removeFromCart(product['_id']);
                       },
                     ),
                   ],

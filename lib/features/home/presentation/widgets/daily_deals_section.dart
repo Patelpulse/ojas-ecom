@@ -37,20 +37,22 @@ class DailyDealsSection extends StatelessWidget {
           const SizedBox(height: 32),
           
           // Cards: Row on Desktop, Column on Mobile
-          if (isMobile)
+          if (dailyDeals.isEmpty)
+             const Center(child: Padding(padding: EdgeInsets.all(40), child: Text('Check back later for daily deals!', style: TextStyle(color: Colors.grey))))
+          else if (isMobile)
             Column(
-              children: [
-                DailyDealCard(product: dailyDeals[0]),
-                const SizedBox(height: 16),
-                DailyDealCard(product: dailyDeals[1]),
-              ],
+              children: dailyDeals.map((p) => Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: DailyDealCard(product: p),
+              )).toList(),
             )
           else
             Row(
               children: [
-                Expanded(child: DailyDealCard(product: dailyDeals[0])),
-                const SizedBox(width: 24),
-                Expanded(child: DailyDealCard(product: dailyDeals[1])),
+                for (var i = 0; i < dailyDeals.length; i++) ...[
+                  Expanded(child: DailyDealCard(product: dailyDeals[i])),
+                  if (i < dailyDeals.length - 1) const SizedBox(width: 24),
+                ],
               ],
             ),
           

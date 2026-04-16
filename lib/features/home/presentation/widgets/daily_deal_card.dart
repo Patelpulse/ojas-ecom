@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:ojas_user/features/home/domain/models/product_model.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
 
 class DailyDealCard extends StatelessWidget {
   final ProductModel product;
@@ -37,12 +38,20 @@ class DailyDealCard extends StatelessWidget {
                 height: 180,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  image: DecorationImage(
-                    image: product.imageUrl.startsWith('http')
-                        ? NetworkImage(product.imageUrl) as ImageProvider
-                        : AssetImage(product.imageUrl),
-                    fit: BoxFit.cover,
-                  ),
+                  color: Colors.white,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: product.imageUrl.startsWith('http')
+                      ? Image.network(
+                          product.imageUrl,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, _, __) => const Center(child: Icon(Icons.image_not_supported_outlined, size: 40, color: Colors.grey)),
+                        )
+                      : Image.asset(
+                          product.imageUrl,
+                          fit: BoxFit.contain,
+                        ),
                 ),
               ),
               Positioned(
@@ -162,11 +171,22 @@ class DailyDealCard extends StatelessWidget {
                     ),
                     const Spacer(),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        final success = await CartController.instance.addToCart(product.id);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(success ? '${product.name} added to cart' : 'Failed to add to cart. Please login first.'),
+                              backgroundColor: success ? Colors.green : Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFF01B6B),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12), // Adjusted vertical padding
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                       child: const Text('Add to Cart', style: TextStyle(fontWeight: FontWeight.bold)),
