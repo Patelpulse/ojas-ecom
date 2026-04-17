@@ -24,9 +24,9 @@ class HeroSideBanner extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         image: DecorationImage(
-          image: imageUrl.startsWith('http')
+          image: (imageUrl.isNotEmpty && imageUrl.startsWith('http'))
               ? NetworkImage(imageUrl) as ImageProvider
-              : AssetImage(imageUrl),
+              : AssetImage(imageUrl.isEmpty ? 'assets/images/colorful_pillows_promo.png' : imageUrl),
           fit: BoxFit.cover,
         ),
       ),
