@@ -469,12 +469,12 @@ class _DealCardState extends State<_DealCard> {
                   ? Image.network(
                       p.imageUrl,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.image_not_supported_outlined, size: 60, color: Color(0xFFCBD5E1))),
+                      errorBuilder: (_, _, _) => const Center(child: Icon(Icons.image_not_supported_outlined, size: 60, color: Color(0xFFCBD5E1))),
                     )
                   : Image.asset(
                       p.imageUrl,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.image_not_supported_outlined, size: 60, color: Color(0xFFCBD5E1))),
+                      errorBuilder: (_, _, _) => const Center(child: Icon(Icons.image_not_supported_outlined, size: 60, color: Color(0xFFCBD5E1))),
                     ),
               ),
               // Discount badge (top-left)

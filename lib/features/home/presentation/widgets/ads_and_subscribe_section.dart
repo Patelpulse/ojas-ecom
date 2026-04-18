@@ -14,7 +14,10 @@ class AdsAndSubscribeSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: AppColors.bgPrimaryLight,
-      padding: EdgeInsets.symmetric(vertical: isMobile ? 32 : 60.0, horizontal: isMobile ? 12 : 24.0),
+      padding: EdgeInsets.symmetric(
+        vertical: isMobile ? 32 : 60.0,
+        horizontal: isMobile ? 12 : 24.0,
+      ),
       child: CenteredContent(
         horizontalPadding: isMobile ? 0 : 40,
         child: Column(
@@ -33,7 +36,7 @@ class AdsAndSubscribeSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: const [
                     Expanded(child: _OfferCard()),
-                    const SizedBox(width: 24),
+                    SizedBox(width: 24),
                     Expanded(child: _SubscribeCard()),
                   ],
                 ),
@@ -45,9 +48,18 @@ class AdsAndSubscribeSection extends StatelessWidget {
               spacing: 32,
               runSpacing: 16,
               children: [
-                _buildGuarantee(Icons.check_circle_outline, '10,000+ Happy Customers'),
-                _buildGuarantee(Icons.check_circle_outline, 'No Spam Guarantee'),
-                _buildGuarantee(Icons.check_circle_outline, 'Unsubscribe Anytime'),
+                _buildGuarantee(
+                  Icons.check_circle_outline,
+                  '10,000+ Happy Customers',
+                ),
+                _buildGuarantee(
+                  Icons.check_circle_outline,
+                  'No Spam Guarantee',
+                ),
+                _buildGuarantee(
+                  Icons.check_circle_outline,
+                  'Unsubscribe Anytime',
+                ),
               ],
             ),
           ],
@@ -96,7 +108,7 @@ class _OfferCard extends StatelessWidget {
             color: const Color(0xFFE91E63).withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -110,11 +122,18 @@ class _OfferCard extends StatelessWidget {
                   color: Colors.white.withOpacity(0.2),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.card_giftcard, color: Colors.white, size: 18),
+                child: const Icon(
+                  Icons.card_giftcard,
+                  color: Colors.white,
+                  size: 18,
+                ),
               ),
               const SizedBox(width: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -192,9 +211,7 @@ class _OfferCard extends StatelessWidget {
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFFE91E63),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         elevation: 0,
       ),
       child: Row(
@@ -205,10 +222,7 @@ class _OfferCard extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             'Claim Offer',
-            style: GoogleFonts.inter(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-            ),
+            style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15),
           ),
           const SizedBox(width: 8),
           const Icon(Icons.arrow_forward, size: 18),
@@ -221,7 +235,11 @@ class _OfferCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.auto_awesome, color: Colors.white.withOpacity(0.8), size: 16),
+        Icon(
+          Icons.auto_awesome,
+          color: Colors.white.withOpacity(0.8),
+          size: 16,
+        ),
         const SizedBox(width: 6),
         Text(
           'Valid until Dec 31, 2024',
@@ -257,7 +275,7 @@ class _SubscribeCard extends StatelessWidget {
             color: Colors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -273,7 +291,11 @@ class _SubscribeCard extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(Icons.mail_outline, color: Colors.white, size: 32),
+            child: const Icon(
+              Icons.mail_outline,
+              color: Colors.white,
+              size: 32,
+            ),
           ),
           const SizedBox(height: 24),
           Text(
@@ -295,7 +317,7 @@ class _SubscribeCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 32),
-          
+
           // Input field
           Container(
             height: 54,
@@ -311,7 +333,10 @@ class _SubscribeCard extends StatelessWidget {
                     child: TextField(
                       decoration: InputDecoration(
                         hintText: 'Enter your email',
-                        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                        hintStyle: TextStyle(
+                          color: Colors.grey.shade400,
+                          fontSize: 13,
+                        ),
                         border: InputBorder.none,
                       ),
                     ),
@@ -319,13 +344,17 @@ class _SubscribeCard extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(right: 16),
-                  child: Icon(Icons.mail_outline, color: Colors.grey.shade400, size: 20),
+                  child: Icon(
+                    Icons.mail_outline,
+                    color: Colors.grey.shade400,
+                    size: 20,
+                  ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Button
           SizedBox(
             width: double.infinity,
@@ -357,11 +386,11 @@ class _SubscribeCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 32),
-          
+
           // Divider
           Divider(color: Colors.grey.shade100, thickness: 1),
           const SizedBox(height: 16),
-          
+
           // Perks
           Align(
             alignment: Alignment.centerLeft,
@@ -375,7 +404,7 @@ class _SubscribeCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           if (isMobile)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,18 +454,12 @@ class _SubscribeCard extends StatelessWidget {
         Container(
           width: 6,
           height: 6,
-          decoration: BoxDecoration(
-            color: dotColor,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
         ),
         const SizedBox(width: 10),
         Text(
           text,
-          style: GoogleFonts.inter(
-            color: Colors.grey.shade600,
-            fontSize: 12,
-          ),
+          style: GoogleFonts.inter(color: Colors.grey.shade600, fontSize: 12),
         ),
       ],
     );

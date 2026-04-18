@@ -9,7 +9,7 @@ import 'package:ojas_user/features/cart/application/cart_controller.dart';
 
 class OjasNavbar extends StatelessWidget implements PreferredSizeWidget {
   final String activeTitle;
-  const OjasNavbar({Key? key, this.activeTitle = 'HOME'}) : super(key: key);
+  const OjasNavbar({super.key, this.activeTitle = 'HOME'});
 
   @override
   Size get preferredSize => const Size.fromHeight(180);
@@ -382,7 +382,7 @@ class _NavItem extends StatelessWidget {
   final String title;
   final bool isActive;
   final VoidCallback? onTap;
-  const _NavItem({Key? key, required this.title, this.isActive = false, this.onTap}) : super(key: key);
+  const _NavItem({super.key, required this.title, this.isActive = false, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -423,12 +423,12 @@ class _IconAction extends StatelessWidget {
   final VoidCallback? onTap;
   
   const _IconAction({
-    Key? key,
+    super.key,
     required this.icon, 
     required this.label, 
     required this.count,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -454,7 +454,7 @@ class _IconAction extends StatelessWidget {
 
 class _AuthLink extends StatelessWidget {
   final String title;
-  const _AuthLink({Key? key, required this.title}) : super(key: key);
+  const _AuthLink({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -473,7 +473,7 @@ class _AuthLink extends StatelessWidget {
 }
 
 class _RegisterButton extends StatelessWidget {
-  const _RegisterButton({Key? key}) : super(key: key);
+  const _RegisterButton({super.key});
   @override
   Widget build(BuildContext context) {
     return InkWell(

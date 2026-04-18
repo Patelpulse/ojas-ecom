@@ -12,7 +12,8 @@ class LatestProductsSection extends StatelessWidget {
     final bool isMobile = Responsive.isMobile(context);
     final items = [
       {
-        'imageUrl': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
         'title': 'Luxury Gold Plated Smartwatch',
         'price': 499.0,
         'oldPrice': 699.0,
@@ -20,7 +21,8 @@ class LatestProductsSection extends StatelessWidget {
         'hasBestSellerBadge': false,
       },
       {
-        'imageUrl': 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=500',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=500',
         'title': 'Black Color Laptop',
         'price': 52999.0,
         'oldPrice': 70000.0,
@@ -28,7 +30,8 @@ class LatestProductsSection extends StatelessWidget {
         'hasBestSellerBadge': false,
       },
       {
-        'imageUrl': 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=500',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=500',
         'title': 'How to Win Friends and Influence People',
         'price': 396.0,
         'oldPrice': 700.0,
@@ -36,7 +39,8 @@ class LatestProductsSection extends StatelessWidget {
         'hasBestSellerBadge': true,
       },
       {
-        'imageUrl': 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=500',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=500',
         'title': 'Storio Soft Toy Unicorn Plushie – Soft Cuddly Toy for Kids',
         'price': 358.0,
         'oldPrice': 600.0,
@@ -44,7 +48,8 @@ class LatestProductsSection extends StatelessWidget {
         'hasBestSellerBadge': false,
       },
       {
-        'imageUrl': 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=500',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=500',
         'title': 'Aerofit Spin Bike AF-780 (Yellow/Black) – 12 kg High...',
         'price': 34499.0,
         'oldPrice': 42999.0,
@@ -52,7 +57,8 @@ class LatestProductsSection extends StatelessWidget {
         'hasBestSellerBadge': false,
       },
       {
-        'imageUrl': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
         'title': 'Premium Wireless Noise Cancelling Headphones',
         'price': 99.0,
         'oldPrice': 149.0,
@@ -60,7 +66,8 @@ class LatestProductsSection extends StatelessWidget {
         'hasBestSellerBadge': false,
       },
       {
-        'imageUrl': 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500',
         'title': 'Smart Watch with Health Monitor',
         'price': 2999.0,
         'oldPrice': 4500.0,
@@ -92,7 +99,7 @@ class LatestProductsSection extends StatelessWidget {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: items.length,
-                separatorBuilder: (_, _x) => const SizedBox(width: 16),
+                separatorBuilder: (_, x) => const SizedBox(width: 16),
                 itemBuilder: (context, index) {
                   final item = items[index];
                   return LatestProductCard(

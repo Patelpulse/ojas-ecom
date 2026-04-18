@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HeroMainBanner extends StatelessWidget {

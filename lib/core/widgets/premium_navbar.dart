@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
 
-
 /// A Premium, Highly Animated Navbar for eCommerce
 /// Designed by Ojas Senior UI/UX Expert
 class PremiumAnimatedNavbar extends StatefulWidget {
@@ -13,7 +12,8 @@ class PremiumAnimatedNavbar extends StatefulWidget {
   State<PremiumAnimatedNavbar> createState() => _PremiumAnimatedNavbarState();
 }
 
-class _PremiumAnimatedNavbarState extends State<PremiumAnimatedNavbar> with SingleTickerProviderStateMixin {
+class _PremiumAnimatedNavbarState extends State<PremiumAnimatedNavbar>
+    with SingleTickerProviderStateMixin {
   late AnimationController _loadController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -26,13 +26,15 @@ class _PremiumAnimatedNavbarState extends State<PremiumAnimatedNavbar> with Sing
       duration: const Duration(milliseconds: 1200),
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _loadController, curve: Curves.easeIn),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _loadController, curve: Curves.easeIn));
 
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero).animate(
-      CurvedAnimation(parent: _loadController, curve: Curves.elasticOut),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero).animate(
+          CurvedAnimation(parent: _loadController, curve: Curves.elasticOut),
+        );
 
     _loadController.forward();
   }
@@ -111,10 +113,7 @@ class _TopUtilityBar extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             'good message ',
-            style: GoogleFonts.poppins(
-              color: Colors.white70,
-              fontSize: 12,
-            ),
+            style: GoogleFonts.poppins(color: Colors.white70, fontSize: 12),
           ),
           Text(
             'Learn More',
@@ -126,7 +125,7 @@ class _TopUtilityBar extends StatelessWidget {
           ),
           const Spacer(),
           _TopLink(
-            icon: Icons.location_on_outlined, 
+            icon: Icons.location_on_outlined,
             text: 'Track Order',
             onTap: () => Navigator.pushReplacementNamed(context, '/orders'),
           ),
@@ -179,7 +178,10 @@ class _MainNavbar extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.pinkAccent.withOpacity(0.5), width: 1.5),
+                border: Border.all(
+                  color: Colors.pinkAccent.withOpacity(0.5),
+                  width: 1.5,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -195,9 +197,7 @@ class _MainNavbar extends StatelessWidget {
           ),
           const SizedBox(width: 50),
           // Navigation Menu Items
-          const _NavMenu(
-            items: ['HOME', 'FEATURES', 'DEALS', 'SHOP', 'BLOG'],
-          ),
+          const _NavMenu(items: ['HOME', 'FEATURES', 'DEALS', 'SHOP', 'BLOG']),
           const Spacer(),
           // User Interactions
           const _UserActionSection(),
@@ -217,52 +217,46 @@ class _NavMenu extends StatelessWidget {
     final currentRoute = ModalRoute.of(context)?.settings.name;
 
     return Row(
-      children: List.generate(
-        items.length,
-        (index) {
-          final item = items[index];
-          bool isActive = false;
-          if (item == 'HOME' && currentRoute == '/') isActive = true;
-          if (item == 'FEATURES' && currentRoute == '/features') isActive = true;
-          if (item == 'DEALS' && currentRoute == '/deals') isActive = true;
-          if (item == 'SHOP' && currentRoute == '/shop') isActive = true;
-          if (item == 'BLOG' && currentRoute == '/blog') isActive = true;
-          if (item == 'LOGIN' && currentRoute == '/login') isActive = true;
-          if (item == 'REGISTER' && currentRoute == '/register') isActive = true;
+      children: List.generate(items.length, (index) {
+        final item = items[index];
+        bool isActive = false;
+        if (item == 'HOME' && currentRoute == '/') isActive = true;
+        if (item == 'FEATURES' && currentRoute == '/features') isActive = true;
+        if (item == 'DEALS' && currentRoute == '/deals') isActive = true;
+        if (item == 'SHOP' && currentRoute == '/shop') isActive = true;
+        if (item == 'BLOG' && currentRoute == '/blog') isActive = true;
+        if (item == 'LOGIN' && currentRoute == '/login') isActive = true;
+        if (item == 'REGISTER' && currentRoute == '/register') isActive = true;
 
-
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _HoverMenuAction(
-              title: item,
-              index: index,
-              isActive: isActive,
-              onTap: () {
-                if (item == 'HOME') {
-                  Navigator.of(context).pushReplacementNamed('/');
-                } else if (item == 'FEATURES') {
-                  Navigator.of(context).pushReplacementNamed('/features');
-                } else if (item == 'DEALS') {
-                  Navigator.of(context).pushReplacementNamed('/deals');
-                } else if (item == 'SHOP') {
-                  Navigator.of(context).pushReplacementNamed('/shop');
-                } else if (item == 'BLOG') {
-                  Navigator.of(context).pushReplacementNamed('/blog');
-                } else if (item == 'LOGIN') {
-                  Navigator.of(context).pushReplacementNamed('/login');
-                } else if (item == 'REGISTER') {
-                  Navigator.of(context).pushReplacementNamed('/register');
-                }
-              },
-            ),
-          );
-        },
-      ),
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: _HoverMenuAction(
+            title: item,
+            index: index,
+            isActive: isActive,
+            onTap: () {
+              if (item == 'HOME') {
+                Navigator.of(context).pushReplacementNamed('/');
+              } else if (item == 'FEATURES') {
+                Navigator.of(context).pushReplacementNamed('/features');
+              } else if (item == 'DEALS') {
+                Navigator.of(context).pushReplacementNamed('/deals');
+              } else if (item == 'SHOP') {
+                Navigator.of(context).pushReplacementNamed('/shop');
+              } else if (item == 'BLOG') {
+                Navigator.of(context).pushReplacementNamed('/blog');
+              } else if (item == 'LOGIN') {
+                Navigator.of(context).pushReplacementNamed('/login');
+              } else if (item == 'REGISTER') {
+                Navigator.of(context).pushReplacementNamed('/register');
+              }
+            },
+          ),
+        );
+      }),
     );
   }
 }
-
 
 class _HoverMenuAction extends StatefulWidget {
   final String title;
@@ -274,15 +268,14 @@ class _HoverMenuAction extends StatefulWidget {
     required this.index,
     this.isActive = false,
     required this.onTap,
-    super.key,
   });
 
   @override
   State<_HoverMenuAction> createState() => _HoverMenuActionState();
 }
 
-
-class _HoverMenuActionState extends State<_HoverMenuAction> with SingleTickerProviderStateMixin {
+class _HoverMenuActionState extends State<_HoverMenuAction>
+    with SingleTickerProviderStateMixin {
   bool _isHovered = false;
   late AnimationController _entryController;
   late Animation<double> _fadeAnimation;
@@ -292,11 +285,18 @@ class _HoverMenuActionState extends State<_HoverMenuAction> with SingleTickerPro
   void initState() {
     super.initState();
     _entryController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 800));
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
 
-    _fadeAnimation = CurvedAnimation(parent: _entryController, curve: Curves.easeIn);
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _entryController, curve: Curves.easeOutBack));
+    _fadeAnimation = CurvedAnimation(
+      parent: _entryController,
+      curve: Curves.easeIn,
+    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero).animate(
+          CurvedAnimation(parent: _entryController, curve: Curves.easeOutBack),
+        );
 
     Future.delayed(Duration(milliseconds: 400 + (widget.index * 100)), () {
       if (mounted) _entryController.forward();
@@ -333,10 +333,17 @@ class _HoverMenuActionState extends State<_HoverMenuAction> with SingleTickerPro
                     style: GoogleFonts.poppins(
                       color: isEffectiveActive ? Colors.white : Colors.white70,
                       fontSize: 14,
-                      shadows: isEffectiveActive 
-                        ? [Shadow(color: Colors.pinkAccent.withOpacity(0.5), blurRadius: 8)] 
-                        : [],
-                      fontWeight: isEffectiveActive ? FontWeight.bold : FontWeight.w500,
+                      shadows: isEffectiveActive
+                          ? [
+                              Shadow(
+                                color: Colors.pinkAccent.withOpacity(0.5),
+                                blurRadius: 8,
+                              ),
+                            ]
+                          : [],
+                      fontWeight: isEffectiveActive
+                          ? FontWeight.bold
+                          : FontWeight.w500,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -349,7 +356,10 @@ class _HoverMenuActionState extends State<_HoverMenuAction> with SingleTickerPro
                       color: Colors.pinkAccent,
                       boxShadow: [
                         if (isEffectiveActive)
-                          BoxShadow(color: Colors.pinkAccent.withOpacity(0.8), blurRadius: 4),
+                          BoxShadow(
+                            color: Colors.pinkAccent.withOpacity(0.8),
+                            blurRadius: 4,
+                          ),
                       ],
                     ),
                   ),
@@ -363,8 +373,6 @@ class _HoverMenuActionState extends State<_HoverMenuAction> with SingleTickerPro
   }
 }
 
-
-
 /// Right section of Navbar: Wishlist, Cart, Login, Register
 class _UserActionSection extends StatelessWidget {
   const _UserActionSection();
@@ -374,10 +382,7 @@ class _UserActionSection extends StatelessWidget {
     return Row(
       children: [
         // Wishlist
-        _HoverIconAction(
-          icon: Icons.favorite_border,
-          label: 'Wishlist 0',
-        ),
+        _HoverIconAction(icon: Icons.favorite_border, label: 'Wishlist 0'),
         const SizedBox(width: 20),
         // Cart Button (Highlighted Animation)
         const _PulseCartButton(),
@@ -395,10 +400,11 @@ class _UserActionSection extends StatelessWidget {
             Navigator.of(context).pushReplacementNamed('/login');
           },
           child: Text(
-
-
             'Login',
-            style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600),
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         const SizedBox(width: 10),
@@ -407,11 +413,12 @@ class _UserActionSection extends StatelessWidget {
             Navigator.of(context).pushReplacementNamed('/register');
           },
 
-
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
             foregroundColor: AppColors.primaryPink,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           ),
           child: Text(
@@ -466,7 +473,8 @@ class _PulseCartButton extends StatefulWidget {
   State<_PulseCartButton> createState() => _PulseCartButtonState();
 }
 
-class _PulseCartButtonState extends State<_PulseCartButton> with SingleTickerProviderStateMixin {
+class _PulseCartButtonState extends State<_PulseCartButton>
+    with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _scaleAnimation;
 
@@ -508,7 +516,11 @@ class _PulseCartButtonState extends State<_PulseCartButton> with SingleTickerPro
         ),
         child: Row(
           children: [
-            const Icon(Icons.shopping_cart_outlined, color: Colors.white, size: 20),
+            const Icon(
+              Icons.shopping_cart_outlined,
+              color: Colors.white,
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Text(
               'My Cart',
@@ -650,7 +662,10 @@ class _AnimatedSearchBarState extends State<_AnimatedSearchBar> {
                 focusNode: _focusNode,
                 decoration: InputDecoration(
                   hintText: 'Enter your keyword...',
-                  hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 16),
+                  hintStyle: GoogleFonts.poppins(
+                    color: Colors.grey,
+                    fontSize: 16,
+                  ),
                   border: InputBorder.none,
                 ),
               ),

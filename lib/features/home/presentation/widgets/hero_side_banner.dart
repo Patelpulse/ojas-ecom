@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HeroSideBanner extends StatelessWidget {
@@ -82,10 +81,7 @@ class HeroSideBanner extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: GoogleFonts.inter(
-                color: Colors.white70,
-                fontSize: 13,
-              ),
+              style: GoogleFonts.inter(color: Colors.white70, fontSize: 13),
             ),
             const SizedBox(height: 12),
             Row(

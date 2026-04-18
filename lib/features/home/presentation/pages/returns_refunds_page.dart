@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/ojas_layout.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
-import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
 
 class ReturnsRefundsPage extends StatelessWidget {

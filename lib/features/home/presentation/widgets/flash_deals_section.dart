@@ -35,7 +35,7 @@ class FlashDealsSection extends StatelessWidget {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: flashProducts.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 24),
+                  separatorBuilder: (_, _) => const SizedBox(width: 24),
                   itemBuilder: (context, index) {
                     final product = flashProducts[index];
                     return SizedBox(
@@ -43,12 +43,19 @@ class FlashDealsSection extends StatelessWidget {
                       child: ProductCard(
                         product: product,
                         onAddToCart: () async {
-                          final success = await CartController.instance.addToCart(product.id);
+                          final success = await CartController.instance
+                              .addToCart(product.id);
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(success ? 'Added to cart' : 'Failed to add to cart. Please login.'),
-                                backgroundColor: success ? Colors.green : Colors.red,
+                                content: Text(
+                                  success
+                                      ? 'Added to cart'
+                                      : 'Failed to add to cart. Please login.',
+                                ),
+                                backgroundColor: success
+                                    ? Colors.green
+                                    : Colors.red,
                                 duration: const Duration(seconds: 1),
                               ),
                             );
@@ -96,7 +103,10 @@ class _TimeBox extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -107,7 +117,10 @@ class _TimerDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 4),
-      child: Text(':', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+      child: Text(
+        ':',
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      ),
     );
   }
 }

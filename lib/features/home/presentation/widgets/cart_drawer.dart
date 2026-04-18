@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ojas_user/core/constants/app_colors.dart';
 
 class CartItem {
   final String id;
@@ -35,12 +34,14 @@ class _CartDrawerState extends State<CartDrawer> {
   final List<CartItem> _dummyItems = [
     CartItem(
       id: '1',
-      name: 'Aerofit Spin Bike AF-780 (Yellow/Black) \u2013 12 kg High Inertia...',
+      name:
+          'Aerofit Spin Bike AF-780 (Yellow/Black) \u2013 12 kg High Inertia...',
       brand: 'Patel Pulse V.',
       price: 34499,
       oldPrice: 42999,
       discount: 20,
-      imageUrl: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400',
     ),
     CartItem(
       id: '2',
@@ -49,7 +50,8 @@ class _CartDrawerState extends State<CartDrawer> {
       price: 52999,
       oldPrice: 70000,
       discount: 24,
-      imageUrl: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400',
     ),
   ];
 
@@ -80,7 +82,11 @@ class _CartDrawerState extends State<CartDrawer> {
                     color: Color(0xFFF01B6B),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 24),
+                  child: const Icon(
+                    Icons.shopping_bag_outlined,
+                    color: Colors.white,
+                    size: 24,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -113,19 +119,20 @@ class _CartDrawerState extends State<CartDrawer> {
             ),
           ),
           const Divider(height: 1),
-          
+
           // Cart Items List
           Expanded(
-            child: _dummyItems.isEmpty 
-              ? _buildEmptyState(context)
-              : ListView.separated(
-                  padding: const EdgeInsets.all(24),
-                  itemCount: _dummyItems.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 16),
-                  itemBuilder: (context, index) {
-                    return _buildCartItem(_dummyItems[index]);
-                  },
-                ),
+            child: _dummyItems.isEmpty
+                ? _buildEmptyState(context)
+                : ListView.separated(
+                    padding: const EdgeInsets.all(24),
+                    itemCount: _dummyItems.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 16),
+                    itemBuilder: (context, index) {
+                      return _buildCartItem(_dummyItems[index]);
+                    },
+                  ),
           ),
 
           if (_dummyItems.isNotEmpty) ...[
@@ -135,19 +142,26 @@ class _CartDrawerState extends State<CartDrawer> {
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 children: [
-                  _buildSummaryRow('Subtotal', '\u20b9${subtotal.toStringAsFixed(2)}'),
+                  _buildSummaryRow(
+                    'Subtotal',
+                    '\u20b9${subtotal.toStringAsFixed(2)}',
+                  ),
                   const SizedBox(height: 12),
                   _buildSummaryRow(
-                    'You saved', 
-                    '-\u20b9${savings.toStringAsFixed(2)}', 
+                    'You saved',
+                    '-\u20b9${savings.toStringAsFixed(2)}',
                     valueColor: const Color(0xFF2E7D32),
                   ),
                   const SizedBox(height: 12),
-                  _buildSummaryRow('Shipping', 'FREE', valueColor: const Color(0xFF2E7D32)),
+                  _buildSummaryRow(
+                    'Shipping',
+                    'FREE',
+                    valueColor: const Color(0xFF2E7D32),
+                  ),
                   const SizedBox(height: 12),
                   _buildSummaryRow(
-                    'Tax', 
-                    '\u20b9${tax.toStringAsFixed(2)}', 
+                    'Tax',
+                    '\u20b9${tax.toStringAsFixed(2)}',
                     valueColor: Colors.grey[300]!,
                   ),
                   const Padding(
@@ -170,7 +184,9 @@ class _CartDrawerState extends State<CartDrawer> {
                         style: GoogleFonts.hind(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFFB71C1C), // Maroon-ish red as in image
+                          color: const Color(
+                            0xFFB71C1C,
+                          ), // Maroon-ish red as in image
                         ),
                       ),
                     ],
@@ -184,7 +200,9 @@ class _CartDrawerState extends State<CartDrawer> {
                         backgroundColor: const Color(0xFFF01B6B),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 20),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         elevation: 0,
                       ),
                       child: Row(
@@ -322,7 +340,9 @@ class _CartDrawerState extends State<CartDrawer> {
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             child: Text(
                               '${item.quantity}',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           _quantityButton(Icons.add, () {
@@ -333,7 +353,11 @@ class _CartDrawerState extends State<CartDrawer> {
                     ),
                     const Spacer(),
                     IconButton(
-                      icon: const Icon(Icons.delete_outline, color: Color(0xFFFB1B4F), size: 20),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        color: Color(0xFFFB1B4F),
+                        size: 20,
+                      ),
                       onPressed: () {
                         setState(() {
                           _dummyItems.removeWhere((i) => i.id == item.id);
@@ -368,7 +392,9 @@ class _CartDrawerState extends State<CartDrawer> {
           label,
           style: GoogleFonts.inter(
             fontSize: 16,
-            color: label == 'You saved' || label == 'Shipping' ? const Color(0xFF2E7D32) : Colors.grey[700],
+            color: label == 'You saved' || label == 'Shipping'
+                ? const Color(0xFF2E7D32)
+                : Colors.grey[700],
           ),
         ),
         Text(
@@ -411,10 +437,7 @@ class _CartDrawerState extends State<CartDrawer> {
         const SizedBox(height: 12),
         Text(
           'Add some products to get started',
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            color: Colors.grey[500],
-          ),
+          style: GoogleFonts.inter(fontSize: 16, color: Colors.grey[500]),
         ),
         const SizedBox(height: 40),
         ElevatedButton(
@@ -423,7 +446,9 @@ class _CartDrawerState extends State<CartDrawer> {
             backgroundColor: const Color(0xFFF01B6B),
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
             elevation: 0,
           ),
           child: Row(
@@ -442,4 +467,3 @@ class _CartDrawerState extends State<CartDrawer> {
     );
   }
 }
-
