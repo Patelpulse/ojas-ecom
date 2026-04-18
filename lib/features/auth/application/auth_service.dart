@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ojas_user/core/constants/app_constants.dart';
 import 'package:ojas_user/core/services/api_service.dart';
 import '../domain/models/user_model.dart';
@@ -45,6 +47,78 @@ class AuthService {
       }
     } catch (e) {
       return AuthResponse(success: false, message: 'Server error: $e');
+    }
+  }
+
+  Future<AuthResponse> signInWithGoogle() async {
+    try {
+      User? firebaseUser;
+
+      if (kIsWeb) {
+        final authProvider = GoogleAuthProvider();
+        try {
+          final userCredential = await FirebaseAuth.instance.signInWithPopup(authProvider);
+          firebaseUser = userCredential.user;
+        } catch (e) {
+          return AuthResponse(success: false, message: 'Google Sign In Error: $e');
+        }
+      } else {
+        final googleSignIn = GoogleSignIn.instance;
+        try {
+          await googleSignIn.initialize();
+        } catch (_) {}
+
+        GoogleSignInAccount? googleUser;
+        try {
+          googleUser = await googleSignIn.authenticate();
+        } catch (e) {
+          return AuthResponse(success: false, message: 'Google Sign In Error: $e');
+        }
+        
+        if (googleUser == null) {
+          return AuthResponse(success: false, message: 'Google sign in cancelled');
+        }
+
+        final googleAuth = await googleUser.authentication;
+        final credential = FirebaseAuth.instance.signInWithCredential(
+          GoogleAuthProvider.credential(
+            idToken: googleAuth.idToken,
+          )
+        );
+
+        final userCredential = await credential;
+        firebaseUser = userCredential.user;
+      }
+
+      if (firebaseUser != null) {
+        final idToken = await firebaseUser.getIdToken(true);
+        if (idToken != null) {
+          final response = await http.post(
+            Uri.parse('$endpoint/google'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({'idToken': idToken}),
+          );
+
+          final data = json.decode(response.body);
+
+          if (response.statusCode == 200) {
+            if (data['token'] != null) {
+              await _saveToken(data['token']);
+            }
+            return AuthResponse(
+              success: true,
+              user: data['data'] != null ? UserModel.fromJson(data['data']) : null,
+              message: data['message'] ?? 'Login Successful',
+              token: data['token'],
+            );
+          } else {
+            return AuthResponse(success: false, message: data['message'] ?? 'Login Failed');
+          }
+        }
+      }
+      return AuthResponse(success: false, message: 'Failed to retrieve Google token');
+    } catch (e) {
+      return AuthResponse(success: false, message: 'Google Sign In Error: $e');
     }
   }
 

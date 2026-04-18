@@ -47,3 +47,4 @@ app.*.map.json
 
 # Build output (do not commit)
 /build/
+build_log*.txt

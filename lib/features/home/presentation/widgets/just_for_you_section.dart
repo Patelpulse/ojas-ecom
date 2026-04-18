@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:ojas_user/core/widgets/centered_content.dart';
-import 'package:ojas_user/features/home/presentation/widgets/just_for_you_card.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ojas_user/core/controllers/home_controller.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
+import 'package:ojas_user/core/widgets/centered_content.dart';
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
+import 'package:ojas_user/features/home/domain/models/product_model.dart';
+import 'package:ojas_user/features/home/presentation/widgets/just_for_you_card.dart';
 
 class JustForYouSection extends StatelessWidget {
   const JustForYouSection({super.key});
@@ -10,124 +13,113 @@ class JustForYouSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isMobile = Responsive.isMobile(context);
-    // Dummy Data for Just For You
-    final items = [
-      {
-        'imageUrl': 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=500', // Unicorn Plushie (approx)
-        'brand': 'Unknown Brand',
-        'title': 'Storio Soft Toy Unicorn Plushie - Soft Cuddly Toy',
-        'price': 358.0,
-        'oldPrice': 600.0,
-        'discount': 68,
-        'hasBestSellerBadge': false,
-      },
-      {
-        'imageUrl': 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=500', // Spin Bike
-        'brand': 'Unknown Brand',
-        'title': 'Aerofit Spin Bike AF-780 (Yellow/Black) - 12 kg...',
-        'price': 34499.0,
-        'oldPrice': 42999.0,
-        'discount': 25,
-        'hasBestSellerBadge': false,
-      },
-      {
-        'imageUrl': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500', // Watch
-        'brand': 'RUDRAM',
-        'title': 'Luxury Gold Plated Smartwatch',
-        'price': 499.99,
-        'oldPrice': 699.99,
-        'discount': 40,
-        'hasBestSellerBadge': false,
-      },
-      {
-        'imageUrl': 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=500', // Laptop
-        'brand': 'Yogesh',
-        'title': 'Black Color Laptop',
-        'price': 52999.0,
-        'oldPrice': 70000.0,
-        'discount': 32,
-        'hasBestSellerBadge': false,
-      },
-      {
-        'imageUrl': 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=500', // Book
-        'brand': 'Unknown Brand',
-        'title': 'How to Win Friends and Influence People',
-        'price': 396.0,
-        'oldPrice': 700.0,
-        'discount': 77,
-        'hasBestSellerBadge': true,
-      },
-      {
-        'imageUrl': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500', // Headphones
-        'brand': 'RUDRAM',
-        'title': 'Premium Wireless Headphones',
-        'price': 99.0,
-        'oldPrice': 100.0,
-        'discount': 1,
-        'hasBestSellerBadge': false,
-      },
-    ];
+    
+    return ListenableBuilder(
+      listenable: HomeController.instance,
+      builder: (context, _) {
+        final products = HomeController.instance.products;
+        final List<ProductModel> productModels = products.map((p) => ProductModel.fromMap(p)).toList();
 
-    return CenteredContent(
-      horizontalPadding: isMobile ? 16 : 40,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 40.0),
-        child: Column(
-          children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return CenteredContent(
+          horizontalPadding: isMobile ? 16 : 40,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 40.0),
+            child: Column(
               children: [
-                Text(
-                  'Just For You',
-                  style: GoogleFonts.outfit(
-                    fontSize: isMobile ? 20 : 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    'View all',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFFF01B6B),
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Just For You',
+                      style: GoogleFonts.outfit(
+                        fontSize: isMobile ? 20 : 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
-                  ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        'View all',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFFF01B6B),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 24),
+                
+                if (productModels.isEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 60),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.shopping_bag_outlined, size: 48, color: Colors.grey.shade300),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No products available in this section yet.',
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            color: Colors.grey.shade500,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  // Grid
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: productModels.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: isMobile ? 2 : 5,
+                      crossAxisSpacing: isMobile ? 12 : 16,
+                      mainAxisSpacing: isMobile ? 12 : 16,
+                      childAspectRatio: isMobile ? 0.60 : 0.62,
+                    ),
+                    itemBuilder: (context, index) {
+                      final product = productModels[index];
+                      return JustForYouCard(
+                        imageUrl: product.imageUrl,
+                        brand: 'Ojas',
+                        title: product.name,
+                        price: product.price,
+                        oldPrice: product.oldPrice ?? (product.price * 1.2),
+                        discount: product.discount,
+                        hasBestSellerBadge: product.discount > 50,
+                        onAddToCart: () async {
+                          final success = await CartController.instance.addToCart(product.id);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(success ? 'Added to cart!' : 'Failed to add to cart'),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          }
+                        },
+                      );
+                    },
+                  ),
               ],
             ),
-            const SizedBox(height: 24),
-            
-            // Grid
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: items.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: isMobile ? 2 : 5,
-                crossAxisSpacing: isMobile ? 12 : 16,
-                mainAxisSpacing: isMobile ? 12 : 16,
-                childAspectRatio: isMobile ? 0.68 : 0.72,
-              ),
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return JustForYouCard(
-                  imageUrl: item['imageUrl'] as String,
-                  brand: item['brand'] as String,
-                  title: item['title'] as String,
-                  price: item['price'] as double,
-                  oldPrice: item['oldPrice'] as double,
-                  discount: item['discount'] as int,
-                  hasBestSellerBadge: item['hasBestSellerBadge'] as bool,
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
+
+

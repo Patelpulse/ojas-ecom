@@ -9,6 +9,7 @@ class JustForYouCard extends StatefulWidget {
   final double oldPrice;
   final int discount;
   final bool hasBestSellerBadge;
+  final VoidCallback? onAddToCart;
 
   const JustForYouCard({
     super.key,
@@ -19,6 +20,7 @@ class JustForYouCard extends StatefulWidget {
     required this.oldPrice,
     required this.discount,
     this.hasBestSellerBadge = false,
+    this.onAddToCart,
   });
 
   @override
@@ -132,7 +134,26 @@ class _JustForYouCardState extends State<JustForYouCard> {
                         ),
                       ),
                     ],
-                  )
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: widget.onAddToCart,
+                      icon: const Icon(Icons.shopping_cart_outlined, size: 16),
+                      label: Text(
+                        'Add to Cart',
+                        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF01B6B),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        elevation: 0,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             )

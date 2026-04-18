@@ -147,7 +147,25 @@ class _LoginFormState extends State<LoginForm> {
             icon: Ionicons.logo_google,
             text: 'Sign in with Google',
             color: Colors.redAccent,
-            onPressed: () {},
+            onPressed: () async {
+              setState(() => _isLoading = true);
+              final response = await _authService.signInWithGoogle();
+              setState(() => _isLoading = false);
+
+              if (response.success) {
+                if (mounted) {
+                  SessionService.instance.setUser(response.user);
+                  await CartController.instance.loadCart();
+                  Navigator.of(context).pushReplacementNamed('/welcome', arguments: response.user);
+                }
+              } else {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(response.message), backgroundColor: Colors.red),
+                  );
+                }
+              }
+            },
           ),
           
           const SizedBox(height: 24),

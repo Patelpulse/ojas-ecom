@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/features/home/domain/models/product_model.dart';
 import 'package:ojas_user/features/home/presentation/widgets/product_card.dart';
 import 'package:ojas_user/features/home/presentation/widgets/section_title.dart';
@@ -10,7 +11,8 @@ class FeaturedDealsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final featuredProducts = ProductModel.dummyProducts.getRange(0, 3).toList();
+    final allProducts = ProductModel.dummyProducts;
+    final featuredProducts = allProducts.take(3).toList();
 
     return CenteredContent(
       child: Padding(
@@ -19,29 +21,54 @@ class FeaturedDealsSection extends StatelessWidget {
           children: [
             SectionTitle(title: 'Featured Deals of the Week', onSeeAll: null),
             const SizedBox(height: 32),
-            Row(
-              children: featuredProducts.map((product) {
-                return Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 24),
-                    child: ProductCard(
-                      product: product,
-                      onAddToCart: () async {
-                        final success = await CartController.instance.addToCart(product.id);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(success ? '${product.name} added to cart!' : 'Failed. Please login.'),
-                            backgroundColor: success ? Colors.green : Colors.red,
-                            behavior: SnackBarBehavior.floating,
-                            duration: const Duration(seconds: 2),
-                          ));
-                        }
-                      },
+            if (featuredProducts.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 60),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.stars_outlined, size: 48, color: Colors.grey.shade300),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Stay tuned for this week\'s featured deals!',
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                );
-              }).toList()..removeLast(),
-            ),
+                  ],
+                ),
+              )
+            else
+              Row(
+                children: [
+                  for (var i = 0; i < featuredProducts.length; i++) ...[
+                    Expanded(
+                      child: ProductCard(
+                        product: featuredProducts[i],
+                        onAddToCart: () async {
+                          final success = await CartController.instance.addToCart(featuredProducts[i].id);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(success ? '${featuredProducts[i].name} added to cart!' : 'Failed. Please login.'),
+                              backgroundColor: success ? Colors.green : Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                              duration: const Duration(seconds: 2),
+                            ));
+                          }
+                        },
+                      ),
+                    ),
+                    if (i < featuredProducts.length - 1) const SizedBox(width: 24),
+                  ],
+                ],
+              ),
           ],
         ),
       ),

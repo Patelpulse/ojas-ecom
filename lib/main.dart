@@ -22,8 +22,23 @@ import 'package:ojas_user/features/home/presentation/pages/privacy_policy_page.d
 import 'package:ojas_user/features/home/presentation/pages/contact_page.dart';
 import 'package:ojas_user/features/auth/domain/models/user_model.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: "AIzaSyC2StOCcAiACVKZg1G4d1k-zyl1YxctVcQ",
+      authDomain: "ojas-app-d0bc6.firebaseapp.com",
+      projectId: "ojas-app-d0bc6",
+      storageBucket: "ojas-app-d0bc6.firebasestorage.app",
+      messagingSenderId: "25163277339",
+      appId: "1:25163277339:web:90cc45ebf7f2189b4bc4be",
+      measurementId: "G-ZYKJ1CH89N",
+    ),
+  );
+
   await SessionService.instance.initSession();
   
   // Initialize Real-time services

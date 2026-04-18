@@ -103,7 +103,7 @@ class HomeController with ChangeNotifier {
 
   Future<void> fetchCategories() async {
     try {
-      final response = await http.get(Uri.parse('${ApiService.baseUrl}/home/categories?type=global'));
+      final response = await http.get(Uri.parse('${ApiService.baseUrl}/home/categories?type=approved&tree=true'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         _categories = data['data'] ?? [];

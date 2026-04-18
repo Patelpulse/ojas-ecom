@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/features/home/domain/models/product_model.dart';
 import 'package:ojas_user/features/home/presentation/widgets/product_card.dart';
@@ -157,34 +158,58 @@ class TrendingItemsSection extends StatelessWidget {
           SizedBox(height: isMobile ? 32 : 48),
           
           // 3. Trending Product Grid
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 5,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: isMobile ? 2 : 5,
-              mainAxisSpacing: isMobile ? 12 : 24,
-              crossAxisSpacing: isMobile ? 12 : 24,
-              childAspectRatio: isMobile ? 0.65 : 0.62,
+          if (products.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 60),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                children: [
+                  Icon(Icons.trending_up_outlined, size: 48, color: Colors.grey.shade300),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No trending products at the moment.',
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: products.length > 5 ? 5 : products.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: isMobile ? 2 : 5,
+                mainAxisSpacing: isMobile ? 12 : 24,
+                crossAxisSpacing: isMobile ? 12 : 24,
+                childAspectRatio: isMobile ? 0.65 : 0.62,
+              ),
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return ProductCard(
+                  product: product,
+                  onAddToCart: () async {
+                    final success = await CartController.instance.addToCart(product.id);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(success ? '${product.name} added to cart!' : 'Failed to add. Please login.'),
+                        backgroundColor: success ? Colors.green : Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                        duration: const Duration(seconds: 2),
+                      ));
+                    }
+                  },
+                );
+              },
             ),
-            itemBuilder: (context, index) {
-              final product = products[index % products.length];
-              return ProductCard(
-                product: product,
-                onAddToCart: () async {
-                  final success = await CartController.instance.addToCart(product.id);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(success ? '${product.name} added to cart!' : 'Failed to add. Please login.'),
-                      backgroundColor: success ? Colors.green : Colors.red,
-                      behavior: SnackBarBehavior.floating,
-                      duration: const Duration(seconds: 2),
-                    ));
-                  }
-                },
-              );
-            },
-          ),
           SizedBox(height: isMobile ? 32 : 60),
         ],
       ),
