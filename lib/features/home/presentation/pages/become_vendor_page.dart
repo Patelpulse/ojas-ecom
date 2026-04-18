@@ -211,7 +211,7 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
         // Define vendor panel URLs for dev and prod
         final vendorPanelUrl = kDebugMode
             ? 'http://localhost:3001/#/?token=$token'
-            : 'https://vendor.samajwaditechforce.com/#/?token=$token';
+            : 'http://72.61.172.182/vendor/#/?token=$token';
         Future.delayed(const Duration(seconds: 1), () {
           html.window.location.href = vendorPanelUrl;
         });

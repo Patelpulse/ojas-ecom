@@ -15,7 +15,7 @@ class SocketService {
     if (socket != null) return;
 
     // Use the same base URL as API but without /api suffix usually for socket.io
-    // Assuming backend is at http://localhost:5001 or prod URL
+    // Same host as API without trailing /api (Socket.IO on ojas_backend port).
     final baseUrl = ApiService.baseUrl.replaceAll('/api', '');
     
     debugPrint('Initializing Socket connection to: $baseUrl');
