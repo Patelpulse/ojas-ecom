@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/ojas_layout.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
+import 'package:ojas_user/core/controllers/settings_controller.dart';
+import 'package:provider/provider.dart';
+import 'package:ojas_user/core/models/app_settings.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
@@ -10,6 +13,8 @@ class PrivacyPolicyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isMobile = Responsive.isMobile(context);
+    final settings = context.watch<SettingsController>().settings;
+    final String customContent = settings.privacyPolicy;
 
     return OjasLayout(
       activeTitle: 'PRIVACY POLICY',
@@ -23,6 +28,27 @@ class PrivacyPolicyPage extends StatelessWidget {
               // 1. Header
               _buildHeader(isMobile),
               SizedBox(height: isMobile ? 32 : 60),
+
+              // If dynamic content exists, show it at the top
+              if (customContent.trim().isNotEmpty) ...[
+                _buildSectionCard(
+                  'Policy Update',
+                  customContent,
+                  isMobile,
+                ),
+                const SizedBox(height: 48),
+                const Divider(),
+                const SizedBox(height: 48),
+                Text(
+                  'General Privacy Clauses',
+                  style: GoogleFonts.outfit(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1E1B4B),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
 
               // 2. Table of Contents
               _buildTableOfContents(isMobile),
@@ -86,7 +112,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               const SizedBox(height: 48),
 
               // 8. Contact Us
-              _buildPrivacyContact(isMobile),
+              _buildPrivacyContact(isMobile, settings),
               const SizedBox(height: 48),
 
               // 9. Related Info
@@ -241,7 +267,7 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
-  Widget _buildPrivacyContact(bool isMobile) {
+  Widget _buildPrivacyContact(bool isMobile, AppSettings settings) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 24 : 40),
@@ -266,20 +292,20 @@ class PrivacyPolicyPage extends StatelessWidget {
           if (isMobile)
             Column(
               children: [
-                _contactSubCard(Icons.email_outlined, 'Email', 'privacy@ojas.com', isMobile),
+                _contactSubCard(Icons.email_outlined, 'Email', settings.contactEmail, isMobile),
                 const SizedBox(height: 16),
-                _contactSubCard(Icons.phone_outlined, 'Phone', '+1 (555) 123-4567', isMobile),
+                _contactSubCard(Icons.phone_outlined, 'Phone', settings.contactPhone, isMobile),
                 const SizedBox(height: 16),
-                _contactSubCard(Icons.location_on_outlined, 'Address', '123 Business Ave, NY 10001', isMobile),
+                _contactSubCard(Icons.location_on_outlined, 'Address', settings.contactAddress, isMobile),
               ],
             )
           else
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _contactSubCard(Icons.email_outlined, 'Email', 'privacy@ojas.com', isMobile),
-                _contactSubCard(Icons.phone_outlined, 'Phone', '+1 (555) 123-4567', isMobile),
-                _contactSubCard(Icons.location_on_outlined, 'Address', '123 Business Ave, NY 10001', isMobile),
+                _contactSubCard(Icons.email_outlined, 'Email', settings.contactEmail, isMobile),
+                _contactSubCard(Icons.phone_outlined, 'Phone', settings.contactPhone, isMobile),
+                _contactSubCard(Icons.location_on_outlined, 'Address', settings.contactAddress, isMobile),
               ],
             ),
         ],

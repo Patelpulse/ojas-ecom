@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
+import 'package:ojas_user/core/controllers/home_controller.dart';
 
 class AdsAndSubscribeSection extends StatelessWidget {
   const AdsAndSubscribeSection({super.key});
@@ -93,120 +94,135 @@ class _OfferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isMobile = Responsive.isMobile(context);
+    final homeController = HomeController.instance;
 
-    return Container(
-      padding: EdgeInsets.all(isMobile ? 24 : 40),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
-          colors: [Color(0xFFE91E63), Color(0xFF9C27B0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFE91E63).withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+    return ListenableBuilder(
+      listenable: homeController,
+      builder: (context, _) {
+        final offer = homeController.offerBanner;
+
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: offer.imageUrl.isEmpty 
+                ? const LinearGradient(
+                    colors: [Color(0xFFE91E63), Color(0xFF9C27B0)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            image: offer.imageUrl.isNotEmpty
+                ? DecorationImage(
+                    image: NetworkImage(offer.imageUrl),
+                    fit: BoxFit.cover,
+                  )
+                : null,
+            boxShadow: [
+              BoxShadow(
+                color: (offer.imageUrl.isEmpty ? const Color(0xFFE91E63) : Colors.black).withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              )
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.card_giftcard,
+          child: Container(
+            padding: EdgeInsets.all(isMobile ? 24 : 40),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: offer.imageUrl.isNotEmpty
+                  ? LinearGradient(
+                      colors: [Colors.black.withOpacity(0.7), Colors.transparent],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    )
+                  : null,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.card_giftcard, color: Colors.white, size: 18),
+                  ),
+                  const SizedBox(width: 12),
+                  if (offer.tag.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        offer.tag.toUpperCase(),
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              Text(
+                offer.title,
+                style: GoogleFonts.outfit(
+                  fontSize: isMobile ? 28 : 40,
+                  fontWeight: FontWeight.bold,
+                  height: 1.2,
                   color: Colors.white,
-                  size: 18,
                 ),
               ),
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.only(right: 20),
                 child: Text(
-                  'LIMITED TIME',
+                  offer.subtitle,
                   style: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: isMobile ? 14 : 16,
+                    height: 1.5,
                   ),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          RichText(
-            text: TextSpan(
-              style: GoogleFonts.outfit(
-                fontSize: isMobile ? 28 : 40,
-                fontWeight: FontWeight.bold,
-                height: 1.2,
-                color: Colors.white,
-              ),
-              children: [
-                const TextSpan(text: 'Get '),
-                TextSpan(
-                  text: '50% OFF\n',
-                  style: TextStyle(color: Colors.yellow.shade400),
+              const SizedBox(height: 32),
+              if (isMobile)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildClaimButton(offer.link),
+                    const SizedBox(height: 16),
+                    _buildValidityText(),
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    _buildClaimButton(offer.link),
+                    const SizedBox(width: 24),
+                    _buildValidityText(),
+                  ],
                 ),
-                const TextSpan(text: 'Your First Order'),
               ],
             ),
           ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: Text(
-              'Discover amazing deals on premium products. Limited time offer for new customers only!',
-              style: GoogleFonts.inter(
-                color: Colors.white.withOpacity(0.9),
-                fontSize: isMobile ? 14 : 16,
-                height: 1.5,
-              ),
-            ),
-          ),
-          const SizedBox(height: 32),
-          if (isMobile)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildClaimButton(),
-                const SizedBox(height: 16),
-                _buildValidityText(),
-              ],
-            )
-          else
-            Row(
-              children: [
-                _buildClaimButton(),
-                const SizedBox(width: 24),
-                _buildValidityText(),
-              ],
-            ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildClaimButton() {
+  Widget _buildClaimButton(String link) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: () {
+        // Handle navigation to link
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFFE91E63),
@@ -242,7 +258,7 @@ class _OfferCard extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         Text(
-          'Valid until Dec 31, 2024',
+          'Valid for a limited time',
           style: GoogleFonts.inter(
             color: Colors.white.withOpacity(0.8),
             fontSize: 12,

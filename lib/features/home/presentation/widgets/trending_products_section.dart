@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
 import 'package:ojas_user/features/home/domain/models/product_model.dart';
 import 'package:ojas_user/features/home/presentation/widgets/product_card.dart';
 import 'package:ojas_user/features/home/presentation/widgets/section_title.dart';
@@ -29,9 +30,20 @@ class TrendingProductsSection extends StatelessWidget {
               ),
               itemCount: trendingProducts.length,
               itemBuilder: (context, index) {
+                final product = trendingProducts[index];
                 return ProductCard(
-                  product: trendingProducts[index],
-                  onAddToCart: () {},
+                  product: product,
+                  onAddToCart: () async {
+                    final success = await CartController.instance.addToCart(product.id);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(success ? '${product.name} added to cart!' : 'Failed. Please login.'),
+                        backgroundColor: success ? Colors.green : Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                        duration: const Duration(seconds: 2),
+                      ));
+                    }
+                  },
                 );
               },
             ),

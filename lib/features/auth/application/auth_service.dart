@@ -1,25 +1,23 @@
 import 'dart:convert';
-import 'dart:html' as html; // Web-only
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ojas_user/core/constants/app_constants.dart';
+import 'package:ojas_user/core/services/api_service.dart';
 import '../domain/models/user_model.dart';
 
 class AuthService {
-  static const String endpoint = AppConstants.apiBaseUrlUser;
+  String get endpoint => ApiService.userBaseUrl;
 
   Future<void> _saveToken(String token) async {
-    if (kIsWeb) {
-      html.window.localStorage['token'] = token;
-    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_auth_token', token);
   }
 
   Future<String?> getToken() async {
-    if (kIsWeb) {
-      return html.window.localStorage['token'];
-    }
-    return null;
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('user_auth_token');
   }
 
   Future<AuthResponse> login(String email, String password) async {
@@ -128,9 +126,8 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    if (kIsWeb) {
-      html.window.localStorage.remove('token');
-    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user_auth_token');
   }
 }
 

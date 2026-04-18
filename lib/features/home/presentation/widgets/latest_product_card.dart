@@ -9,6 +9,7 @@ class LatestProductCard extends StatefulWidget {
   final double rating;
   final int ratingCount;
   final bool hasBestSellerBadge;
+  final VoidCallback? onAddToCart;
 
   const LatestProductCard({
     super.key,
@@ -19,6 +20,7 @@ class LatestProductCard extends StatefulWidget {
     this.rating = 4.0,
     this.ratingCount = 100,
     this.hasBestSellerBadge = false,
+    this.onAddToCart,
   });
 
   @override
@@ -35,7 +37,7 @@ class _LatestProductCardState extends State<LatestProductCard> {
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 200,
+        width: 210,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
@@ -125,6 +127,22 @@ class _LatestProductCardState extends State<LatestProductCard> {
                   ),
                   const SizedBox(height: 8),
                   _StarRating(rating: widget.rating),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: widget.onAddToCart,
+                      icon: const Icon(Icons.shopping_cart_outlined, size: 14),
+                      label: Text('Add to Cart', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE91E63),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        elevation: 0,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

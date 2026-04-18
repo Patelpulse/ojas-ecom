@@ -32,7 +32,7 @@ class ServiceCard extends StatelessWidget {
               color: Colors.grey[50],
               shape: BoxShape.circle,
             ),
-            child: Image.network(iconUrl, width: 32, height: 32, errorBuilder: (_, _, _) => const Icon(Icons.help_outline)),
+            child: Image.network(iconUrl, width: 32, height: 32, errorBuilder: (context, error, stackTrace) => const Icon(Icons.help_outline)),
           ),
           const SizedBox(height: 16),
           Text(

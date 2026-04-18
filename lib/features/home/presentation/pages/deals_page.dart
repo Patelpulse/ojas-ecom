@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/ojas_layout.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
+import 'package:ojas_user/core/controllers/home_controller.dart';
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
+import 'package:provider/provider.dart';
 
 class DealsPage extends StatefulWidget {
   const DealsPage({super.key});
@@ -15,202 +18,162 @@ class _DealsPageState extends State<DealsPage> {
   String _sortBy = 'Highest Discount';
   bool _isGridView = true;
 
-  final List<_DealProduct> _deals = const [
-    _DealProduct(
-      name: 'Premium Wireless Headphones',
-      vendor: 'SoundPro',
-      category: 'Electronics',
-      originalPrice: 15000,
-      discountedPrice: 9999,
-      discountPercent: 33,
-      badge: 'Hot Deal',
-      isWishlisted: false,
-      stockPercent: 0.35,
-      imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&fit=crop',
-    ),
-    _DealProduct(
-      name: 'Smart Watch Series 9',
-      vendor: 'TechWear',
-      category: 'Gadgets',
-      originalPrice: 24999,
-      discountedPrice: 18499,
-      discountPercent: 26,
-      badge: 'Bestseller',
-      isWishlisted: true,
-      stockPercent: 0.2,
-      imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&fit=crop',
-    ),
-    _DealProduct(
-      name: 'Leather Messenger Bag',
-      vendor: 'Urban Style',
-      category: 'Accessories',
-      originalPrice: 4500,
-      discountedPrice: 2999,
-      discountPercent: 33,
-      badge: 'Clearance',
-      isWishlisted: false,
-      stockPercent: 0.5,
-      imageUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&fit=crop',
-    ),
-    _DealProduct(
-      name: 'Mechanical Gaming Keyboard',
-      vendor: 'GamerX',
-      category: 'Computing',
-      originalPrice: 8999,
-      discountedPrice: 5499,
-      discountPercent: 38,
-      badge: 'Hot Deal',
-      isWishlisted: false,
-      stockPercent: 0.65,
-      imageUrl: 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?w=500&fit=crop',
-    ),
-    _DealProduct(
-      name: 'Coffee Maker Pro Espresso Machine',
-      vendor: 'BrewMaster',
-      category: 'Home Appliances',
-      originalPrice: 12000,
-      discountedPrice: 7999,
-      discountPercent: 33,
-      badge: 'Flash Sale',
-      isWishlisted: false,
-      stockPercent: 0.15,
-      imageUrl: 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=500&fit=crop',
-    ),
-    _DealProduct(
-      name: 'Designer Sunglasses',
-      vendor: 'LuxVibe',
-      category: 'Fashion',
-      originalPrice: 5500,
-      discountedPrice: 3850,
-      discountPercent: 30,
-      badge: 'Best Deal',
-      isWishlisted: true,
-      stockPercent: 0.4,
-      imageUrl: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&fit=crop',
-    ),
-  ];
+  List<_DealProduct> get _deals {
+    final list = HomeController.instance.products.map((p) => _DealProduct.fromMap(p)).toList();
+    
+    switch (_sortBy) {
+      case 'Lowest Price':
+        list.sort((a, b) => a.discountedPrice.compareTo(b.discountedPrice));
+        break;
+      case 'Highest Price':
+        list.sort((a, b) => b.discountedPrice.compareTo(a.discountedPrice));
+        break;
+      case 'Highest Discount':
+        list.sort((a, b) => b.discountPercent.compareTo(a.discountPercent));
+        break;
+      case 'Newest':
+        list.sort((a, b) => b.id.compareTo(a.id));
+        break;
+    }
+    return list;
+  }
 
   @override
   Widget build(BuildContext context) {
     final bool isMobile = Responsive.isMobile(context);
     final bool isTablet = Responsive.isTablet(context);
 
-    return OjasLayout(
-      activeTitle: 'DEALS',
-      child: Container(
-        color: const Color(0xFFF8FAFC),
-        child: Column(
-          children: [
-            CenteredContent(
-              horizontalPadding: isMobile ? 12 : 24,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: isMobile ? 32 : 60),
+    return ListenableBuilder(
+      listenable: HomeController.instance,
+      builder: (context, _) {
+        final List<_DealProduct> deals = _deals;
 
-                  // Header
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+        return OjasLayout(
+          activeTitle: 'DEALS',
+          child: Container(
+            color: const Color(0xFFF8FAFC),
+            child: Column(
+              children: [
+                CenteredContent(
+                  horizontalPadding: isMobile ? 12 : 24,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      SizedBox(height: isMobile ? 32 : 60),
+
+                      // Header
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const Icon(Icons.bolt_rounded, color: Color(0xFFEAB308), size: 36),
-                          const SizedBox(width: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.bolt_rounded, color: Color(0xFFEAB308), size: 36),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Hot Deals & Offers',
+                                style: GoogleFonts.outfit(
+                                  fontSize: isMobile ? 28 : 42,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF0F172A),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
                           Text(
-                            'Hot Deals & Offers',
-                            style: GoogleFonts.outfit(
-                              fontSize: isMobile ? 28 : 42,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF0F172A),
+                            "Don't miss out on these amazing deals! Limited time offers with incredible savings.",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              fontSize: isMobile ? 14 : 16, 
+                              color: const Color(0xFF64748B),
+                              height: 1.5,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        "Don't miss out on these amazing deals! Limited time offers with incredible savings.",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
-                          fontSize: isMobile ? 14 : 16, 
-                          color: const Color(0xFF64748B),
-                          height: 1.5,
+
+                      const SizedBox(height: 48),
+
+                      if (HomeController.instance.isLoading)
+                        const Center(child: Padding(padding: EdgeInsets.all(100), child: CircularProgressIndicator())),
+                      
+                      if (!HomeController.instance.isLoading && deals.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 60),
+                          child: _buildEmptyState(),
                         ),
-                      ),
-                    ],
-                  ),
 
-                  const SizedBox(height: 48),
+                      if (!HomeController.instance.isLoading && deals.isNotEmpty) ...[
+                        // Filter & Sort Bar
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.03),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                          ),
+                          child: isMobile 
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Text(
+                                    '${deals.length} deals found',
+                                    style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569), fontWeight: FontWeight.w500),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  _buildSortBar(),
+                                ],
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    '${deals.length} deals found',
+                                    style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569), fontWeight: FontWeight.w500),
+                                  ),
+                                  _buildSortBar(),
+                                ],
+                              ),
+                        ),
 
-                  // Filter & Sort Bar
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                        const SizedBox(height: 40),
+
+                        // Product Grid
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: isMobile ? 1 : (isTablet ? 2 : 3),
+                            crossAxisSpacing: 24,
+                            mainAxisSpacing: 24,
+                            mainAxisExtent: isMobile ? 440 : 450,
+                          ),
+                          itemCount: deals.length,
+                          itemBuilder: (context, index) => _DealCard(product: deals[index]),
                         ),
                       ],
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: isMobile 
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              '${_deals.length} deals found',
-                              style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569), fontWeight: FontWeight.w500),
-                            ),
-                            const SizedBox(height: 16),
-                            _buildSortBar(),
-                          ],
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '${_deals.length} deals found',
-                              style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569), fontWeight: FontWeight.w500),
-                            ),
-                            _buildSortBar(),
-                          ],
-                        ),
+
+                      const SizedBox(height: 80),
+                    ],
                   ),
-
-                  const SizedBox(height: 40),
-
-                  // Product Grid or Empty State
-                  if (_deals.isEmpty)
-                    _buildEmptyState()
-                  else
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: isMobile ? 1 : (isTablet ? 2 : 3),
-                        crossAxisSpacing: 24,
-                        mainAxisSpacing: 24,
-                        mainAxisExtent: isMobile ? 440 : 450,
-                      ),
-                      itemCount: _deals.length,
-                      itemBuilder: (context, index) => _DealCard(product: _deals[index]),
-                    ),
-
-                  const SizedBox(height: 80),
-                ],
-              ),
+                ),
+                
+                // Red Newsletter Section
+                const _NeverMissDealSection(),
+                const SizedBox(height: 60),
+              ],
             ),
-            
-            // Red Newsletter Section
-            const _NeverMissDealSection(),
-            const SizedBox(height: 60),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -258,20 +221,37 @@ class _DealsPageState extends State<DealsPage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 180,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          width: 190,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-            borderRadius: BorderRadius.circular(6),
+            color: Colors.white,
+            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: _sortBy,
               isExpanded: true,
               isDense: true,
-              style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF334155)),
+              dropdownColor: Colors.white,
+              icon: const Icon(Icons.tune_rounded, size: 18, color: Color(0xFF64748B)),
+              style: GoogleFonts.inter(
+                fontSize: 13, 
+                color: const Color(0xFF1E293B),
+                fontWeight: FontWeight.w500,
+              ),
               items: ['Highest Discount', 'Lowest Price', 'Highest Price', 'Newest'].map((v) {
-                return DropdownMenuItem(value: v, child: Text(v));
+                return DropdownMenuItem(
+                  value: v, 
+                  child: Text(v, style: GoogleFonts.inter(color: const Color(0xFF1E293B))),
+                );
               }).toList(),
               onChanged: (v) => setState(() => _sortBy = v!),
             ),
@@ -283,7 +263,7 @@ class _DealsPageState extends State<DealsPage> {
           isActive: _isGridView,
           onTap: () => setState(() => _isGridView = true),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: 6),
         _ViewToggleBtn(
           icon: Icons.view_list_rounded,
           isActive: !_isGridView,
@@ -401,6 +381,7 @@ class _NeverMissDealSection extends StatelessWidget {
 
 // ─── Model ───────────────────────────────────────────────────────────────────
 class _DealProduct {
+  final String id;
   final String name;
   final String vendor;
   final String category;
@@ -413,6 +394,7 @@ class _DealProduct {
   final String imageUrl;
 
   const _DealProduct({
+    required this.id,
     required this.name,
     required this.vendor,
     required this.category,
@@ -424,6 +406,33 @@ class _DealProduct {
     required this.stockPercent,
     required this.imageUrl,
   });
+
+  factory _DealProduct.fromMap(Map<String, dynamic> p) {
+    double oldPrice = (p['price'] ?? 0).toDouble();
+    double newPrice = (p['discountPrice'] != null && p['discountPrice'] > 0 ? p['discountPrice'] : oldPrice).toDouble();
+    int disc = oldPrice > 0 && oldPrice > newPrice ? (((oldPrice - newPrice) / oldPrice) * 100).toInt() : 0;
+    
+    // Assign a badge based on discount
+    String badge = 'Hot Deal';
+    if (disc > 50) badge = 'Flash Sale';
+    else if (disc > 30) badge = 'Best Deal';
+    else if (disc > 0) badge = 'Limited Offer';
+    else badge = 'New Arrival';
+
+    return _DealProduct(
+      id: p['_id'] ?? '',
+      name: p['name'] ?? 'Product',
+      vendor: p['brand'] ?? 'Official Store',
+      category: p['category'] ?? 'General',
+      originalPrice: oldPrice,
+      discountedPrice: newPrice,
+      discountPercent: disc,
+      badge: badge,
+      isWishlisted: false, // Default to false
+      stockPercent: (p['stock'] ?? 10) / 20.0, // Mocking stock percent
+      imageUrl: p['image'] ?? 'https://via.placeholder.com/500',
+    );
+  }
 }
 
 // ─── Card ────────────────────────────────────────────────────────────────────
@@ -469,12 +478,12 @@ class _DealCardState extends State<_DealCard> {
                   ? Image.network(
                       p.imageUrl,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => const Center(child: Icon(Icons.image_not_supported_outlined, size: 60, color: Color(0xFFCBD5E1))),
+                      errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.image_not_supported_outlined, size: 60, color: Color(0xFFCBD5E1))),
                     )
                   : Image.asset(
                       p.imageUrl,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => const Center(child: Icon(Icons.image_not_supported_outlined, size: 60, color: Color(0xFFCBD5E1))),
+                      errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.image_not_supported_outlined, size: 60, color: Color(0xFFCBD5E1))),
                     ),
               ),
               // Discount badge (top-left)
@@ -615,7 +624,19 @@ class _DealCardState extends State<_DealCard> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () async {
+                        final success = await CartController.instance.addToCart(p.id);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(success ? '${p.name} added to cart' : 'Failed to add to cart. Please login first.'),
+                              backgroundColor: success ? Colors.green : Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      },
                       icon: const Icon(Icons.shopping_cart_outlined, size: 16),
                       label: Text('Add to Cart', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14)),
                       style: ElevatedButton.styleFrom(

@@ -16,6 +16,7 @@ class FeaturedProductCard extends StatefulWidget {
   final List<String> tags;
   final String badge; // e.g. "Premium", "New"
   final Color badgeColor;
+  final VoidCallback? onAddToCart;
 
   const FeaturedProductCard({
     super.key,
@@ -32,6 +33,7 @@ class FeaturedProductCard extends StatefulWidget {
     this.tags = const ["Premium quality", "Fast shipping", "Warranty included"],
     this.badge = "Premium",
     this.badgeColor = const Color(0xFFE0E7FF),
+    this.onAddToCart,
   });
 
   @override
@@ -268,6 +270,22 @@ class _FeaturedProductCardState extends State<FeaturedProductCard> {
                         ),
                       ],
                     ],
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: widget.onAddToCart,
+                      icon: const Icon(Icons.shopping_cart_outlined, size: 16),
+                      label: Text('Add to Cart', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE91E63),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        elevation: 0,
+                      ),
+                    ),
                   ),
                 ],
               ),

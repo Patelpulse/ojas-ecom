@@ -3,6 +3,8 @@ import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/features/home/presentation/widgets/latest_product_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
+import 'package:ojas_user/core/controllers/home_controller.dart';
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
 
 class LatestProductsSection extends StatelessWidget {
   const LatestProductsSection({super.key});
@@ -96,19 +98,59 @@ class LatestProductsSection extends StatelessWidget {
             // Horizontal Scrollable List
             SizedBox(
               height: 320,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: items.length,
-                separatorBuilder: (_, x) => const SizedBox(width: 16),
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  return LatestProductCard(
-                    imageUrl: item['imageUrl'] as String,
-                    title: item['title'] as String,
-                    price: item['price'] as double,
-                    oldPrice: item['oldPrice'] as double,
-                    rating: item['rating'] as double,
-                    hasBestSellerBadge: item['hasBestSellerBadge'] as bool,
+              child: ListenableBuilder(
+                listenable: HomeController.instance,
+                builder: (context, _) {
+                  final backendProducts = HomeController.instance.products;
+                  return ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: backendProducts.isNotEmpty ? backendProducts.length : items.length,
+                    separatorBuilder: (_, _x) => const SizedBox(width: 16),
+                    itemBuilder: (context, index) {
+                      if (backendProducts.isNotEmpty) {
+                        final p = backendProducts[index];
+                        final id = p['_id']?.toString() ?? p['id']?.toString() ?? '';
+                        final imageUrl = (p['images'] != null && (p['images'] as List).isNotEmpty)
+                            ? p['images'][0].toString()
+                            : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500';
+                        final discountPrice = (p['discountPrice'] ?? 0).toDouble();
+                        final price = (p['price'] ?? 0).toDouble();
+                        return LatestProductCard(
+                          imageUrl: imageUrl,
+                          title: p['name']?.toString() ?? 'Product',
+                          price: discountPrice > 0 ? discountPrice : price,
+                          oldPrice: discountPrice > 0 ? price : price * 1.2,
+                          rating: 4.0,
+                          onAddToCart: () async {
+                            final success = await CartController.instance.addToCart(id);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(success ? 'Added to cart!' : 'Failed. Please login.'),
+                                backgroundColor: success ? Colors.green : Colors.red,
+                                behavior: SnackBarBehavior.floating,
+                                duration: const Duration(seconds: 2),
+                              ));
+                            }
+                          },
+                        );
+                      }
+                      final item = items[index];
+                      return LatestProductCard(
+                        imageUrl: item['imageUrl'] as String,
+                        title: item['title'] as String,
+                        price: item['price'] as double,
+                        oldPrice: item['oldPrice'] as double,
+                        rating: item['rating'] as double,
+                        hasBestSellerBadge: item['hasBestSellerBadge'] as bool,
+                        onAddToCart: () {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text('Please login to add items to cart.'),
+                            behavior: SnackBarBehavior.floating,
+                            duration: Duration(seconds: 2),
+                          ));
+                        },
+                      );
+                    },
                   );
                 },
               ),

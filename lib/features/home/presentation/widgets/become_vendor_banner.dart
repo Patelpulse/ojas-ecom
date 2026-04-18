@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
+import 'package:ojas_user/features/home/presentation/pages/become_vendor_page.dart';
+import 'package:ojas_user/features/home/presentation/pages/shop_page.dart';
 
 class BecomeVendorBanner extends StatelessWidget {
   const BecomeVendorBanner({super.key});
@@ -66,7 +68,12 @@ class BecomeVendorBanner extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const BecomeVendorPage()),
+                  );
+                },
                 icon: const Icon(Icons.storefront, size: 18),
                 label: const Text('Become a Vendor'),
                 style: ElevatedButton.styleFrom(
@@ -78,7 +85,12 @@ class BecomeVendorBanner extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               OutlinedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ShopPage()),
+                  );
+                },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF0F172A),
                   side: const BorderSide(color: Colors.grey),
@@ -131,7 +143,12 @@ class BecomeVendorBanner extends StatelessWidget {
               Row(
                 children: [
                   ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const BecomeVendorPage()),
+                      );
+                    },
                     icon: const Icon(Icons.storefront, size: 18),
                     label: const Text('Become a Vendor'),
                     style: ElevatedButton.styleFrom(
@@ -144,7 +161,12 @@ class BecomeVendorBanner extends StatelessWidget {
                   ),
                   const SizedBox(width: 16),
                   OutlinedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ShopPage()),
+                      );
+                    },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF0F172A),
                       side: const BorderSide(color: Colors.grey),

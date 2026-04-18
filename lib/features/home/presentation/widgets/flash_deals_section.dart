@@ -35,7 +35,7 @@ class FlashDealsSection extends StatelessWidget {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: flashProducts.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 24),
+                  separatorBuilder: (context, index) => const SizedBox(width: 24),
                   itemBuilder: (context, index) {
                     final product = flashProducts[index];
                     return SizedBox(

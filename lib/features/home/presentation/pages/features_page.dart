@@ -5,7 +5,8 @@ import 'package:ojas_user/features/home/presentation/widgets/featured_product_ca
 import 'package:ojas_user/features/home/presentation/widgets/why_choose_section.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
-
+import 'package:ojas_user/core/controllers/home_controller.dart';
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
 
 class FeaturesPage extends StatelessWidget {
   const FeaturesPage({super.key});
@@ -19,48 +20,92 @@ class FeaturesPage extends StatelessWidget {
       activeTitle: 'FEATURES',
       child: CenteredContent(
         horizontalPadding: isMobile ? 12 : 20,
-        child: Column(
-          children: [
-            FeaturedHeader(productCount: _featuredProducts.length),
-            SizedBox(height: isMobile ? 24 : 48),
-            
-            // Product Grid
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: isMobile ? 1 : (isTablet ? 2 : 3),
-                crossAxisSpacing: isMobile ? 16 : 30,
-                mainAxisSpacing: isMobile ? 16 : 30,
-                childAspectRatio: isMobile ? 0.8 : 0.6,
-              ),
-              itemCount: _featuredProducts.length,
-              itemBuilder: (context, index) {
-                final product = _featuredProducts[index];
-                return FeaturedProductCard(
-                  name: product['name'],
-                  imageUrl: product['imageUrl'],
-                  price: product['price'],
-                  oldPrice: product['oldPrice'],
-                  discount: product['discount'],
-                  brand: product['brand'],
-                  category: product['category'],
-                  rating: product['rating'],
-                  ratingCount: product['ratingCount'],
-                  description: product['description'],
-                  badge: product['badge'],
-                  badgeColor: product['badgeColor'],
-                );
-              },
-            ),
-            
-            SizedBox(height: isMobile ? 40 : 60),
+        child: ListenableBuilder(
+          listenable: HomeController.instance,
+          builder: (context, _) {
+            // Use backend products if available, fallback to static list
+            final backendProducts = HomeController.instance.products;
+            final int count = backendProducts.isNotEmpty ? backendProducts.length : _featuredProducts.length;
 
-            // 5. Why Choose Section
-            const WhyChooseSection(),
-
-            const SizedBox(height: 100), // Extra space at bottom
-          ],
+            return Column(
+              children: [
+                FeaturedHeader(productCount: count),
+                SizedBox(height: isMobile ? 24 : 48),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: isMobile ? 1 : (isTablet ? 2 : 3),
+                    crossAxisSpacing: isMobile ? 16 : 30,
+                    mainAxisSpacing: isMobile ? 16 : 30,
+                    childAspectRatio: isMobile ? 0.8 : 0.6,
+                  ),
+                  itemCount: count,
+                  itemBuilder: (context, index) {
+                    if (backendProducts.isNotEmpty) {
+                      final p = backendProducts[index];
+                      final id = p['_id']?.toString() ?? p['id']?.toString() ?? '';
+                      final imageUrl = (p['images'] != null && (p['images'] as List).isNotEmpty)
+                          ? p['images'][0].toString()
+                          : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500';
+                      final discountPrice = (p['discountPrice'] ?? 0).toDouble();
+                      final price = (p['price'] ?? 0).toDouble();
+                      final int discountPct = discountPrice > 0 && price > 0
+                          ? ((price - discountPrice) / price * 100).round()
+                          : 0;
+                      return FeaturedProductCard(
+                        name: p['name']?.toString() ?? 'Product',
+                        imageUrl: imageUrl,
+                        price: discountPrice > 0 ? discountPrice : price,
+                        oldPrice: discountPrice > 0 ? price : null,
+                        discount: discountPct,
+                        brand: p['brand']?.toString() ?? 'Brand',
+                        category: p['category']?.toString() ?? 'Category',
+                        description: p['description']?.toString() ?? '',
+                        onAddToCart: () async {
+                          final success = await CartController.instance.addToCart(id);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(success ? 'Added to cart!' : 'Failed. Please login.'),
+                              backgroundColor: success ? Colors.green : Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                              duration: const Duration(seconds: 2),
+                            ));
+                          }
+                        },
+                      );
+                    }
+                    // Fallback to static data
+                    final product = _featuredProducts[index];
+                    return FeaturedProductCard(
+                      name: product['name'],
+                      imageUrl: product['imageUrl'],
+                      price: product['price'],
+                      oldPrice: product['oldPrice'],
+                      discount: product['discount'],
+                      brand: product['brand'],
+                      category: product['category'],
+                      rating: product['rating'],
+                      ratingCount: product['ratingCount'],
+                      description: product['description'],
+                      badge: product['badge'],
+                      badgeColor: product['badgeColor'],
+                      onAddToCart: () {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Please login to add items to cart.'),
+                          behavior: SnackBarBehavior.floating,
+                          duration: Duration(seconds: 2),
+                        ));
+                      },
+                    );
+                  },
+                ),
+                SizedBox(height: isMobile ? 40 : 60),
+                const WhyChooseSection(),
+                const SizedBox(height: 100),
+              ],
+            );
+          },
         ),
       ),
     );

@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
+import 'package:ojas_user/core/services/session_service.dart';
+import 'package:ojas_user/features/cart/application/cart_controller.dart';
 
 /// A Premium, Highly Animated Navbar for eCommerce
 /// Designed by Ojas Senior UI/UX Expert
@@ -395,36 +397,60 @@ class _UserActionSection extends StatelessWidget {
           ),
         ),
         // Auth Buttons
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pushReplacementNamed('/login');
+        ListenableBuilder(
+          listenable: SessionService.instance,
+          builder: (context, _) {
+            if (SessionService.instance.isLoggedIn) {
+              return Row(
+                children: [
+                  _HoverIconAction(
+                    icon: Icons.person_outline,
+                    label: SessionService.instance.currentUser?.name ?? 'Profile',
+                    onTap: () => Navigator.of(context).pushReplacementNamed('/profile'),
+                  ),
+                  const SizedBox(width: 15),
+                  IconButton(
+                    icon: const Icon(Icons.logout, color: Colors.white70, size: 20),
+                    onPressed: () async {
+                       await SessionService.instance.logout();
+                       if (context.mounted) {
+                         Navigator.of(context).pushReplacementNamed('/login');
+                       }
+                    },
+                  ),
+                ],
+              );
+            }
+            return Row(
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushReplacementNamed('/login');
+                  },
+                  child: Text(
+                    'Login',
+                    style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pushReplacementNamed('/register');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primaryPink,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  child: Text(
+                    'Register',
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            );
           },
-          child: Text(
-            'Login',
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pushReplacementNamed('/register');
-          },
-
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: AppColors.primaryPink,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          ),
-          child: Text(
-            'Register',
-            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-          ),
         ),
       ],
     );
@@ -434,7 +460,8 @@ class _UserActionSection extends StatelessWidget {
 class _HoverIconAction extends StatefulWidget {
   final IconData icon;
   final String label;
-  const _HoverIconAction({required this.icon, required this.label});
+  final VoidCallback? onTap;
+  const _HoverIconAction({required this.icon, required this.label, this.onTap});
 
   @override
   State<_HoverIconAction> createState() => _HoverIconActionState();
@@ -448,19 +475,22 @@ class _HoverIconActionState extends State<_HoverIconAction> {
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(widget.icon, color: _isHovered ? Colors.white : Colors.white70),
-          const SizedBox(width: 6),
-          Text(
-            widget.label,
-            style: GoogleFonts.poppins(
-              color: _isHovered ? Colors.white : Colors.white70,
-              fontSize: 14,
+      child: InkWell(
+        onTap: widget.onTap,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(widget.icon, color: _isHovered ? Colors.white : Colors.white70),
+            const SizedBox(width: 6),
+            Text(
+              widget.label,
+              style: GoogleFonts.poppins(
+                color: _isHovered ? Colors.white : Colors.white70,
+                fontSize: 14,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -499,40 +529,45 @@ class _PulseCartButtonState extends State<_PulseCartButton>
 
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          gradient: AppColors.pinkGradient,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.pinkAccent.withOpacity(0.4),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            const Icon(
-              Icons.shopping_cart_outlined,
-              color: Colors.white,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'My Cart',
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+    return ListenableBuilder(
+      listenable: CartController.instance,
+      builder: (context, _) {
+        final count = CartController.instance.itemCount;
+        return ScaleTransition(
+          scale: _scaleAnimation,
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pushReplacementNamed('/cart'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: AppColors.pinkGradient,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.pinkAccent.withOpacity(0.4),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.shopping_cart_outlined, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'My Cart ($count)',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

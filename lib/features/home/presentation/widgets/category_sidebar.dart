@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
-import 'package:ojas_user/features/home/domain/models/category_model.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ojas_user/core/controllers/home_controller.dart';
 
 class CategorySidebar extends StatelessWidget {
   const CategorySidebar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final categories = CategoryModel.dummyCategories;
-
     return Container(
       width: 280,
       decoration: BoxDecoration(
@@ -54,25 +52,68 @@ class CategorySidebar extends StatelessWidget {
           
           // Category List
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: categories.length,
-              separatorBuilder: (context, index) => const Divider(height: 1, indent: 20, endIndent: 20),
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                return ListTile(
-                  leading: Text(category.icon ?? '📦', style: const TextStyle(fontSize: 18)),
-                  title: Text(
-                    category.title,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: AppColors.textPrimary,
+            child: ListenableBuilder(
+              listenable: HomeController.instance,
+              builder: (context, _) {
+                final categories = HomeController.instance.categories;
+                
+                if (HomeController.instance.isLoading && categories.isEmpty) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Color(0xFFF01B6B), strokeWidth: 2),
+                  );
+                }
+
+                if (categories.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No categories found',
+                      style: GoogleFonts.inter(color: Colors.grey, fontSize: 13),
                     ),
-                  ),
-                  trailing: const Icon(Icons.chevron_right, size: 16, color: Colors.grey),
-                  onTap: () {},
-                  dense: true,
-                  hoverColor: AppColors.bgSecondaryLight,
+                  );
+                }
+
+                return ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemCount: categories.length,
+                  separatorBuilder: (context, index) => const Divider(height: 1, indent: 20, endIndent: 20),
+                  itemBuilder: (context, index) {
+                    final category = categories[index];
+                    final title = category['name'] ?? 'Unknown';
+                    
+                    final String? imageUrl = category['image'];
+                    Widget leadingWidget;
+                    if (imageUrl != null && imageUrl.isNotEmpty) {
+                      leadingWidget = ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Image.network(
+                          imageUrl,
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Text('📁', style: TextStyle(fontSize: 18)),
+                        ),
+                      );
+                    } else {
+                      leadingWidget = const Text('📁', style: TextStyle(fontSize: 18));
+                    }
+                    
+                    return ListTile(
+                      leading: leadingWidget,
+                      title: Text(
+                        title,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      trailing: const Icon(Icons.chevron_right, size: 16, color: Colors.grey),
+                      onTap: () {
+                        // TODO: Navigate to category products page
+                      },
+                      dense: true,
+                      hoverColor: AppColors.bgSecondaryLight,
+                    );
+                  },
                 );
               },
             ),

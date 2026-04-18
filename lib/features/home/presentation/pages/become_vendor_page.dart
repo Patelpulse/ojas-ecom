@@ -9,6 +9,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:html' as html;
+import 'package:flutter/foundation.dart';
+import 'package:ojas_user/core/services/api_service.dart';
 
 class BecomeVendorPage extends StatefulWidget {
   const BecomeVendorPage({super.key});
@@ -100,11 +102,7 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
     );
 
     try {
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('http://72.61.172.182:5001/api/signup'),
-      );
-
+      var request = http.MultipartRequest('POST', Uri.parse('${ApiService.baseUrl}/vendor/signup'));
       // Fields
       request.fields['firstName'] = _firstNameController.text;
       request.fields['lastName'] = _lastNameController.text;
@@ -189,7 +187,7 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://72.61.172.182:5001/api/login'),
+        Uri.parse('${ApiService.baseUrl}/vendor/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': _loginEmailController.text,
@@ -209,10 +207,11 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
         );
 
         final token = data['token'];
-        // Construct the vendor dashboard URL with the token
-        // In production, this would be your production URL
-        final vendorPanelUrl = 'http://localhost:3001/login?token=$token';
 
+        // Define vendor panel URLs for dev and prod
+        final vendorPanelUrl = kDebugMode
+            ? 'http://localhost:3001/#/?token=$token'
+            : 'https://vendor.samajwaditechforce.com/#/?token=$token';
         Future.delayed(const Duration(seconds: 1), () {
           html.window.location.href = vendorPanelUrl;
         });
@@ -1425,7 +1424,8 @@ class _DropdownField extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          initialValue: value ?? items.first,
+          value: value ?? items.first,
+          dropdownColor: Colors.white,
           icon: const Icon(Icons.expand_more, color: Color(0xFF64748B)),
           items: items
               .map(

@@ -18,6 +18,9 @@ class SessionService extends ChangeNotifier {
 
   void setUser(UserModel? user) {
     userNotifier.value = user;
+    if (user == null) {
+      CartController.instance.clear();
+    }
     notifyListeners();
   }
 
@@ -38,7 +41,10 @@ class SessionService extends ChangeNotifier {
     }
   }
 
-  void logout() {
+  Future<void> logout() async {
+    final authService = AuthService();
+    await authService.logout();
+    CartController.instance.clear();
     userNotifier.value = null;
     notifyListeners();
   }

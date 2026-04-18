@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/ojas_layout.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
+import 'package:ojas_user/core/controllers/settings_controller.dart';
+import 'package:provider/provider.dart';
+import 'package:ojas_user/core/models/app_settings.dart';
 
 class TermsConditionsPage extends StatelessWidget {
   const TermsConditionsPage({super.key});
@@ -10,6 +13,8 @@ class TermsConditionsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isMobile = Responsive.isMobile(context);
+    final settings = context.watch<SettingsController>().settings;
+    final String customContent = settings.termsConditions;
 
     return OjasLayout(
       activeTitle: 'TERMS & CONDITIONS',
@@ -23,6 +28,28 @@ class TermsConditionsPage extends StatelessWidget {
               // 1. Header
               _buildHeader(isMobile),
               SizedBox(height: isMobile ? 32 : 60),
+
+              // Dynamic content from admin
+              if (customContent.trim().isNotEmpty) ...[
+                _buildSectionCard(
+                  'Policy Update',
+                  customContent,
+                  isMobile: isMobile,
+                  icon: Icons.gavel_outlined,
+                ),
+                const SizedBox(height: 48),
+                const Divider(),
+                const SizedBox(height: 48),
+                Text(
+                  'General Terms & Conditions',
+                  style: GoogleFonts.outfit(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1E1B4B),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
 
               // 2. Table of Contents
               _buildTableOfContents(isMobile),
@@ -59,7 +86,7 @@ class TermsConditionsPage extends StatelessWidget {
               const SizedBox(height: 48),
 
               // 8. Contact Info
-              _buildContactInfo(isMobile),
+              _buildContactInfo(isMobile, settings),
               const SizedBox(height: 60),
 
               // 9. Footer Banner
@@ -395,7 +422,7 @@ class TermsConditionsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildContactInfo(bool isMobile) {
+  Widget _buildContactInfo(bool isMobile, AppSettings settings) {
     return Column(
       children: [
         Text('Contact Information', style: GoogleFonts.outfit(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.bold, color: const Color(0xFF1E1B4B))),
@@ -405,20 +432,20 @@ class TermsConditionsPage extends StatelessWidget {
         if (isMobile)
           Column(
             children: [
-              _contactCard(Icons.email_outlined, 'Email', 'legal@ojas.com', isMobile),
+              _contactCard(Icons.email_outlined, 'Email', settings.contactEmail, isMobile),
               const SizedBox(height: 16),
-              _contactCard(Icons.language_outlined, 'Website', 'www.ojas.com', isMobile),
+              _contactCard(Icons.phone_outlined, 'Phone', settings.contactPhone, isMobile),
               const SizedBox(height: 16),
-              _contactCard(Icons.location_on_outlined, 'Address', '123 Business Ave, Suite 100\nNY 10001', isMobile),
+              _contactCard(Icons.location_on_outlined, 'Address', settings.contactAddress, isMobile),
             ],
           )
         else
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _contactCard(Icons.email_outlined, 'Email', 'legal@ojas.com', isMobile),
-              _contactCard(Icons.language_outlined, 'Website', 'www.ojas.com', isMobile),
-              _contactCard(Icons.location_on_outlined, 'Address', '123 Business Ave, Suite 100\nNY 10001', isMobile),
+              _contactCard(Icons.email_outlined, 'Email', settings.contactEmail, isMobile),
+              _contactCard(Icons.phone_outlined, 'Phone', settings.contactPhone, isMobile),
+              _contactCard(Icons.location_on_outlined, 'Address', settings.contactAddress, isMobile),
             ],
           ),
       ],
