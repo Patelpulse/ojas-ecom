@@ -72,48 +72,88 @@ class CategorySidebar extends StatelessWidget {
                   );
                 }
 
-                return ListView.separated(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: categories.length,
-                  separatorBuilder: (context, index) => const Divider(height: 1, indent: 20, endIndent: 20),
-                  itemBuilder: (context, index) {
-                    final category = categories[index];
-                    final title = category['name'] ?? 'Unknown';
-                    
-                    final String? imageUrl = category['image'];
-                    Widget leadingWidget;
-                    if (imageUrl != null && imageUrl.isNotEmpty) {
-                      leadingWidget = ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: Image.network(
-                          imageUrl,
-                          width: 24,
-                          height: 24,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Text('📁', style: TextStyle(fontSize: 18)),
+                return Theme(
+                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: categories.length,
+                    separatorBuilder: (context, index) => const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0xFFF1F5F9)),
+                    itemBuilder: (context, index) {
+                      final category = categories[index];
+                      final title = category['name'] ?? 'Unknown';
+                      final List<dynamic> subcategories = category['subcategories'] ?? [];
+                      
+                      final String? imageUrl = category['image'];
+                      Widget leadingWidget;
+                      if (imageUrl != null && imageUrl.isNotEmpty) {
+                        leadingWidget = ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: Image.network(
+                            imageUrl,
+                            width: 24,
+                            height: 24,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(Icons.category_outlined, size: 20, color: Colors.grey),
+                          ),
+                        );
+                      } else {
+                        leadingWidget = const Icon(Icons.category_outlined, size: 20, color: Colors.grey);
+                      }
+                      
+                      if (subcategories.isEmpty) {
+                        return ListTile(
+                          leading: leadingWidget,
+                          title: Text(
+                            title,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          trailing: const Icon(Icons.chevron_right, size: 16, color: Colors.grey),
+                          onTap: () {
+                            // TODO: Navigate to category products page
+                          },
+                          dense: true,
+                          hoverColor: AppColors.bgSecondaryLight,
+                        );
+                      }
+
+                      return ExpansionTile(
+                        leading: leadingWidget,
+                        title: Text(
+                          title,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
+                        tilePadding: const EdgeInsets.only(left: 16, right: 16),
+                        childrenPadding: const EdgeInsets.only(left: 12),
+                        collapsedIconColor: Colors.grey,
+                        iconColor: const Color(0xFFF01B6B),
+                        children: subcategories.map((sub) {
+                          return ListTile(
+                            contentPadding: const EdgeInsets.only(left: 48, right: 16),
+                            title: Text(
+                              sub['name'] ?? '',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            onTap: () {
+                              // TODO: Navigate to subcategory products page
+                            },
+                            dense: true,
+                            visualDensity: VisualDensity.compact,
+                          );
+                        }).toList(),
                       );
-                    } else {
-                      leadingWidget = const Text('📁', style: TextStyle(fontSize: 18));
-                    }
-                    
-                    return ListTile(
-                      leading: leadingWidget,
-                      title: Text(
-                        title,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      trailing: const Icon(Icons.chevron_right, size: 16, color: Colors.grey),
-                      onTap: () {
-                        // TODO: Navigate to category products page
-                      },
-                      dense: true,
-                      hoverColor: AppColors.bgSecondaryLight,
-                    );
-                  },
+                    },
+                  ),
                 );
               },
             ),

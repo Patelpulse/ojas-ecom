@@ -61,6 +61,52 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
   bool _obscureLoginPassword = true;
   bool _obscureSignupPassword = true;
 
+  @override
+  void initState() {
+    super.initState();
+    _cityController.addListener(_onCityChanged);
+  }
+
+  @override
+  void dispose() {
+    _cityController.removeListener(_onCityChanged);
+    super.dispose();
+  }
+
+  void _onCityChanged() {
+    final city = _cityController.text.trim().toLowerCase();
+    
+    // Mapping for common Indian cities
+    final Map<String, Map<String, String>> cityMap = {
+      'noida': {'state': 'Uttar Pradesh', 'zip': '201301'},
+      'delhi': {'state': 'Delhi', 'zip': '110001'},
+      'mumbai': {'state': 'Maharashtra', 'zip': '400001'},
+      'bangalore': {'state': 'Karnataka', 'zip': '560001'},
+      'bengaluru': {'state': 'Karnataka', 'zip': '560001'},
+      'chennai': {'state': 'Tamil Nadu', 'zip': '600001'},
+      'kolkata': {'state': 'West Bengal', 'zip': '700001'},
+      'hyderabad': {'state': 'Telangana', 'zip': '500001'},
+      'pune': {'state': 'Maharashtra', 'zip': '411001'},
+      'lucknow': {'state': 'Uttar Pradesh', 'zip': '226001'},
+      'jaipur': {'state': 'Rajasthan', 'zip': '302001'},
+      'ahmedabad': {'state': 'Gujarat', 'zip': '380001'},
+      'gurgaon': {'state': 'Haryana', 'zip': '122001'},
+      'gurugram': {'state': 'Haryana', 'zip': '122001'},
+      'chandigarh': {'state': 'Chandigarh', 'zip': '160001'},
+    };
+
+    if (cityMap.containsKey(city)) {
+      final data = cityMap[city]!;
+      // Only auto-fill if the fields are currently empty to avoid overwriting user intent
+      if (_stateController.text.isEmpty) {
+        _stateController.text = data['state']!;
+      }
+      if (_zipCodeController.text.isEmpty) {
+        _zipCodeController.text = data['zip']!;
+      }
+    }
+  }
+
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,

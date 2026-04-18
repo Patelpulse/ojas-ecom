@@ -38,7 +38,29 @@ class DailyDealsSection extends StatelessWidget {
           
           // Cards: Row on Desktop, Column on Mobile
           if (dailyDeals.isEmpty)
-             const Center(child: Padding(padding: EdgeInsets.all(40), child: Text('Check back later for daily deals!', style: TextStyle(color: Colors.grey))))
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 60),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                children: [
+                  Icon(Icons.calendar_today_outlined, size: 48, color: Colors.grey.shade300),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Check back later for daily deals!',
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      color: Colors.grey.shade500,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            )
           else if (isMobile)
             Column(
               children: dailyDeals.map((p) => Padding(

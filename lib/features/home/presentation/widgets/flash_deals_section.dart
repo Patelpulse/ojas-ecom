@@ -30,35 +30,61 @@ class FlashDealsSection extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 32),
-              SizedBox(
-                height: 480,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: flashProducts.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 24),
-                  itemBuilder: (context, index) {
-                    final product = flashProducts[index];
-                    return SizedBox(
-                      width: 300,
-                      child: ProductCard(
-                        product: product,
-                        onAddToCart: () async {
-                          final success = await CartController.instance.addToCart(product.id);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(success ? 'Added to cart' : 'Failed to add to cart. Please login.'),
-                                backgroundColor: success ? Colors.green : Colors.red,
-                                duration: const Duration(seconds: 1),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    );
-                  },
+              const SizedBox(height: 32),
+              if (flashProducts.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 60),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
                 ),
-              ),
+                child: Column(
+                  children: [
+                    Icon(Icons.bolt_outlined, size: 48, color: Colors.grey.shade300),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No flash deals at the moment.',
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+              else
+                SizedBox(
+                  height: 480,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: flashProducts.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 24),
+                    itemBuilder: (context, index) {
+                      final product = flashProducts[index];
+                      return SizedBox(
+                        width: 300,
+                        child: ProductCard(
+                          product: product,
+                          onAddToCart: () async {
+                            final success = await CartController.instance.addToCart(product.id);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(success ? 'Added to cart' : 'Failed to add to cart. Please login.'),
+                                  backgroundColor: success ? Colors.green : Colors.red,
+                                  duration: const Duration(seconds: 1),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
             ],
           ),
         ),
