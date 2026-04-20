@@ -37,7 +37,6 @@ class _LatestProductCardState extends State<LatestProductCard> {
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 210,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
@@ -99,17 +98,17 @@ class _LatestProductCardState extends State<LatestProductCard> {
                       widget.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                      style: GoogleFonts.outfit(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF0F172A),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
                         Text(
-                          'Rs. ${widget.price.toStringAsFixed(0)}',
+                          '₹${widget.price.toStringAsFixed(0)}',
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -118,7 +117,7 @@ class _LatestProductCardState extends State<LatestProductCard> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Rs. ${widget.oldPrice.toStringAsFixed(0)}',
+                          '₹${widget.oldPrice.toStringAsFixed(0)}',
                           style: GoogleFonts.inter(
                             fontSize: 11,
                             color: Colors.grey.shade500,

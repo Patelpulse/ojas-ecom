@@ -554,11 +554,11 @@ class _DealCardState extends State<_DealCard> {
                     p.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF1E293B),
-                      height: 1.4,
+                    style: GoogleFonts.outfit(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF0F172A),
+                      height: 1.2,
                     ),
                   ),
                   const SizedBox(height: 4),

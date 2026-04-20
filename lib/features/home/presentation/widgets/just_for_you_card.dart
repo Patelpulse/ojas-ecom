@@ -115,18 +115,22 @@ class _JustForYouCardState extends State<JustForYouCard> {
                     widget.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style: GoogleFonts.outfit(
+                      fontSize: 15, 
+                      fontWeight: FontWeight.bold, 
+                      color: const Color(0xFF0F172A)
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       Text(
-                        'Rs. ${widget.price.toStringAsFixed(0)}',
+                        '₹${widget.price.toStringAsFixed(0)}',
                         style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Rs. ${widget.oldPrice.toStringAsFixed(0)}',
+                        '₹${widget.oldPrice.toStringAsFixed(0)}',
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           color: Colors.grey.shade500,

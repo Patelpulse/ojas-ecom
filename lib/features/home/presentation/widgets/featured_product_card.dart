@@ -251,7 +251,7 @@ class _FeaturedProductCardState extends State<FeaturedProductCard> {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        'Rs.${widget.price}',
+                        '₹${widget.price}',
                         style: GoogleFonts.outfit(
                           fontSize: 20,
                           fontWeight: FontWeight.w900,
@@ -261,7 +261,7 @@ class _FeaturedProductCardState extends State<FeaturedProductCard> {
                       if (widget.oldPrice != null) ...[
                         const SizedBox(width: 8),
                         Text(
-                          'Rs.${widget.oldPrice}',
+                          '₹${widget.oldPrice}',
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             color: Colors.grey[400],

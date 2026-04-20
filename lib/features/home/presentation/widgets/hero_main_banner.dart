@@ -94,29 +94,8 @@ class HeroMainBanner extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
-            // Pagination Dots Simulator
-            Row(
-              children: [
-                _dot(true),
-                const SizedBox(width: 8),
-                _dot(false),
-                const SizedBox(width: 8),
-                _dot(false),
-              ],
-            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _dot(bool active) {
-    return Container(
-      width: active ? 24 : 8,
-      height: 8,
-      decoration: BoxDecoration(
-        color: active ? Colors.white : Colors.white54,
-        borderRadius: BorderRadius.circular(4),
       ),
     );
   }

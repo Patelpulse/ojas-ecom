@@ -20,10 +20,12 @@ class HomeController with ChangeNotifier {
   List<BannerModel> get banners => _banners;
   bool get isLoading => _isLoading;
 
-  List<BannerModel> get mainBanners => _banners.where((b) => b.type == 'main').toList();
+  List<BannerModel> get mainBanners => _banners.where((b) => b.type == 'main' || b.type == 'main_slider_1' || b.type == 'main_slider_2').toList();
   BannerModel get sideTopBanner => _banners.firstWhere((b) => b.type == 'side_top', orElse: () => _defaultSideTop);
   BannerModel get sideBottomBanner => _banners.firstWhere((b) => b.type == 'side_bottom', orElse: () => _defaultSideBottom);
   BannerModel get offerBanner => _banners.firstWhere((b) => b.type == 'offer', orElse: () => _defaultOfferBanner);
+  BannerModel get trendingBanner => _banners.firstWhere((b) => b.type == 'trending', orElse: () => _defaultTrendingBanner);
+  List<BannerModel> get promoBanners => _banners.where((b) => b.type == 'promo').toList();
 
   final _defaultSideTop = BannerModel(
     id: 'default_top',
@@ -53,6 +55,16 @@ class HomeController with ChangeNotifier {
     link: '/',
     tag: 'LIMITED TIME',
     type: 'offer',
+  );
+  
+  final _defaultTrendingBanner = BannerModel(
+    id: 'default_trending',
+    title: 'ARMCHAIR FURNITURE',
+    subtitle: 'up to 50% OFF',
+    imageUrl: 'https://images.unsplash.com/photo-1592078615290-033ee584e267?w=800',
+    link: '/',
+    tag: 'Trending',
+    type: 'trending',
   );
 
   Future<void> init() async {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
-import 'package:ojas_user/features/home/domain/models/banner_model.dart';
+import 'package:ojas_user/features/home/data/models/banner_model.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 
@@ -74,9 +74,9 @@ class BannerWidget extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text(
-                  banner.buttonText,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                child: const Text(
+                  'Shop Now',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ],

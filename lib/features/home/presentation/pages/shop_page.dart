@@ -525,7 +525,12 @@ class _ShopProductCard extends StatelessWidget {
                     name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1E293B), height: 1.4),
+                    style: GoogleFonts.outfit(
+                      fontSize: 15, 
+                      fontWeight: FontWeight.bold, 
+                      color: const Color(0xFF0F172A), 
+                      height: 1.3
+                    ),
                   ),
                   const Spacer(),
                   Row(

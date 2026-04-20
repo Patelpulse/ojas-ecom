@@ -1,18 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/features/home/domain/models/product_model.dart';
 import 'package:ojas_user/features/home/presentation/widgets/daily_deal_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
 
-class DailyDealsSection extends StatelessWidget {
+class DailyDealsSection extends StatefulWidget {
   const DailyDealsSection({super.key});
+
+  @override
+  State<DailyDealsSection> createState() => _DailyDealsSectionState();
+}
+
+class _DailyDealsSectionState extends State<DailyDealsSection> {
+  int _currentIndex = 0;
+  final CarouselSliderController _carouselController = CarouselSliderController();
 
   @override
   Widget build(BuildContext context) {
     final dailyDeals = ProductModel.getDailyDeals();
     final bool isMobile = Responsive.isMobile(context);
+    final bool isTablet = Responsive.isTablet(context);
 
+    // Grouping deals: Use the smaller of (total deals) or (screen limit) to ensure 
+    // cards fill the width like before when there are few items.
+    int maxOnScreen = isMobile ? 1 : (isTablet ? 2 : 3);
+    int itemsPerPage = dailyDeals.length > 0 && dailyDeals.length < maxOnScreen 
+        ? dailyDeals.length 
+        : maxOnScreen;
+    
+    // Fallback to 1 to avoid division by zero if dailyDeals is empty
+    if (itemsPerPage == 0) itemsPerPage = 1;
+    
     return CenteredContent(
       horizontalPadding: isMobile ? 16 : 40,
       child: Column(
@@ -29,14 +49,15 @@ class DailyDealsSection extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              _navButton(Icons.chevron_left),
-              const SizedBox(width: 8),
-              _navButton(Icons.chevron_right),
+              if (dailyDeals.length > itemsPerPage) ...[
+                _navButton(Icons.chevron_left, () => _carouselController.previousPage()),
+                const SizedBox(width: 8),
+                _navButton(Icons.chevron_right, () => _carouselController.nextPage()),
+              ],
             ],
           ),
           const SizedBox(height: 32),
           
-          // Cards: Row on Desktop, Column on Mobile
           if (dailyDeals.isEmpty)
             Container(
               width: double.infinity,
@@ -61,60 +82,97 @@ class DailyDealsSection extends StatelessWidget {
                 ],
               ),
             )
-          else if (isMobile)
-            Column(
-              children: dailyDeals.map((p) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: DailyDealCard(product: p),
-              )).toList(),
-            )
           else
-            Row(
-              children: [
-                for (var i = 0; i < dailyDeals.length; i++) ...[
-                  Expanded(child: DailyDealCard(product: dailyDeals[i])),
-                  if (i < dailyDeals.length - 1) const SizedBox(width: 24),
-                ],
-              ],
+            CarouselSlider.builder(
+              carouselController: _carouselController,
+              itemCount: (dailyDeals.length / itemsPerPage).ceil(),
+              options: CarouselOptions(
+                height: isMobile ? 420 : 450,
+                viewportFraction: 1.0,
+                autoPlay: true,
+                autoPlayInterval: const Duration(seconds: 7),
+                enlargeCenterPage: false,
+                onPageChanged: (index, reason) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+              ),
+              itemBuilder: (context, index, realIndex) {
+                final int start = index * itemsPerPage;
+                final int end = (index + 1) * itemsPerPage;
+                final List<ProductModel> pageDeals = dailyDeals.sublist(
+                  start,
+                  end > dailyDeals.length ? dailyDeals.length : end,
+                );
+
+                return Row(
+                  children: [
+                    for (var i = 0; i < pageDeals.length; i++) ...[
+                      Expanded(child: DailyDealCard(product: pageDeals[i])),
+                      if (i < pageDeals.length - 1) const SizedBox(width: 24),
+                    ],
+                    // Fill remaining space if last page has fewer items
+                    if (pageDeals.length < itemsPerPage)
+                      for (var i = 0; i < itemsPerPage - pageDeals.length; i++)
+                        const Expanded(child: SizedBox()),
+                  ],
+                );
+              },
             ),
           
           const SizedBox(height: 32),
           // Pagination Dots
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _pageDot(false),
-              const SizedBox(width: 8),
-              _pageDot(true),
-              const SizedBox(width: 8),
-              _pageDot(false),
-            ],
-          ),
+          if (dailyDeals.length > itemsPerPage)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                (dailyDeals.length / itemsPerPage).ceil(),
+                (index) => _pageDot(_currentIndex == index, index),
+              ),
+            ),
           const SizedBox(height: 40),
         ],
       ),
     );
   }
 
-  Widget _navButton(IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.grey[200]!),
+  Widget _navButton(IconData icon, VoidCallback onTap) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.grey[200]!),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Icon(icon, size: 20, color: Colors.grey[700]),
+        ),
       ),
-      child: Icon(icon, size: 20, color: Colors.grey),
     );
   }
 
-  Widget _pageDot(bool active) {
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(
-        color: active ? const Color(0xFFF01B6B) : Colors.grey[300],
-        shape: BoxShape.circle,
+  Widget _pageDot(bool active, int index) {
+    return GestureDetector(
+      onTap: () => _carouselController.animateToPage(index),
+      child: Container(
+        width: active ? 24 : 8,
+        height: 8,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          color: active ? const Color(0xFFF01B6B) : Colors.grey[300],
+          borderRadius: BorderRadius.circular(4),
+        ),
       ),
     );
   }

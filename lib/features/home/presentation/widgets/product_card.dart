@@ -109,16 +109,17 @@ class _ProductCardState extends State<ProductCard> {
                     widget.product.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: const Color(0xFF0F172A),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       Text(
-                        '\$${widget.product.price.toStringAsFixed(2)}',
+                        '₹${widget.product.price.toStringAsFixed(2)}',
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
@@ -128,7 +129,7 @@ class _ProductCardState extends State<ProductCard> {
                       if (widget.product.oldPrice != null) ...[
                         const SizedBox(width: 8),
                         Text(
-                          '\$${widget.product.oldPrice!.toStringAsFixed(2)}',
+                          '₹${widget.product.oldPrice!.toStringAsFixed(2)}',
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             color: AppColors.textSecondary,

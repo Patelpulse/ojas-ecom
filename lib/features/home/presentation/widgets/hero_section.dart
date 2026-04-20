@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ojas_user/core/controllers/home_controller.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/features/home/presentation/widgets/category_sidebar.dart';
@@ -7,8 +8,16 @@ import 'package:ojas_user/features/home/presentation/widgets/hero_side_banner.da
 import 'package:ojas_user/features/home/presentation/widgets/gift_promo_strip.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
 
-class HeroSection extends StatelessWidget {
+class HeroSection extends StatefulWidget {
   const HeroSection({super.key});
+
+  @override
+  State<HeroSection> createState() => _HeroSectionState();
+}
+
+class _HeroSectionState extends State<HeroSection> {
+  int _currentBannerIndex = 0;
+  final CarouselSliderController _carouselController = CarouselSliderController();
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +31,28 @@ class HeroSection extends StatelessWidget {
         final sideTop = homeController.sideTopBanner;
         final sideBottom = homeController.sideBottomBanner;
 
+        // Default banners if empty
+        final displayBanners = mainBanners.isEmpty
+            ? [
+                const HeroMainBanner(
+                  title: 'SALE UP TO 50% OFF',
+                  subtitle: "They're built to save energy, they help to clean up every door.",
+                  imageUrl: 'assets/images/modern_furniture_hero.png',
+                ),
+                const HeroMainBanner(
+                  title: 'NEW ARRIVALS',
+                  subtitle: "Explore our latest collection of premium office furniture.",
+                  imageUrl: 'assets/images/modern_furniture_hero.png',
+                  badgeText: 'New ✨',
+                ),
+              ]
+            : mainBanners.map((banner) => HeroMainBanner(
+                title: banner.title,
+                subtitle: banner.subtitle,
+                imageUrl: banner.imageUrl,
+                badgeText: banner.tag,
+              )).toList();
+
         return CenteredContent(
           horizontalPadding: isMobile ? 16 : 40,
           child: Padding(
@@ -31,21 +62,7 @@ class HeroSection extends StatelessWidget {
                 if (isMobile)
                   Column(
                     children: [
-                      SizedBox(
-                        height: 300,
-                        child: mainBanners.isEmpty 
-                          ? const HeroMainBanner(
-                              title: 'SALE UP TO 50% OFF',
-                              subtitle: "They're built to save energy, they help to clean up every door.",
-                              imageUrl: 'assets/images/modern_furniture_hero.png',
-                            )
-                          : HeroMainBanner(
-                              title: mainBanners.first.title,
-                              subtitle: mainBanners.first.subtitle,
-                              imageUrl: mainBanners.first.imageUrl,
-                              badgeText: mainBanners.first.tag,
-                            ),
-                      ),
+                      _buildCarousel(displayBanners, 300),
                       const SizedBox(height: 16),
                       SizedBox(
                         height: 180,
@@ -69,18 +86,7 @@ class HeroSection extends StatelessWidget {
                         const SizedBox(width: 24),
                         Expanded(
                           flex: 3,
-                          child: mainBanners.isEmpty
-                            ? const HeroMainBanner(
-                                title: 'SALE UP TO 50% OFF',
-                                subtitle: "They're built to save energy, they help to clean up every door. We don't know them well, but we love them.",
-                                imageUrl: 'assets/images/modern_furniture_hero.png',
-                              )
-                            : HeroMainBanner(
-                                title: mainBanners.first.title,
-                                subtitle: mainBanners.first.subtitle,
-                                imageUrl: mainBanners.first.imageUrl,
-                                badgeText: mainBanners.first.tag,
-                              ),
+                          child: _buildCarousel(displayBanners, 600),
                         ),
                         const SizedBox(width: 24),
                         Expanded(
@@ -120,6 +126,53 @@ class HeroSection extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildCarousel(List<Widget> items, double height) {
+    return Stack(
+      children: [
+        CarouselSlider(
+          items: items,
+          carouselController: _carouselController,
+          options: CarouselOptions(
+            height: height,
+            viewportFraction: 1.0,
+            autoPlay: true,
+            autoPlayInterval: const Duration(seconds: 5),
+            autoPlayAnimationDuration: const Duration(milliseconds: 800),
+            autoPlayCurve: Curves.fastOutSlowIn,
+            onPageChanged: (index, reason) {
+              setState(() {
+                _currentBannerIndex = index;
+              });
+            },
+          ),
+        ),
+        // Dots indicator
+        Positioned(
+          bottom: 40,
+          left: 40,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: items.asMap().entries.map((entry) {
+              bool isActive = _currentBannerIndex == entry.key;
+              return GestureDetector(
+                onTap: () => _carouselController.animateToPage(entry.key),
+                child: Container(
+                  width: isActive ? 24.0 : 8.0,
+                  height: 8.0,
+                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: Colors.white.withOpacity(isActive ? 0.9 : 0.4),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
     );
   }
 }

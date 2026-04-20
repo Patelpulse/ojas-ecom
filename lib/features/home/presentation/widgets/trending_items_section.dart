@@ -85,7 +85,7 @@ class TrendingItemsSection extends StatelessWidget {
                   children: const [
                     ServiceCard(
                       title: 'FREE DELIVERY',
-                      subtitle: 'From \$89.00',
+                      subtitle: 'From ₹89.00',
                       iconUrl: 'https://cdn-icons-png.flaticon.com/512/709/709790.png',
                     ),
                     ServiceCard(
@@ -125,7 +125,7 @@ class TrendingItemsSection extends StatelessWidget {
                       children: const [
                         ServiceCard(
                           title: 'FREE DELIVERY',
-                          subtitle: 'From \$89.00',
+                          subtitle: 'From ₹89.00',
                           iconUrl: 'https://cdn-icons-png.flaticon.com/512/709/709790.png',
                         ),
                         ServiceCard(
