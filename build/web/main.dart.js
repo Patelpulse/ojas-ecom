@@ -98788,7 +98788,7 @@ xc(){var s=0,r=A.E(t.H),q=1,p=[],o=this,n,m,l,k,j,i,h,g
 var $async$xc=A.A(function(a,b){if(a===1){p.push(b)
 s=q}for(;;)switch(s){case 0:q=3
 s=6
-return A.t(A.N9(A.dj("https://api.samajwaditechforce.com/ojas/api/home/banners",0,null),null),$async$xc)
+return A.t(A.N9(A.dj("http://72.61.172.182/api/home/banners",0,null),null),$async$xc)
 case 6:n=b
 if(n.b===200){j=n
 m=B.ai.c5(0,A.mv(A.mu(j.e)).c5(0,j.w))
@@ -98815,7 +98815,7 @@ xd(){var s=0,r=A.E(t.H),q=1,p=[],o=this,n,m,l,k,j,i
 var $async$xd=A.A(function(a,b){if(a===1){p.push(b)
 s=q}for(;;)switch(s){case 0:q=3
 s=6
-return A.t(A.N9(A.dj("https://api.samajwaditechforce.com/ojas/api/home/categories?type=approved&tree=true",0,null),null),$async$xd)
+return A.t(A.N9(A.dj("http://72.61.172.182/api/home/categories?type=approved&tree=true",0,null),null),$async$xd)
 case 6:n=b
 if(n.b===200){k=n
 m=B.ai.c5(0,A.mv(A.mu(k.e)).c5(0,k.w))
@@ -98839,7 +98839,7 @@ xe(){var s=0,r=A.E(t.H),q=1,p=[],o=this,n,m,l,k,j,i
 var $async$xe=A.A(function(a,b){if(a===1){p.push(b)
 s=q}for(;;)switch(s){case 0:q=3
 s=6
-return A.t(A.N9(A.dj("https://api.samajwaditechforce.com/ojas/api/home/products",0,null),null),$async$xe)
+return A.t(A.N9(A.dj("http://72.61.172.182/api/home/products",0,null),null),$async$xe)
 case 6:n=b
 if(n.b===200){k=n
 m=B.ai.c5(0,A.mv(A.mu(k.e)).c5(0,k.w))
@@ -98930,7 +98930,7 @@ var $async$CX=A.A(function(a,b){if(a===1){p.push(b)
 s=q}for(;;)switch(s){case 0:q=3
 n.af()
 s=6
-return A.t(A.N9(A.dj("https://api.samajwaditechforce.com/ojas/api/home/settings",0,null),null),$async$CX)
+return A.t(A.N9(A.dj("http://72.61.172.182/api/home/settings",0,null),null),$async$CX)
 case 6:m=b
 if(m.b===200){j=m
 l=B.ai.c5(0,A.mv(A.mu(j.e)).c5(0,j.w))
@@ -99008,7 +99008,7 @@ return A.D($async$lp,r)}}
 A.atj.prototype={
 kr(){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d=this,c=null,b="query"
 if(d.a!=null)return
-s=A.eR("https://api.samajwaditechforce.com/ojas/api","/api","")
+s=A.eR("http://72.61.172.182/api","/api","")
 A.e9().$1("Initializing Socket connection to: "+s)
 r=t.N
 q=t.z
@@ -99135,7 +99135,7 @@ xS(a,b){return this.az9(a,b)},
 az9(a,b){var s=0,r=A.E(t.W8),q,p=2,o=[],n=this,m,l,k,j,i,h,g,f
 var $async$xS=A.A(function(c,d){if(c===1){o.push(d)
 s=p}for(;;)switch(s){case 0:p=4
-j=A.dj("https://api.samajwaditechforce.com/ojas/api/user/login",0,null)
+j=A.dj("http://72.61.172.182/api/user/login",0,null)
 i=t.N
 h=A.a4(["Content-Type","application/json"],i,i)
 s=7
@@ -99215,7 +99215,7 @@ return A.t(m.a.qC(!0),$async$oN)
 case 14:i=a3
 s=i!=null?15:16
 break
-case 15:e=A.dj("https://api.samajwaditechforce.com/ojas/api/user/google",0,null)
+case 15:e=A.dj("http://72.61.172.182/api/user/google",0,null)
 b=t.N
 a=A.a4(["Content-Type","application/json"],b,b)
 s=17
@@ -99267,7 +99267,7 @@ qo(a,b,c,d,e,f,g,h){return this.aBB(0,b,c,d,e,f,g,h)},
 aBB(a,b,c,d,a0,a1,a2,a3){var s=0,r=A.E(t.W8),q,p=2,o=[],n=this,m,l,k,j,i,h,g,f,e
 var $async$qo=A.A(function(a4,a5){if(a4===1){o.push(a5)
 s=p}for(;;)switch(s){case 0:p=4
-m=A.aO7("POST",A.dj("https://api.samajwaditechforce.com/ojas/api/user/register",0,null))
+m=A.aO7("POST",A.dj("http://72.61.172.182/api/user/register",0,null))
 m.x.m(0,"name",a1)
 m.x.m(0,"email",b)
 m.x.m(0,"password",a2)
@@ -99328,7 +99328,7 @@ s=p}for(;;)switch(s){case 0:p=4
 s=7
 return A.t(n.uI(),$async$uy)
 case 7:m=b
-i=A.dj("https://api.samajwaditechforce.com/ojas/api/user/profile",0,null)
+i=A.dj("http://72.61.172.182/api/user/profile",0,null)
 h=t.N
 l=A.r(h,h)
 J.ep(l,"Content-Type","application/json")
@@ -99375,7 +99375,7 @@ qw(a,b,c,d,e){return this.aCY(a,b,c,d,e)},
 aCY(a,a0,a1,a2,a3){var s=0,r=A.E(t.lM),q,p=2,o=[],n,m,l,k,j,i,h,g,f,e,d,c,b
 var $async$qw=A.A(function(a4,a5){if(a4===1){o.push(a5)
 s=p}for(;;)switch(s){case 0:p=4
-n=A.dj("https://api.samajwaditechforce.com/ojas/api/user/profile/update",0,null)
+n=A.dj("http://72.61.172.182/api/user/profile/update",0,null)
 m=A.aO7("PUT",n)
 s=7
 return A.t(new A.r0().uI(),$async$qw)
@@ -100110,7 +100110,7 @@ return A.t(n.oY(),$async$ik)
 case 7:m=d
 if(m==null){q=!1
 s=1
-break}j=A.dj("https://api.samajwaditechforce.com/ojas/api/user/cart/add",0,null)
+break}j=A.dj("http://72.61.172.182/api/user/cart/add",0,null)
 i=t.N
 h=A.a4(["Content-Type","application/json","Authorization","Bearer "+m],i,i)
 s=8
@@ -100147,7 +100147,7 @@ if(m==null){q=[]
 s=1
 break}i=t.N
 s=8
-return A.t(A.N9(A.dj("https://api.samajwaditechforce.com/ojas/api/user/cart",0,null),A.a4(["Content-Type","application/json","Authorization","Bearer "+m],i,i)),$async$ux)
+return A.t(A.N9(A.dj("http://72.61.172.182/api/user/cart",0,null),A.a4(["Content-Type","application/json","Authorization","Bearer "+m],i,i)),$async$ux)
 case 8:l=b
 if(l.b===200){i=l
 k=B.ai.c5(0,A.mv(A.mu(i.e)).c5(0,i.w))
@@ -100184,7 +100184,7 @@ return A.t(n.oY(),$async$jS)
 case 7:m=c
 if(m==null){q=!1
 s=1
-break}j=A.dj("https://api.samajwaditechforce.com/ojas/api/user/cart/remove",0,null)
+break}j=A.dj("http://72.61.172.182/api/user/cart/remove",0,null)
 i=t.N
 h=A.a4(["Content-Type","application/json","Authorization","Bearer "+m],i,i)
 s=8
@@ -100220,7 +100220,7 @@ return A.t(n.oY(),$async$wD)
 case 7:m=c
 if(m==null){q=!1
 s=1
-break}j=A.dj("https://api.samajwaditechforce.com/ojas/api/order/create",0,null)
+break}j=A.dj("http://72.61.172.182/api/order/create",0,null)
 i=t.N
 h=A.a4(["Content-Type","application/json","Authorization","Bearer "+m],i,i)
 s=8
@@ -100289,7 +100289,7 @@ h.toString
 g=t.z
 A.aMp(!1,new A.ayh(),h,g)
 p=4
-m=A.aO7("POST",A.dj("https://api.samajwaditechforce.com/ojas/api/vendor/signup",0,null))
+m=A.aO7("POST",A.dj("http://72.61.172.182/api/vendor/signup",0,null))
 m.x.m(0,"firstName",n.z.a.a)
 m.x.m(0,"lastName",n.Q.a.a)
 m.x.m(0,"email",n.as.a.a)
@@ -100354,7 +100354,7 @@ s=q}for(;;)switch(s){case 0:f=o.c
 f.toString
 A.aMp(!1,new A.ayb(),f,t.z)
 q=3
-f=A.dj("https://api.samajwaditechforce.com/ojas/api/vendor/login",0,null)
+f=A.dj("http://72.61.172.182/api/vendor/login",0,null)
 i=t.N
 h=A.a4(["Content-Type","application/json"],i,i)
 s=6
@@ -100370,7 +100370,7 @@ i=t.Q
 h=o.c
 if(f===200){h.a9(i).f.eo(B.a_3)
 l=J.as(m,"token")
-k="https://vendor.samajwaditechforce.com/#/?token="+A.k(l)
+k="http://72.61.172.182/vendor/#/?token="+A.k(l)
 A.rT(B.dQ,new A.ayc(k),t.P)}else{f=h.a9(i).f
 i=J.as(m,"message")
 f.eo(A.hw(null,null,null,null,null,B.y,null,A.m(i==null?"Login failed":i,null,null,null,null,null,null),null,B.bz,null,null,null,null,null,null,null,null,null,null))}q=1
