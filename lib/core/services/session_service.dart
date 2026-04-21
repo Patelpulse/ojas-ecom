@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ojas_user/features/auth/domain/models/user_model.dart';
 import 'package:ojas_user/features/auth/application/auth_service.dart';
 import 'package:ojas_user/features/cart/application/cart_controller.dart';
+import 'package:ojas_user/core/controllers/wishlist_controller.dart';
 
 class SessionService extends ChangeNotifier {
   static final SessionService _instance = SessionService._internal();
@@ -20,6 +21,9 @@ class SessionService extends ChangeNotifier {
     userNotifier.value = user;
     if (user == null) {
       CartController.instance.clear();
+      WishlistController.instance.fetchWishlist(); // Will clear since token is null
+    } else {
+      WishlistController.instance.fetchWishlist();
     }
     notifyListeners();
   }
@@ -32,6 +36,7 @@ class SessionService extends ChangeNotifier {
       
       if (user != null) {
         await CartController.instance.loadCart();
+        await WishlistController.instance.fetchWishlist();
       }
     } catch (e) {
       userNotifier.value = null;
@@ -45,6 +50,7 @@ class SessionService extends ChangeNotifier {
     final authService = AuthService();
     await authService.logout();
     CartController.instance.clear();
+    WishlistController.instance.fetchWishlist();
     userNotifier.value = null;
     notifyListeners();
   }

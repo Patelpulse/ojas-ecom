@@ -5,7 +5,9 @@ import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
 import 'package:ojas_user/core/controllers/home_controller.dart';
 import 'package:ojas_user/features/cart/application/cart_controller.dart';
+import 'package:ojas_user/core/controllers/wishlist_controller.dart';
 import 'package:provider/provider.dart';
+import 'package:ojas_user/core/services/api_service.dart';
 
 class DealsPage extends StatefulWidget {
   const DealsPage({super.key});
@@ -19,7 +21,7 @@ class _DealsPageState extends State<DealsPage> {
   bool _isGridView = true;
 
   List<_DealProduct> get _deals {
-    final list = HomeController.instance.products.map((p) => _DealProduct.fromMap(p)).toList();
+    final list = HomeController.instance.dealProducts.map((p) => _DealProduct.fromMap(p)).toList();
     
     switch (_sortBy) {
       case 'Lowest Price':
@@ -419,6 +421,10 @@ class _DealProduct {
     else if (disc > 0) badge = 'Limited Offer';
     else badge = 'New Arrival';
 
+    String? rawImg = p['images'] != null && (p['images'] as List).isNotEmpty 
+        ? p['images'][0].toString() 
+        : p['image']?.toString();
+
     return _DealProduct(
       id: p['_id'] ?? '',
       name: p['name'] ?? 'Product',
@@ -428,9 +434,9 @@ class _DealProduct {
       discountedPrice: newPrice,
       discountPercent: disc,
       badge: badge,
-      isWishlisted: false, // Default to false
+      isWishlisted: WishlistController.instance.isWishlisted(p['_id'] ?? ''),
       stockPercent: (p['stock'] ?? 10) / 20.0, // Mocking stock percent
-      imageUrl: p['image'] ?? 'https://via.placeholder.com/500',
+      imageUrl: ApiService.formatImageUrl(rawImg),
     );
   }
 }
@@ -445,215 +451,222 @@ class _DealCard extends StatefulWidget {
 }
 
 class _DealCardState extends State<_DealCard> {
-  bool _wishlisted = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _wishlisted = widget.product.isWishlisted;
-  }
-
   @override
   Widget build(BuildContext context) {
     final p = widget.product;
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 4)),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image Area
-          Stack(
-            children: [
-              SizedBox(
-                height: 210,
-                width: double.infinity,
-                child: p.imageUrl.startsWith('http')
-                  ? Image.network(
-                      p.imageUrl,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.image_not_supported_outlined, size: 60, color: Color(0xFFCBD5E1))),
-                    )
-                  : Image.asset(
-                      p.imageUrl,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.image_not_supported_outlined, size: 60, color: Color(0xFFCBD5E1))),
-                    ),
-              ),
-              // Discount badge (top-left)
-              Positioned(
-                top: 12,
-                left: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF01B6B),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    '-${p.discountPercent}%',
-                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                ),
-              ),
-              // Clearance badge (top-right-ish)
-              Positioned(
-                top: 12,
-                right: 40,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEDE9FE),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    p.badge,
-                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF7C3AED)),
-                  ),
-                ),
-              ),
-              // Wishlist heart
-              Positioned(
-                top: 8,
-                right: 8,
-                child: GestureDetector(
-                  onTap: () => setState(() => _wishlisted = !_wishlisted),
-                  child: Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _wishlisted ? const Color(0xFFF01B6B) : Colors.white,
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 4)],
-                    ),
-                    child: Icon(
-                      _wishlisted ? Icons.favorite : Icons.favorite_border,
-                      size: 16,
-                      color: _wishlisted ? Colors.white : const Color(0xFF94A3B8),
-                    ),
-                  ),
-                ),
-              ),
+    return ListenableBuilder(
+      listenable: WishlistController.instance,
+      builder: (context, _) {
+        final bool isWishlisted = WishlistController.instance.isWishlisted(p.id);
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 4)),
             ],
           ),
-
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image Area
+              Stack(
                 children: [
-                  // Product Name
-                  Text(
-                    p.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.outfit(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF0F172A),
-                      height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-
-                  // Vendor & Category
-                  Text(
-                    '${p.vendor} • ${p.category}',
-                    style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF94A3B8)),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Prices
-                  Row(
-                    children: [
-                      Text(
-                        '₹${p.discountedPrice.toInt()}',
-                        style: GoogleFonts.outfit(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF0F172A),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '₹${p.originalPrice.toInt()}',
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: const Color(0xFF94A3B8),
-                          decoration: TextDecoration.lineThrough,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Stock bar
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: p.stockPercent,
-                      minHeight: 5,
-                      backgroundColor: const Color(0xFFE2E8F0),
-                      valueColor: const AlwaysStoppedAnimation(Color(0xFFF01B6B)),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-
-                  // Limited Stock label
-                  Row(
-                    children: [
-                      const Icon(Icons.local_fire_department_outlined, size: 14, color: Color(0xFFF01B6B)),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Limited Stock left',
-                        style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFFF01B6B), fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                  
-                  const Spacer(), // Pushes the button to the bottom!
-
-                  // Add to Cart button
                   SizedBox(
+                    height: 210,
                     width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () async {
-                        final success = await CartController.instance.addToCart(p.id);
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(success ? '${p.name} added to cart' : 'Failed to add to cart. Please login first.'),
-                              backgroundColor: success ? Colors.green : Colors.red,
-                              behavior: SnackBarBehavior.floating,
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
-                        }
+                    child: p.imageUrl.startsWith('http')
+                      ? Image.network(
+                          p.imageUrl,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.image_not_supported_outlined, size: 60, color: Color(0xFFCBD5E1))),
+                        )
+                      : Image.asset(
+                          p.imageUrl,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.image_not_supported_outlined, size: 60, color: Color(0xFFCBD5E1))),
+                        ),
+                  ),
+                  // Discount badge (top-left)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF01B6B),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '-${p.discountPercent}%',
+                        style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  // Clearance badge (top-right-ish)
+                  Positioned(
+                    top: 12,
+                    right: 40,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEDE9FE),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        p.badge,
+                        style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF7C3AED)),
+                      ),
+                    ),
+                  ),
+                  // Wishlist heart
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () {
+                        // Create a map that matches what the controller expects or handle it carefully
+                        final productMap = {
+                          '_id': p.id,
+                          'name': p.name,
+                          'price': p.discountedPrice,
+                          'images': [p.imageUrl],
+                        };
+                        WishlistController.instance.toggleWishlist(productMap);
                       },
-                      icon: const Icon(Icons.shopping_cart_outlined, size: 16),
-                      label: Text('Add to Cart', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFF01B6B),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        elevation: 0,
+                      child: Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isWishlisted ? const Color(0xFFF01B6B) : Colors.white,
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 4)],
+                        ),
+                        child: Icon(
+                          isWishlisted ? Icons.favorite : Icons.favorite_border,
+                          size: 16,
+                          color: isWishlisted ? Colors.white : const Color(0xFF94A3B8),
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
+
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Product Name
+                      Text(
+                        p.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF0F172A),
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+
+                      // Vendor & Category
+                      Text(
+                        '${p.vendor} • ${p.category}',
+                        style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF94A3B8)),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Prices
+                      Row(
+                        children: [
+                          Text(
+                            '₹${p.discountedPrice.toInt()}',
+                            style: GoogleFonts.outfit(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF0F172A),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '₹${p.originalPrice.toInt()}',
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              color: const Color(0xFF94A3B8),
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Stock bar
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: p.stockPercent,
+                          minHeight: 5,
+                          backgroundColor: const Color(0xFFE2E8F0),
+                          valueColor: const AlwaysStoppedAnimation(Color(0xFFF01B6B)),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Limited Stock label
+                      Row(
+                        children: [
+                          const Icon(Icons.local_fire_department_outlined, size: 14, color: Color(0xFFF01B6B)),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Limited Stock left',
+                            style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFFF01B6B), fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                      
+                      const Spacer(), // Pushes the button to the bottom!
+
+                      // Add to Cart button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            final success = await CartController.instance.addToCart(p.id);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(success ? '${p.name} added to cart' : 'Failed to add to cart. Please login first.'),
+                                  backgroundColor: success ? Colors.green : Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          },
+                          icon: const Icon(Icons.shopping_cart_outlined, size: 16),
+                          label: Text('Add to Cart', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFF01B6B),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

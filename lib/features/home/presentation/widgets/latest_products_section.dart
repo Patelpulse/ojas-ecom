@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
 import 'package:ojas_user/core/controllers/home_controller.dart';
 import 'package:ojas_user/features/cart/application/cart_controller.dart';
+import 'package:ojas_user/core/services/api_service.dart';
 
 class LatestProductsSection extends StatelessWidget {
   const LatestProductsSection({super.key});
@@ -50,7 +51,7 @@ class LatestProductsSection extends StatelessWidget {
             ListenableBuilder(
               listenable: HomeController.instance,
               builder: (context, _) {
-                final backendProducts = HomeController.instance.products;
+                final backendProducts = HomeController.instance.homeProducts;
 
                 if (backendProducts.isEmpty) {
                   return Container(
@@ -90,14 +91,16 @@ class LatestProductsSection extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final p = backendProducts[index];
                     final id = p['_id']?.toString() ?? p['id']?.toString() ?? '';
-                    final imageUrl = (p['images'] != null && (p['images'] as List).isNotEmpty)
+                    final String rawImageUrl = (p['images'] != null && (p['images'] as List).isNotEmpty)
                         ? p['images'][0].toString()
-                        : (p['image']?.toString() ?? 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500');
+                        : (p['image']?.toString() ?? '');
+                    final imageUrl = ApiService.formatImageUrl(rawImageUrl);
                     
                     final discountPrice = (p['discountPrice'] ?? 0).toDouble();
                     final price = (p['price'] ?? 0).toDouble();
                     
                     return LatestProductCard(
+                      productId: id,
                       imageUrl: imageUrl,
                       title: p['name']?.toString() ?? 'Product',
                       price: discountPrice > 0 ? discountPrice : price,

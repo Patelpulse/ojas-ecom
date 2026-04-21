@@ -38,8 +38,20 @@ class SocketService {
     // Listen for the general admin update event
     socket!.on('admin_data_updated', (data) {
       debugPrint('Real-time update received: $data');
+      
+      // Notify generic listeners
       if (_listeners.containsKey('admin_data_updated')) {
-        for (var callback in _listeners['admin_data_updated']!) {
+        final listeners = List<Function(dynamic)>.from(_listeners['admin_data_updated']!);
+        for (var callback in listeners) {
+          callback(data);
+        }
+      }
+      
+      // Notify type-specific listeners (e.g., 'blog', 'category', 'product')
+      final type = data['type'];
+      if (type != null && _listeners.containsKey(type)) {
+        final listeners = List<Function(dynamic)>.from(_listeners[type]!);
+        for (var callback in listeners) {
           callback(data);
         }
       }
@@ -62,8 +74,12 @@ class SocketService {
     _listeners[type]!.add(callback);
   }
 
-  void off(String type) {
-    _listeners.remove(type);
+  void off(String type, [Function(dynamic)? callback]) {
+    if (callback == null) {
+      _listeners.remove(type);
+    } else {
+      _listeners[type]?.remove(callback);
+    }
   }
 
   void disconnect() {

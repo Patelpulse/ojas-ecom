@@ -7,6 +7,7 @@ import 'package:ojas_user/core/services/session_service.dart';
 import 'package:ojas_user/core/controllers/settings_controller.dart';
 import 'package:ojas_user/features/auth/domain/models/user_model.dart';
 import 'package:ojas_user/features/cart/application/cart_controller.dart';
+import 'package:ojas_user/core/controllers/wishlist_controller.dart';
 
 class OjasNavbar extends StatelessWidget implements PreferredSizeWidget {
   final String activeTitle;
@@ -209,12 +210,17 @@ class _MainNavBarContent extends StatelessWidget {
         const Spacer(),
         
         // Actions
-        _IconAction(
-          key: const ValueKey('nav_wishlist'),
-          icon: Icons.favorite_border, 
-          label: 'Wishlist', 
-          count: '0', 
-          onTap: () => Navigator.pushNamed(context, '/wishlist')
+        ListenableBuilder(
+          listenable: WishlistController.instance,
+          builder: (context, _) {
+            return _IconAction(
+              key: const ValueKey('nav_wishlist'),
+              icon: Icons.favorite_border, 
+              label: 'Wishlist', 
+              count: WishlistController.instance.count.toString(), 
+              onTap: () => Navigator.pushNamed(context, '/wishlist')
+            );
+          },
         ),
         const SizedBox(width: 24),
         

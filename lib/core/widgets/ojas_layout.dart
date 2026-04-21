@@ -5,6 +5,7 @@ import 'package:ojas_user/features/home/presentation/widgets/cart_drawer.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ojas_user/core/controllers/wishlist_controller.dart';
 
 class OjasLayout extends StatelessWidget {
   final Widget child;
@@ -83,7 +84,17 @@ class _MobileDrawer extends StatelessWidget {
           const Divider(color: Colors.white24, indent: 20, endIndent: 20),
           _DrawerItem(title: 'BECOME VENDOR', icon: Icons.storefront_outlined, onTap: () => Navigator.pushNamed(context, '/become-vendor')),
           _DrawerItem(title: 'MY ORDERS', icon: Icons.local_shipping_outlined, onTap: () => Navigator.pushNamed(context, '/orders')),
-          _DrawerItem(title: 'WISHLIST', icon: Icons.favorite_border, onTap: () => Navigator.pushNamed(context, '/wishlist')),
+          ListenableBuilder(
+            listenable: WishlistController.instance,
+            builder: (context, _) {
+              final count = WishlistController.instance.count;
+              return _DrawerItem(
+                title: 'WISHLIST ${count > 0 ? "($count)" : ""}', 
+                icon: Icons.favorite_border, 
+                onTap: () => Navigator.pushNamed(context, '/wishlist')
+              );
+            },
+          ),
         ],
       ),
     );

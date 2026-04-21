@@ -24,7 +24,7 @@ class FeaturesPage extends StatelessWidget {
         child: ListenableBuilder(
           listenable: HomeController.instance,
           builder: (context, _) {
-            final backendProducts = HomeController.instance.products;
+            final backendProducts = HomeController.instance.featureProducts;
             final int count = backendProducts.length;
 
             if (count == 0 && !HomeController.instance.isLoading) {
@@ -74,6 +74,7 @@ class FeaturesPage extends StatelessWidget {
                           : 0;
 
                       return FeaturedProductCard(
+                        productId: id,
                         name: p['name']?.toString() ?? 'Product',
                         imageUrl: imageUrl,
                         price: discountPrice > 0 ? discountPrice : price,

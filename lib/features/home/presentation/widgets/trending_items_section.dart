@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
+import 'package:ojas_user/core/controllers/home_controller.dart';
 import 'package:ojas_user/features/home/domain/models/product_model.dart';
 import 'package:ojas_user/features/home/presentation/widgets/product_card.dart';
 import 'package:ojas_user/features/home/presentation/widgets/service_card.dart';
@@ -14,113 +15,76 @@ class TrendingItemsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final products = ProductModel.dummyProducts;
-    final bool isMobile = Responsive.isMobile(context);
+    return ListenableBuilder(
+      listenable: HomeController.instance,
+      builder: (context, _) {
+        final products = HomeController.instance.homeProducts;
+        final bool isMobile = Responsive.isMobile(context);
 
-    return CenteredContent(
-      horizontalPadding: isMobile ? 16 : 40,
-      child: Column(
-        children: [
-          SizedBox(height: isMobile ? 32 : 60),
-          // 1. Header
-          if (isMobile)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Text(
-                    'TRENDING ITEMS',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: CategoryFilter(
-                    categories: ['All', 'Pet Supplies', 'Jewelry', 'Parts', 'Books', 'Toys'],
-                    selectedCategory: 'All',
-                  ),
-                ),
-              ],
-            )
-          else
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Text(
-                    'TRENDING ITEMS',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
-                  ),
-                ),
-                const Spacer(),
-                const CategoryFilter(
-                  categories: ['All', 'Pet Supplies', 'Jewelry & Accessories', 'Industrial Parts & Tools', 'Books & Stationery', 'Toys & Games'],
-                  selectedCategory: 'All',
-                ),
-              ],
-            ),
-          SizedBox(height: isMobile ? 24 : 40),
-          
-          // 2. Service Grid & Banner
-          if (isMobile)
-            Column(
-              children: [
-                GridView.count(
-                  shrinkWrap: true,
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 1.5,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: const [
-                    ServiceCard(
-                      title: 'FREE DELIVERY',
-                      subtitle: 'From ₹89.00',
-                      iconUrl: 'https://cdn-icons-png.flaticon.com/512/709/709790.png',
+        return CenteredContent(
+          horizontalPadding: isMobile ? 16 : 40,
+          child: Column(
+            children: [
+              SizedBox(height: isMobile ? 32 : 60),
+              // 1. Header
+              if (isMobile)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0F172A),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text(
+                        'TRENDING ITEMS',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
+                      ),
                     ),
-                    ServiceCard(
-                      title: 'ORDER PROTECTION',
-                      subtitle: '120 Day',
-                      iconUrl: 'https://cdn-icons-png.flaticon.com/512/1161/1161388.png',
+                    const SizedBox(height: 16),
+                    const SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: CategoryFilter(
+                        categories: ['All', 'Pet Supplies', 'Jewelry', 'Parts', 'Books', 'Toys'],
+                        selectedCategory: 'All',
+                      ),
                     ),
-                    ServiceCard(
-                      title: 'PAYMENT SECURITY',
-                      subtitle: 'SSL Secure',
-                      iconUrl: 'https://cdn-icons-png.flaticon.com/512/1069/1069159.png',
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0F172A),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text(
+                        'TRENDING ITEMS',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
+                      ),
                     ),
-                    ServiceCard(
-                      title: '24/7 SUPPORT',
-                      subtitle: 'Dedicated',
-                      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2838/2838634.png',
+                    const Spacer(),
+                    const CategoryFilter(
+                      categories: ['All', 'Pet Supplies', 'Jewelry & Accessories', 'Industrial Parts & Tools', 'Books & Stationery', 'Toys & Games'],
+                      selectedCategory: 'All',
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                const SizedBox(height: 250, child: TrendingPromoBanner()),
-              ],
-            )
-          else
-            SizedBox(
-              height: 380,
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: GridView.count(
+              SizedBox(height: isMobile ? 24 : 40),
+              
+              // 2. Service Grid & Banner
+              if (isMobile)
+                Column(
+                  children: [
+                    GridView.count(
+                      shrinkWrap: true,
                       crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 1.4,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 1.5,
                       physics: const NeverScrollableScrollPhysics(),
                       children: const [
                         ServiceCard(
@@ -130,89 +94,131 @@ class TrendingItemsSection extends StatelessWidget {
                         ),
                         ServiceCard(
                           title: 'ORDER PROTECTION',
-                          subtitle: 'Refund/Resent 120 Day',
+                          subtitle: '120 Day',
                           iconUrl: 'https://cdn-icons-png.flaticon.com/512/1161/1161388.png',
                         ),
                         ServiceCard(
                           title: 'PAYMENT SECURITY',
-                          subtitle: 'SSL Secure Payment',
+                          subtitle: 'SSL Secure',
                           iconUrl: 'https://cdn-icons-png.flaticon.com/512/1069/1069159.png',
                         ),
                         ServiceCard(
                           title: '24/7 SUPPORT',
-                          subtitle: 'Dedicated Support',
+                          subtitle: 'Dedicated',
                           iconUrl: 'https://cdn-icons-png.flaticon.com/512/2838/2838634.png',
                         ),
                       ],
                     ),
+                    const SizedBox(height: 16),
+                    const SizedBox(height: 250, child: TrendingPromoBanner()),
+                  ],
+                )
+              else
+                SizedBox(
+                  height: 380,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: GridView.count(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 1.4,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: const [
+                            ServiceCard(
+                              title: 'FREE DELIVERY',
+                              subtitle: 'From ₹89.00',
+                              iconUrl: 'https://cdn-icons-png.flaticon.com/512/709/709790.png',
+                            ),
+                            ServiceCard(
+                              title: 'ORDER PROTECTION',
+                              subtitle: 'Refund/Resent 120 Day',
+                              iconUrl: 'https://cdn-icons-png.flaticon.com/512/1161/1161388.png',
+                            ),
+                            ServiceCard(
+                              title: 'PAYMENT SECURITY',
+                              subtitle: 'SSL Secure Payment',
+                              iconUrl: 'https://cdn-icons-png.flaticon.com/512/1069/1069159.png',
+                            ),
+                            ServiceCard(
+                              title: '24/7 SUPPORT',
+                              subtitle: 'Dedicated Support',
+                              iconUrl: 'https://cdn-icons-png.flaticon.com/512/2838/2838634.png',
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                      const Expanded(
+                        flex: 2,
+                        child: TrendingPromoBanner(),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 24),
-                  const Expanded(
-                    flex: 2,
-                    child: TrendingPromoBanner(),
+                ),
+              
+              SizedBox(height: isMobile ? 32 : 48),
+              
+              // 3. Trending Product Grid
+              if (products.isEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 60),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade200),
                   ),
-                ],
-              ),
-            ),
-          
-          SizedBox(height: isMobile ? 32 : 48),
-          
-          // 3. Trending Product Grid
-          if (products.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 60),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Column(
-                children: [
-                  Icon(Icons.trending_up_outlined, size: 48, color: Colors.grey.shade300),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No trending products at the moment.',
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      color: Colors.grey.shade500,
-                    ),
+                  child: Column(
+                    children: [
+                      Icon(Icons.trending_up_outlined, size: 48, color: Colors.grey.shade300),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No trending products at the moment.',
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            )
-          else
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: products.length > 5 ? 5 : products.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: isMobile ? 2 : 5,
-                mainAxisSpacing: isMobile ? 12 : 24,
-                crossAxisSpacing: isMobile ? 12 : 24,
-                childAspectRatio: isMobile ? 0.65 : 0.62,
-              ),
-              itemBuilder: (context, index) {
-                final product = products[index];
-                return ProductCard(
-                  product: product,
-                  onAddToCart: () async {
-                    final success = await CartController.instance.addToCart(product.id);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(success ? '${product.name} added to cart!' : 'Failed to add. Please login.'),
-                        backgroundColor: success ? Colors.green : Colors.red,
-                        behavior: SnackBarBehavior.floating,
-                        duration: const Duration(seconds: 2),
-                      ));
-                    }
+                )
+              else
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: products.length > 5 ? 5 : products.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: isMobile ? 2 : 5,
+                    mainAxisSpacing: isMobile ? 12 : 24,
+                    crossAxisSpacing: isMobile ? 12 : 24,
+                    childAspectRatio: isMobile ? 0.65 : 0.62,
+                  ),
+                  itemBuilder: (context, index) {
+                    final product = ProductModel.fromMap(products[index]);
+                    return ProductCard(
+                      product: product,
+                      onAddToCart: () async {
+                        final success = await CartController.instance.addToCart(product.id);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(success ? '${product.name} added to cart!' : 'Failed to add. Please login.'),
+                            backgroundColor: success ? Colors.green : Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 2),
+                          ));
+                        }
+                      },
+                    );
                   },
-                );
-              },
-            ),
-          SizedBox(height: isMobile ? 32 : 60),
-        ],
-      ),
+                ),
+              SizedBox(height: isMobile ? 32 : 60),
+            ],
+          ),
+        );
+      },
     );
   }
 }

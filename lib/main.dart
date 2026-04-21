@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:ojas_user/core/services/socket_service.dart';
 import 'package:ojas_user/core/controllers/settings_controller.dart';
 import 'package:ojas_user/core/controllers/home_controller.dart';
+import 'package:ojas_user/core/controllers/wishlist_controller.dart';
 import 'package:ojas_user/core/theme/app_theme.dart';
 import 'package:ojas_user/features/home/presentation/pages/home_page.dart';
 import 'package:ojas_user/features/home/presentation/pages/features_page.dart';
@@ -45,6 +46,7 @@ void main() async {
   SocketService.instance.init();
   await SettingsController.instance.init();
   await HomeController.instance.init();
+  await WishlistController.instance.init();
   
   runApp(const MyApp());
 }
@@ -74,11 +76,13 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider.value(value: SettingsController.instance),
         ChangeNotifierProvider.value(value: HomeController.instance),
+        ChangeNotifierProvider.value(value: WishlistController.instance),
       ],
       child: ListenableBuilder(
         listenable: Listenable.merge([
           SettingsController.instance,
           HomeController.instance,
+          WishlistController.instance,
         ]),
         builder: (context, _) {
           final settings = SettingsController.instance.settings;

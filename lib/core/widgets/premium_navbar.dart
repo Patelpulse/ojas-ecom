@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:ojas_user/core/services/session_service.dart';
 import 'package:ojas_user/features/cart/application/cart_controller.dart';
+import 'package:ojas_user/core/controllers/wishlist_controller.dart';
 
 /// A Premium, Highly Animated Navbar for eCommerce
 /// Designed by Ojas Senior UI/UX Expert
@@ -384,7 +385,47 @@ class _UserActionSection extends StatelessWidget {
     return Row(
       children: [
         // Wishlist
-        _HoverIconAction(icon: Icons.favorite_border, label: 'Wishlist 0'),
+        ListenableBuilder(
+          listenable: WishlistController.instance,
+          builder: (context, _) {
+            final count = WishlistController.instance.count;
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _HoverIconAction(
+                  icon: Icons.favorite_border, 
+                  label: 'Wishlist',
+                  onTap: () => Navigator.of(context).pushReplacementNamed('/wishlist'),
+                ),
+                if (count > 0)
+                  Positioned(
+                    right: -5,
+                    top: -5,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF01B6B),
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '$count',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
         const SizedBox(width: 20),
         // Cart Button (Highlighted Animation)
         const _PulseCartButton(),

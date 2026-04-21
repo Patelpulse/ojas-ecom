@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:ojas_user/core/widgets/ojas_layout.dart';
@@ -11,6 +12,7 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:ojas_user/core/services/api_service.dart';
+import 'package:ojas_user/core/controllers/home_controller.dart';
 
 class BecomeVendorPage extends StatefulWidget {
   const BecomeVendorPage({super.key});
@@ -56,8 +58,10 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
       TextEditingController();
 
   // Signup Controllers - Documents
-  final TextEditingController _taxIdController = TextEditingController();
+  final TextEditingController _gstController = TextEditingController();
   final TextEditingController _bankAccountController = TextEditingController();
+  final TextEditingController _bankNameController = TextEditingController();
+  final TextEditingController _ifscController = TextEditingController();
 
   bool _agreedToTerms = false;
   bool _agreedToMarketing = false;
@@ -68,12 +72,47 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
   void initState() {
     super.initState();
     _cityController.addListener(_onCityChanged);
+    
+    // Listeners for Personal Info validation
+    _firstNameController.addListener(() => setState(() {}));
+    _lastNameController.addListener(() => setState(() {}));
+    _emailController.addListener(() => setState(() {}));
+    _phoneController.addListener(() => setState(() {}));
+    _passwordController.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
     _cityController.removeListener(_onCityChanged);
+    _cityController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _loginEmailController.dispose();
+    _loginPasswordController.dispose();
+    _businessNameController.dispose();
+    _websiteController.dispose();
+    _addressController.dispose();
+    _stateController.dispose();
+    _zipCodeController.dispose();
+    _descriptionController.dispose();
+    _avgOrderValueController.dispose();
+    _productDetailsController.dispose();
+    _gstController.dispose();
+    _bankAccountController.dispose();
+    _bankNameController.dispose();
+    _ifscController.dispose();
     super.dispose();
+  }
+
+  bool _isPersonalInfoComplete() {
+    return _firstNameController.text.trim().isNotEmpty &&
+        _lastNameController.text.trim().isNotEmpty &&
+        _emailController.text.trim().isNotEmpty &&
+        _phoneController.text.trim().isNotEmpty &&
+        _passwordController.text.trim().isNotEmpty;
   }
 
   void _onCityChanged() {
@@ -167,8 +206,10 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
       request.fields['avgOrderValue'] = _avgOrderValueController.text;
       request.fields['monthlyVolume'] = _monthlyVolume;
       request.fields['productDetails'] = _productDetailsController.text;
-      request.fields['taxId'] = _taxIdController.text;
+      request.fields['gstNumber'] = _gstController.text;
       request.fields['bankAccount'] = _bankAccountController.text;
+      request.fields['bankName'] = _bankNameController.text;
+      request.fields['ifscCode'] = _ifscController.text;
 
       // File
       if (_selectedFile != null && _selectedFile!.bytes != null) {
@@ -477,82 +518,94 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
   }
 
   Widget _buildRegistrationFlow(bool isMobile) {
-    return Column(
-      children: [
-        Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          alignment: WrapAlignment.center,
+    return ListenableBuilder(
+      listenable: HomeController.instance,
+      builder: (context, _) {
+        return Column(
           children: [
-            _BenefitCard(
-              icon: Icons.attach_money,
-              title: 'Commission',
-              desc: 'Low fees',
-              isMobile: isMobile,
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              alignment: WrapAlignment.center,
+              children: [
+                _BenefitCard(
+                  icon: Icons.attach_money,
+                  title: 'Commission',
+                  desc: 'Low fees',
+                  isMobile: isMobile,
+                ),
+                _BenefitCard(
+                  icon: Icons.public,
+                  title: 'Global',
+                  desc: 'Reach 25+ countries',
+                  isMobile: isMobile,
+                ),
+                _BenefitCard(
+                  icon: Icons.security,
+                  title: 'Secure',
+                  desc: 'Safe payments',
+                  isMobile: isMobile,
+                ),
+              ],
             ),
-            _BenefitCard(
-              icon: Icons.public,
-              title: 'Global',
-              desc: 'Reach 25+ countries',
-              isMobile: isMobile,
-            ),
-            _BenefitCard(
-              icon: Icons.security,
-              title: 'Secure',
-              desc: 'Safe payments',
-              isMobile: isMobile,
-            ),
-          ],
-        ),
-        SizedBox(height: isMobile ? 40 : 60),
-        Container(
-          padding: EdgeInsets.all(isMobile ? 20 : 40),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-          ),
-          child: Column(
-            children: [
-              if (isMobile)
-                _MobileProgress(currentStep: _currentStep)
-              else
-                _DesktopProgress(currentStep: _currentStep),
-              SizedBox(height: isMobile ? 32 : 48),
-              const Divider(),
-              SizedBox(height: isMobile ? 32 : 48),
-              _buildStepContent(isMobile),
-              const SizedBox(height: 48),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            SizedBox(height: isMobile ? 40 : 60),
+            Container(
+              padding: EdgeInsets.all(isMobile ? 20 : 40),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Column(
                 children: [
-                  if (_currentStep > 0)
-                    _NavBtn(
-                      label: 'Back',
-                      icon: Icons.arrow_back,
-                      onPressed: _previousStep,
-                      isPrimary: false,
-                    )
+                  if (isMobile)
+                    _MobileProgress(currentStep: _currentStep)
                   else
-                    const SizedBox(),
-                  _NavBtn(
-                    label: _currentStep == 4 ? 'Submit Application' : 'Next',
-                    icon: _currentStep == 4
-                        ? Icons.check_circle_outline
-                        : Icons.arrow_forward,
-                    onPressed: _nextStep,
-                    isPrimary: true,
-                    color: _currentStep == 4
-                        ? const Color(0xFF86EFAC)
-                        : const Color(0xFFF01B6B),
-                    textColor: _currentStep == 4 ? Colors.white : Colors.white,
+                    _DesktopProgress(currentStep: _currentStep),
+                  SizedBox(height: isMobile ? 32 : 48),
+                  const Divider(),
+                  SizedBox(height: isMobile ? 32 : 48),
+                  _buildStepContent(isMobile),
+                  const SizedBox(height: 48),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (_currentStep > 0)
+                        _NavBtn(
+                          label: 'Back',
+                          icon: Icons.arrow_back,
+                          onPressed: _previousStep,
+                          isPrimary: false,
+                        )
+                      else
+                        const SizedBox(),
+                      _NavBtn(
+                        label:
+                            _currentStep == 4 ? 'Submit Application' : 'Next',
+                        icon: _currentStep == 4
+                            ? Icons.check_circle_outline
+                            : Icons.arrow_forward,
+                        onPressed:
+                            (_currentStep == 0 && !_isPersonalInfoComplete())
+                                ? () {}
+                                : _nextStep,
+                        isPrimary: true,
+                        isDisabled:
+                            _currentStep == 0 && !_isPersonalInfoComplete(),
+                        color: _currentStep == 4
+                            ? const Color(0xFF86EFAC)
+                            : const Color(0xFFF01B6B),
+                        textColor:
+                            _currentStep == 4 ? Colors.white : Colors.white,
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -615,8 +668,14 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
             Expanded(
               child: _FormField(
                 label: 'Phone Number *',
-                hintText: '+91 1234567890',
+                hintText: '1234567890',
                 controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                prefixText: '+91 ',
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(10),
+                ],
               ),
             ),
           ],
@@ -748,18 +807,25 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
           ),
           child: Column(
             children: [
-              _buildCategoryGrid([
-                'Electronics',
-                'Fashion & Clothing',
-                'Home & Garden',
-                'Beauty & Personal Care',
-                'Sports & Outdoors',
-                'Books & Media',
-                'Toys & Games',
-                'Automotive',
-                'Health & Wellness',
-                'Food & Beverages',
-              ], isMobile),
+              _buildCategoryGrid(
+                HomeController.instance.categories.isNotEmpty
+                    ? HomeController.instance.categories
+                        .map((c) => c['name'].toString())
+                        .toList()
+                    : [
+                        'Electronics',
+                        'Fashion & Clothing',
+                        'Home & Garden',
+                        'Beauty & Personal Care',
+                        'Sports & Outdoors',
+                        'Books & Media',
+                        'Toys & Games',
+                        'Automotive',
+                        'Health & Wellness',
+                        'Food & Beverages',
+                      ],
+                isMobile,
+              ),
             ],
           ),
         ),
@@ -888,36 +954,67 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
         ),
         const SizedBox(height: 24),
         _DashedUploadBox(
-          label: 'Business License/Registration *',
-          hint:
-              _selectedFileName ??
-              'Upload your business license or registration document',
+          label: 'Business License/Registration/GST Certificate *',
+          hint: _selectedFileName ??
+              'Upload your business license, registration, or GST certificate',
           onTap: _pickFile,
         ),
         const SizedBox(height: 24),
         if (isMobile) ...[
           _FormField(
-            label: 'Tax ID/EIN *',
-            hintText: 'XX-XXXXXXX',
-            controller: _taxIdController,
+            label: 'GST Number *',
+            hintText: 'Enter GST number',
+            controller: _gstController,
           ),
           const SizedBox(height: 24),
           _FormField(
-            label: 'Bank Account Number *',
-            hintText: 'Enter full bank account number',
-            controller: _bankAccountController,
+            label: 'Bank Name *',
+            hintText: 'Enter bank name',
+            controller: _bankNameController,
           ),
-        ] else
+          const SizedBox(height: 24),
           Row(
             children: [
               Expanded(
                 child: _FormField(
-                  label: 'Tax ID/EIN *',
-                  hintText: 'XX-XXXXXXX',
-                  controller: _taxIdController,
+                  label: 'Account Number *',
+                  hintText: 'Enter account number',
+                  controller: _bankAccountController,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _FormField(
+                  label: 'IFSC Code *',
+                  hintText: 'Enter IFSC code',
+                  controller: _ifscController,
+                ),
+              ),
+            ],
+          ),
+        ] else ...[
+          Row(
+            children: [
+              Expanded(
+                child: _FormField(
+                  label: 'GST Number *',
+                  hintText: 'Enter GST number',
+                  controller: _gstController,
                 ),
               ),
               const SizedBox(width: 24),
+              Expanded(
+                child: _FormField(
+                  label: 'Bank Name *',
+                  hintText: 'Enter bank name',
+                  controller: _bankNameController,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
               Expanded(
                 child: _FormField(
                   label: 'Bank Account Number *',
@@ -925,8 +1022,17 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
                   controller: _bankAccountController,
                 ),
               ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: _FormField(
+                  label: 'IFSC Code *',
+                  hintText: 'Enter IFSC code',
+                  controller: _ifscController,
+                ),
+              ),
             ],
           ),
+        ],
         const SizedBox(height: 32),
         Container(
           padding: const EdgeInsets.all(16),
@@ -988,6 +1094,12 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
           content: _selectedCategories.isEmpty
               ? 'None selected'
               : _selectedCategories.join(', '),
+        ),
+        const SizedBox(height: 24),
+        _buildReviewSection(
+          title: 'Documents & Banking',
+          content:
+              'GST: ${_gstController.text} • Bank: ${_bankNameController.text} • A/C: ${_bankAccountController.text} • IFSC: ${_ifscController.text}',
         ),
 
         const SizedBox(height: 40),
@@ -1641,6 +1753,10 @@ class _FormField extends StatelessWidget {
   final VoidCallback? onToggleVisibility;
   final int maxLines;
   final TextEditingController? controller;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? prefixText;
+
   const _FormField({
     required this.label,
     required this.hintText,
@@ -1649,6 +1765,9 @@ class _FormField extends StatelessWidget {
     this.onToggleVisibility,
     this.maxLines = 1,
     this.controller,
+    this.keyboardType,
+    this.inputFormatters,
+    this.prefixText,
   });
 
   @override
@@ -1669,6 +1788,8 @@ class _FormField extends StatelessWidget {
           controller: controller,
           obscureText: isPassword && isObscured,
           maxLines: maxLines,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
           style: GoogleFonts.inter(
             color: const Color(0xFF1E293B),
             fontSize: 14,
@@ -1676,6 +1797,12 @@ class _FormField extends StatelessWidget {
           ),
           decoration: InputDecoration(
             hintText: hintText,
+            prefixText: prefixText,
+            prefixStyle: GoogleFonts.inter(
+              color: const Color(0xFF1E293B),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
             hintStyle: GoogleFonts.inter(
               color: const Color(0xFF94A3B8),
               fontSize: 14,
@@ -1725,6 +1852,7 @@ class _NavBtn extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
   final bool isPrimary;
+  final bool isDisabled;
   final Color? color;
   final Color? textColor;
 
@@ -1733,30 +1861,35 @@ class _NavBtn extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     required this.isPrimary,
+    this.isDisabled = false,
     this.color,
     this.textColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bgColor =
-        color ?? (isPrimary ? const Color(0xFFF01B6B) : Colors.white);
-    final fgColor =
-        textColor ?? (isPrimary ? Colors.white : const Color(0xFF0F172A));
+    final bgColor = isDisabled 
+        ? Colors.grey.shade300 
+        : (color ?? (isPrimary ? const Color(0xFFF01B6B) : Colors.white));
+    final fgColor = isDisabled 
+        ? Colors.grey.shade500 
+        : (textColor ?? (isPrimary ? Colors.white : const Color(0xFF0F172A)));
 
     return ElevatedButton.icon(
-      onPressed: onPressed,
+      onPressed: isDisabled ? null : onPressed,
       icon: Icon(icon, size: 18),
       label: Text(label),
       style: ElevatedButton.styleFrom(
         backgroundColor: bgColor,
         foregroundColor: fgColor,
+        disabledBackgroundColor: Colors.grey.shade200,
+        disabledForegroundColor: Colors.grey.shade500,
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
           side: BorderSide(
-            color: isPrimary ? Colors.transparent : const Color(0xFFE2E8F0),
+            color: isPrimary || isDisabled ? Colors.transparent : const Color(0xFFE2E8F0),
           ),
         ),
       ),

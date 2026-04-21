@@ -1,4 +1,5 @@
 import 'package:ojas_user/core/controllers/home_controller.dart';
+import 'package:ojas_user/core/services/api_service.dart';
 
 class ProductModel {
   final String id;
@@ -30,12 +31,19 @@ class ProductModel {
     double oldPrice = (p['price'] ?? 0).toDouble();
     int disc = oldPrice > 0 && oldPrice > price ? (((oldPrice - price) / oldPrice) * 100).toInt() : 0;
 
+    String? imageUrl;
+    if (p['images'] != null && (p['images'] as List).isNotEmpty) {
+      imageUrl = p['images'][0].toString();
+    } else if (p['image'] != null) {
+      imageUrl = p['image'].toString();
+    }
+
     return ProductModel(
       id: p['_id'] ?? '',
       name: p['name'] ?? 'Product',
       price: price,
       oldPrice: oldPrice > price ? oldPrice : null,
-      imageUrl: p['image'] ?? 'https://via.placeholder.com/500',
+      imageUrl: ApiService.formatImageUrl(imageUrl),
       discount: disc,
       isFlashDeal: disc > 20,
       available: p['stock'] ?? 10,

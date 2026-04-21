@@ -83,12 +83,12 @@ class _HeroSectionState extends State<HeroSection> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const CategorySidebar(),
-                        const SizedBox(width: 24),
+                        const SizedBox(width: 8),
                         Expanded(
-                          flex: 3,
+                          flex: 4,
                           child: _buildCarousel(displayBanners, 600),
                         ),
-                        const SizedBox(width: 24),
+                        const SizedBox(width: 8),
                         Expanded(
                           flex: 1,
                           child: Column(

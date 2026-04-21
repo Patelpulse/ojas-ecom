@@ -6,5 +6,18 @@ class ApiService {
   static const String _devUrl = 'http://localhost:5001/api';
   
   static String get baseUrl => kDebugMode ? _devUrl : _prodUrl;
+  static String get serverUrl => baseUrl.replaceAll('/api', '');
   static String get userBaseUrl => '$baseUrl/user';
+
+  static String formatImageUrl(String? url) {
+    if (url == null || url.isEmpty) {
+      return 'https://via.placeholder.com/500';
+    }
+    if (url.startsWith('http')) {
+      return url;
+    }
+    // Remove leading slash if exists
+    final cleanUrl = url.startsWith('/') ? url.substring(1) : url;
+    return '$serverUrl/$cleanUrl';
+  }
 }

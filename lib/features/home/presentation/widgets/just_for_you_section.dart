@@ -17,7 +17,7 @@ class JustForYouSection extends StatelessWidget {
     return ListenableBuilder(
       listenable: HomeController.instance,
       builder: (context, _) {
-        final products = HomeController.instance.products;
+        final products = HomeController.instance.homeProducts;
         final List<ProductModel> productModels = products.map((p) => ProductModel.fromMap(p)).toList();
 
         return CenteredContent(

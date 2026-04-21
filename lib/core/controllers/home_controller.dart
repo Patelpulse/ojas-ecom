@@ -16,9 +16,15 @@ class HomeController with ChangeNotifier {
   bool _isLoading = false;
 
   List<dynamic> get categories => _categories;
-  List<dynamic> get products => _products;
+  /// All in-stock products (stock > 0)
+  List<dynamic> get products => _products.where((p) => (p['stock'] ?? 0) > 0).toList();
   List<BannerModel> get banners => _banners;
   bool get isLoading => _isLoading;
+
+  List<dynamic> get homeProducts => products.where((p) => (p['showOnPages'] as List?)?.contains('Home') ?? false).toList();
+  List<dynamic> get featureProducts => products.where((p) => (p['showOnPages'] as List?)?.contains('Features') ?? false).toList();
+  List<dynamic> get dealProducts => products.where((p) => (p['showOnPages'] as List?)?.contains('Deals') ?? false).toList();
+  List<dynamic> get shopProducts => products.where((p) => (p['showOnPages'] as List?)?.contains('Shop') ?? true).toList();
 
   List<BannerModel> get mainBanners => _banners.where((b) => b.type == 'main' || b.type == 'main_slider_1' || b.type == 'main_slider_2').toList();
   BannerModel get sideTopBanner => _banners.firstWhere((b) => b.type == 'side_top', orElse: () => _defaultSideTop);

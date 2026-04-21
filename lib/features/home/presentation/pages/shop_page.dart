@@ -23,7 +23,7 @@ class _ShopPageState extends State<ShopPage> {
   String _sortBy = 'Featured';
 
   List<dynamic> get _shopProducts {
-    var list = HomeController.instance.products.toList();
+    var list = HomeController.instance.shopProducts.toList();
     
     // 1. Filtering by Category
     if (_selectedCategory != 'All') {
