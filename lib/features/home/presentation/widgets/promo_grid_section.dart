@@ -29,7 +29,7 @@ class PromoGridSection extends StatelessWidget {
                     crossAxisCount: 2,
                     mainAxisSpacing: 12,
                     crossAxisSpacing: 12,
-                    childAspectRatio: 1.2,
+                    childAspectRatio: 0.85,
                     children: const [
                       CategoryPromoCard(
                         backgroundColor: Colors.blue,

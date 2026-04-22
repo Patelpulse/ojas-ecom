@@ -1,12 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:ojas_user/core/services/api_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:ojas_user/core/widgets/ojas_layout.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
+import 'package:ojas_user/features/orders/data/services/order_service.dart';
+import 'package:ojas_user/features/orders/domain/models/order_model.dart';
+import 'package:ojas_user/features/orders/presentation/pages/order_details_page.dart';
 
-class OrdersPage extends StatelessWidget {
+class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
+
+  @override
+  State<OrdersPage> createState() => _OrdersPageState();
+}
+
+class _OrdersPageState extends State<OrdersPage> {
+  final OrderService _orderService = OrderService();
+  List<OrderModel> _orders = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOrders();
+  }
+
+  Future<void> _loadOrders() async {
+    setState(() => _isLoading = true);
+    final orders = await _orderService.getUserOrders();
+    if (mounted) {
+      setState(() {
+        _orders = orders;
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +67,7 @@ class OrdersPage extends StatelessWidget {
                 'Track and manage your order history',
                 style: GoogleFonts.inter(
                   fontSize: isMobile ? 14 : 16,
-                  color: Colors.grey[600],
+                  color: Colors.black87,
                 ),
               ),
               const SizedBox(height: 48),
@@ -60,32 +91,24 @@ class OrdersPage extends StatelessWidget {
               const SizedBox(height: 48),
 
               // Order List
-              _orderCard(
-                context,
-                isMobile: isMobile,
-                orderId: 'ORD-059041-985',
-                date: '2/16/2026',
-                status: 'Pending',
-                price: '3801.96',
-                itemCount: 1,
-                items: [
-                  'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=200',
-                ],
-              ),
-              const SizedBox(height: 24),
-              _orderCard(
-                context,
-                isMobile: isMobile,
-                orderId: 'ORD-885825-795',
-                date: '1/14/2026',
-                status: 'Pending',
-                price: '103247.64',
-                itemCount: 2,
-                items: [
-                  'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=200',
-                  'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=200',
-                ],
-              ),
+              if (_isLoading)
+                const Center(child: CircularProgressIndicator(color: Color(0xFFF01B6B)))
+              else if (_orders.isEmpty)
+                _buildEmptyState(isMobile)
+              else
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _orders.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 24),
+                  itemBuilder: (context, index) {
+                    return _orderCard(
+                      context,
+                      isMobile: isMobile,
+                      order: _orders[index],
+                    );
+                  },
+                ),
             ],
           ),
         ),
@@ -93,12 +116,46 @@ class OrdersPage extends StatelessWidget {
     );
   }
 
+  Widget _buildEmptyState(bool isMobile) {
+    return Center(
+      child: Column(
+        children: [
+          Icon(Icons.shopping_bag_outlined, size: 80, color: Colors.grey[300]),
+          const SizedBox(height: 24),
+          Text(
+            'No orders found',
+            style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'You haven\'t placed any orders yet.',
+            style: GoogleFonts.inter(color: Colors.black54),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton(
+            onPressed: () => Navigator.pushNamed(context, '/shop'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF01B6B),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: Text('Start Shopping', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   List<Widget> _getSummaryCards(bool isMobile) {
+    int pending = _orders.where((o) => o.status == 'Pending' || o.status == 'Processing' || o.status == 'Shipped').length;
+    int delivered = _orders.where((o) => o.status == 'Delivered').length;
+    int cancelled = _orders.where((o) => o.status == 'Cancelled').length;
+
     return [
       _summaryCard(
         isMobile: isMobile,
         icon: Icons.inventory_2_outlined,
-        count: '10',
+        count: _orders.length.toString(),
         label: 'Total Orders',
         color: const Color(0xFFF01B6B),
         isActive: true,
@@ -106,21 +163,21 @@ class OrdersPage extends StatelessWidget {
       _summaryCard(
         isMobile: isMobile,
         icon: Icons.history_toggle_off,
-        count: '10',
+        count: pending.toString(),
         label: 'Pending',
         color: Colors.amber,
       ),
       _summaryCard(
         isMobile: isMobile,
         icon: Icons.task_alt,
-        count: '0',
+        count: delivered.toString(),
         label: 'Delivered',
         color: Colors.green,
       ),
       _summaryCard(
         isMobile: isMobile,
         icon: Icons.cancel_outlined,
-        count: '0',
+        count: cancelled.toString(),
         label: 'Cancelled',
         color: Colors.red,
       ),
@@ -176,7 +233,7 @@ class OrdersPage extends StatelessWidget {
             label,
             style: GoogleFonts.inter(
               fontSize: isMobile ? 12 : 14,
-              color: Colors.grey[500],
+              color: Colors.black87,
             ),
           ),
         ],
@@ -187,12 +244,7 @@ class OrdersPage extends StatelessWidget {
   Widget _orderCard(
     BuildContext context, {
     required bool isMobile,
-    required String orderId,
-    required String date,
-    required String status,
-    required String price,
-    required int itemCount,
-    required List<String> items,
+    required OrderModel order,
   }) {
     return Container(
       padding: EdgeInsets.all(isMobile ? 16 : 24),
@@ -219,7 +271,7 @@ class OrdersPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    orderId,
+                    order.orderId,
                     style: GoogleFonts.inter(
                       fontSize: isMobile ? 16 : 18,
                       fontWeight: FontWeight.bold,
@@ -238,7 +290,7 @@ class OrdersPage extends StatelessWidget {
                           Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey[600]),
                           const SizedBox(width: 6),
                           Text(
-                            date,
+                            DateFormat('MM/dd/yyyy').format(order.createdAt),
                             style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600]),
                           ),
                         ],
@@ -246,20 +298,20 @@ class OrdersPage extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.amber.withOpacity(0.1),
+                          color: _getStatusColor(order.status).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.access_time, size: 12, color: Colors.amber),
+                            Icon(Icons.access_time, size: 12, color: _getStatusColor(order.status)),
                             const SizedBox(width: 4),
                             Text(
-                              status,
+                              order.status,
                               style: GoogleFonts.inter(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.amber,
+                                color: _getStatusColor(order.status),
                               ),
                             ),
                           ],
@@ -274,7 +326,7 @@ class OrdersPage extends StatelessWidget {
                 crossAxisAlignment: isMobile ? CrossAxisAlignment.start : CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '\u20b9$price',
+                    '\u20b9${order.totalAmount.toStringAsFixed(2)}',
                     style: GoogleFonts.hind(
                       fontSize: isMobile ? 22 : 24,
                       fontWeight: FontWeight.bold,
@@ -282,14 +334,21 @@ class OrdersPage extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '$itemCount item${itemCount > 1 ? 's' : ''}',
+                    '${order.items.length} item${order.items.length > 1 ? 's' : ''}',
                     style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[500]),
                   ),
                   const SizedBox(height: 12),
                   SizedBox(
                     width: isMobile ? double.infinity : null,
                     child: ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OrderDetailsPage(order: order),
+                          ),
+                        );
+                      },
                       icon: const Icon(Icons.open_in_new, size: 14),
                       label: const Text('View Details'),
                       style: ElevatedButton.styleFrom(
@@ -318,7 +377,7 @@ class OrdersPage extends StatelessWidget {
                   height: 60,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: items.length,
+                    itemCount: order.items.length,
                     itemBuilder: (context, index) => Container(
                           margin: const EdgeInsets.only(right: 12),
                           width: 60,
@@ -327,7 +386,7 @@ class OrdersPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: Colors.grey[200]!),
                             image: DecorationImage(
-                              image: NetworkImage(items[index]),
+                              image: NetworkImage(ApiService.formatImageUrl(order.items[index].image)),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -340,5 +399,22 @@ class OrdersPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'Pending':
+        return Colors.amber;
+      case 'Processing':
+        return Colors.blue;
+      case 'Shipped':
+        return Colors.orange;
+      case 'Delivered':
+        return Colors.green;
+      case 'Cancelled':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 }

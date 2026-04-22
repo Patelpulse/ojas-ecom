@@ -17,6 +17,8 @@ class HeroMainBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = MediaQuery.of(context).size.width < 768;
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -28,15 +30,15 @@ class HeroMainBanner extends StatelessWidget {
         ),
       ),
       child: Container(
-        padding: const EdgeInsets.all(40),
+        padding: EdgeInsets.all(isMobile ? 24 : 40),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
             colors: [
-              Colors.black.withOpacity(0.6),
-              Colors.black.withOpacity(0.1),
+              Colors.black.withOpacity(0.7),
+              Colors.black.withOpacity(0.3),
               Colors.transparent,
             ],
           ),
@@ -54,46 +56,56 @@ class HeroMainBanner extends StatelessWidget {
               ),
               child: Text(
                 badgeText.toUpperCase(),
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 12,
+                  fontSize: isMobile ? 10 : 12,
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: isMobile ? 16 : 24),
             Text(
               'OFFICE FURNITURE',
               style: GoogleFonts.inter(
                 color: Colors.white70,
-                fontSize: 16,
+                fontSize: isMobile ? 12 : 16,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 1.2,
               ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 42,
-                fontWeight: FontWeight.bold,
-                height: 1.1,
+            SizedBox(height: isMobile ? 8 : 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: isMobile ? 28 : 42,
+                      fontWeight: FontWeight.bold,
+                      height: 1.1,
+                    ),
+                  ),
+                  SizedBox(height: isMobile ? 8 : 16),
+                  Flexible(
+                    child: Text(
+                      subtitle,
+                      maxLines: isMobile ? 2 : 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: isMobile ? 13 : 16,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: 500,
-              child: Text(
-                subtitle,
-                style: GoogleFonts.inter(
-                  color: Colors.white.withOpacity(0.8),
-                  fontSize: 16,
-                  height: 1.5,
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
           ],
         ),
       ),

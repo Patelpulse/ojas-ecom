@@ -5,6 +5,7 @@ import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
 import 'package:ojas_user/core/controllers/home_controller.dart';
 import 'package:ojas_user/features/cart/application/cart_controller.dart';
+import 'package:ojas_user/core/controllers/wishlist_controller.dart';
 import 'package:provider/provider.dart';
 
 class ShopPage extends StatefulWidget {
@@ -18,7 +19,6 @@ class _ShopPageState extends State<ShopPage> {
   String _selectedCategory = 'All';
   String _selectedBrand = 'All';
   String _selectedPrice = 'All';
-  String _selectedRating = 'All ratings';
   bool _inStockOnly = false;
   String _sortBy = 'Featured';
 
@@ -30,7 +30,39 @@ class _ShopPageState extends State<ShopPage> {
       list = list.where((p) => (p['category'] ?? p['subCategory'] ?? '') == _selectedCategory).toList();
     }
 
-    // 2. Sorting
+    // 2. Filtering by Brand
+    if (_selectedBrand != 'All') {
+      list = list.where((p) => (p['brand'] ?? '') == _selectedBrand).toList();
+    }
+
+    // 3. Filtering by Price
+    if (_selectedPrice != 'All') {
+      list = list.where((p) {
+        final double price = (p['discountPrice'] != null && p['discountPrice'] > 0 
+            ? p['discountPrice'] 
+            : (p['price'] ?? 0)).toDouble();
+            
+        switch (_selectedPrice) {
+          case 'Under ₹50':
+            return price < 50;
+          case '₹50 - ₹100':
+            return price >= 50 && price <= 100;
+          case '₹100 - ₹200':
+            return price >= 100 && price <= 200;
+          case '₹200+':
+            return price > 200;
+          default:
+            return true;
+        }
+      }).toList();
+    }
+
+    // 4. In Stock Only
+    if (_inStockOnly) {
+      list = list.where((p) => (p['stock'] ?? 0) > 0).toList();
+    }
+
+    // 5. Sorting
     switch (_sortBy) {
       case 'Price: Low to High':
         list.sort((a, b) {
@@ -111,7 +143,7 @@ class _ShopPageState extends State<ShopPage> {
                               crossAxisCount: isMobile ? 2 : (isTablet ? 2 : 3),
                               crossAxisSpacing: isMobile ? 12 : 20,
                               mainAxisSpacing: isMobile ? 12 : 20,
-                              mainAxisExtent: isMobile ? 320 : 360,
+                              mainAxisExtent: isMobile ? 350 : 360,
                             ),
                             itemBuilder: (context, index) {
                               return _ShopProductCard(product: _shopProducts[index]);
@@ -313,10 +345,6 @@ class _ShopPageState extends State<ShopPage> {
           _radioGroup(['All', 'Under ₹50', '₹50 - ₹100', '₹100 - ₹200', '₹200+'], _selectedPrice, (v) => setState(() => _selectedPrice = v!)),
           
           const SizedBox(height: 24),
-          _sidebarTitle('Minimum Rating'),
-          _ratingGroup(['All ratings', '4 & up', '3 & up', '2 & up'], _selectedRating, (v) => setState(() => _selectedRating = v!)),
-          
-          const SizedBox(height: 24),
           Row(
             children: [
               SizedBox(
@@ -435,129 +463,160 @@ class _ShopProductCard extends StatelessWidget {
     final int discount = oldPrice > 0 && oldPrice > price ? (((oldPrice - price) / oldPrice) * 100).toInt() : 0;
     final String imageUrl = product['image'] ?? 'https://via.placeholder.com/300';
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: const [BoxShadow(color: Color(0x05000000), offset: Offset(0, 4), blurRadius: 10)],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image Box
-          SizedBox(
-            height: 220,
-            child: Stack(
-              children: [
-                Container(
-                  color: Colors.white,
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Image.network(
-                        imageUrl,
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: const Color(0xFFF1F5F9),
-                          child: const Center(child: Icon(Icons.image_not_supported_outlined, color: Color(0xFFCBD5E1))),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                // Discount Badge
-                if (discount > 0)
-                  Positioned(
-                    top: 12, left: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEF4444),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        '-$discount%',
-                        style: GoogleFonts.inter(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                // Action Buttons
-                Positioned(
-                  top: 12, right: 12,
-                  child: Column(
-                    children: [
-                      _actionButton(Icons.favorite_border, () {}),
-                      const SizedBox(height: 8),
-                      _actionButton(Icons.shopping_cart_outlined, () async {
-                        final success = await CartController.instance.addToCart(id);
-                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(success ? '$name added to cart' : 'Failed to add to cart. Please login first.'),
-                              backgroundColor: success ? Colors.green : Colors.red,
-                              behavior: SnackBarBehavior.floating,
-                              duration: const Duration(seconds: 2),
+    return ListenableBuilder(
+      listenable: WishlistController.instance,
+      builder: (context, _) {
+        final bool isWishlisted = WishlistController.instance.isWishlisted(id);
+        
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                offset: const Offset(0, 4),
+                blurRadius: 12,
+              )
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image Box
+              SizedBox(
+                height: Responsive.isMobile(context) ? 180 : 200,
+                child: Stack(
+                  children: [
+                    Container(
+                      color: Colors.white,
+                      width: double.infinity,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Image.network(
+                            imageUrl,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              color: const Color(0xFFF1F5F9),
+                              child: const Center(child: Icon(Icons.image_not_supported_outlined, color: Color(0xFFCBD5E1))),
                             ),
-                          );
-                        }
-                      }),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    vendor,
-                    style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.outfit(
-                      fontSize: 15, 
-                      fontWeight: FontWeight.bold, 
-                      color: const Color(0xFF0F172A), 
-                      height: 1.3
-                    ),
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      Text(
-                        '₹${price.toInt()}',
-                        style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
-                      ),
-                      if (discount > 0) ...[
-                        const SizedBox(width: 8),
-                        Text(
-                          '₹${oldPrice.toInt()}',
-                          style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF94A3B8), decoration: TextDecoration.lineThrough),
+                          ),
                         ),
-                      ],
-                    ],
-                  ),
-                ],
+                      ),
+                    ),
+                    // Discount Badge
+                    if (discount > 0)
+                      Positioned(
+                        top: 10, left: 10,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEF4444),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            '$discount% OFF',
+                            style: GoogleFonts.inter(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    // Wishlist Button
+                    Positioned(
+                      top: 10, right: 10,
+                      child: _actionButton(
+                        isWishlisted ? Icons.favorite : Icons.favorite_border, 
+                        () => WishlistController.instance.toggleWishlist(product),
+                        color: isWishlisted ? const Color(0xFFF01B6B) : const Color(0xFF475569),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+              
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      vendor,
+                      style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600, letterSpacing: 0.5),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.outfit(
+                        fontSize: 15, 
+                        fontWeight: FontWeight.bold, 
+                        color: const Color(0xFF0F172A), 
+                        height: 1.2
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Text(
+                          '₹${price.toInt()}',
+                          style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w900, color: const Color(0xFFF01B6B)),
+                        ),
+                        if (discount > 0) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            '₹${oldPrice.toInt()}',
+                            style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF94A3B8), decoration: TextDecoration.lineThrough),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          final success = await CartController.instance.addToCart(id);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(success ? '$name added to cart' : 'Failed to add to cart. Please login first.'),
+                                backgroundColor: success ? Colors.green : Colors.red,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                margin: const EdgeInsets.all(20),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.add_shopping_cart, size: 16),
+                        label: Text(
+                          'Add to Cart',
+                          style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0F172A),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          elevation: 0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _actionButton(IconData icon, VoidCallback onTap) {
+  Widget _actionButton(IconData icon, VoidCallback onTap, {Color? color}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -568,8 +627,9 @@ class _ShopProductCard extends StatelessWidget {
           boxShadow: const [BoxShadow(color: Color(0x1A000000), offset: Offset(0, 2), blurRadius: 4)],
           border: Border.all(color: const Color(0xFFF1F5F9)),
         ),
-        child: Icon(icon, size: 14, color: const Color(0xFF475569)),
+        child: Icon(icon, size: 14, color: color ?? const Color(0xFF475569)),
       ),
     );
   }
 }
+

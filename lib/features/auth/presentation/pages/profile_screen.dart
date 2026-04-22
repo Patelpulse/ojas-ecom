@@ -47,7 +47,7 @@ class ProfileScreen extends StatelessWidget {
                             const SizedBox(height: 24),
                             _buildAccountInfoCard(isMobile),
                             const SizedBox(height: 24),
-                            _buildQuickActionsCard(isMobile),
+                            _buildQuickActionsCard(context, isMobile),
                           ],
                         )
                       else
@@ -63,7 +63,7 @@ class ProfileScreen extends StatelessWidget {
                                   const SizedBox(height: 24),
                                   _buildAccountInfoCard(isMobile),
                                   const SizedBox(height: 24),
-                                  _buildQuickActionsCard(isMobile),
+                                  _buildQuickActionsCard(context, isMobile),
                                 ],
                               ),
                             ),
@@ -211,14 +211,14 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActionsCard(bool isMobile) {
+  Widget _buildQuickActionsCard(BuildContext context, bool isMobile) {
     final ordersAction = _buildQuickActionItem(
       icon: Icons.receipt_long_outlined,
       iconBgColor: const Color(0xFFEFF6FF),
       iconColor: const Color(0xFF3B82F6),
       title: 'My Orders',
       subtitle: 'View order history',
-      onTap: () {},
+      onTap: () => Navigator.of(context).pushNamed('/orders'),
     );
     final wishlistAction = _buildQuickActionItem(
       icon: Icons.favorite_border_outlined,

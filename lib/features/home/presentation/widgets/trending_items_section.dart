@@ -84,7 +84,7 @@ class TrendingItemsSection extends StatelessWidget {
                       crossAxisCount: 2,
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
-                      childAspectRatio: 1.5,
+                      childAspectRatio: 1.1,
                       physics: const NeverScrollableScrollPhysics(),
                       children: const [
                         ServiceCard(
