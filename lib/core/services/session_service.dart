@@ -12,14 +12,18 @@ class SessionService extends ChangeNotifier {
 
   final ValueNotifier<UserModel?> userNotifier = ValueNotifier<UserModel?>(null);
   final ValueNotifier<bool> isInitializedNotifier = ValueNotifier<bool>(false);
+  String? _token;
 
   UserModel? get currentUser => userNotifier.value;
   bool get isLoggedIn => userNotifier.value != null;
   bool get isInitialized => isInitializedNotifier.value;
+  String? get token => _token;
 
-  void setUser(UserModel? user) {
+  void setUser(UserModel? user, {String? token}) {
     userNotifier.value = user;
+    if (token != null) _token = token;
     if (user == null) {
+      _token = null;
       CartController.instance.clear();
       WishlistController.instance.fetchWishlist(); // Will clear since token is null
     } else {
@@ -31,6 +35,7 @@ class SessionService extends ChangeNotifier {
   Future<void> initSession() async {
     try {
       final authService = AuthService();
+      _token = await authService.getToken();
       final user = await authService.getCurrentUser();
       userNotifier.value = user;
       
@@ -40,6 +45,7 @@ class SessionService extends ChangeNotifier {
       }
     } catch (e) {
       userNotifier.value = null;
+      _token = null;
     } finally {
       isInitializedNotifier.value = true;
       notifyListeners();
@@ -52,6 +58,7 @@ class SessionService extends ChangeNotifier {
     CartController.instance.clear();
     WishlistController.instance.fetchWishlist();
     userNotifier.value = null;
+    _token = null;
     notifyListeners();
   }
 }

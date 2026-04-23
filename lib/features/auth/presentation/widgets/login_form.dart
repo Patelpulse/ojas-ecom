@@ -35,7 +35,7 @@ class _LoginFormState extends State<LoginForm> {
 
       if (response.success) {
         if (mounted) {
-          SessionService.instance.setUser(response.user);
+          SessionService.instance.setUser(response.user, token: response.token);
           await CartController.instance.loadCart();
           Navigator.of(context).pushReplacementNamed('/welcome', arguments: response.user);
         }
@@ -154,7 +154,7 @@ class _LoginFormState extends State<LoginForm> {
 
               if (response.success) {
                 if (mounted) {
-                  SessionService.instance.setUser(response.user);
+                  SessionService.instance.setUser(response.user, token: response.token);
                   await CartController.instance.loadCart();
                   Navigator.of(context).pushReplacementNamed('/welcome', arguments: response.user);
                 }

@@ -20,9 +20,8 @@ class BlogPage extends StatefulWidget {
 class _BlogPageState extends State<BlogPage> {
   String _selectedCategory = 'All';
   List<dynamic> _blogs = [];
+  List<String> _categories = ['All'];
   bool _isLoading = true;
-
-  final List<String> categories = ['All', 'Technology', 'Home & Living', 'Tips', 'Fashion', 'Fitness'];
   
   late Function(dynamic) _adminUpdateListener;
 
@@ -54,8 +53,17 @@ class _BlogPageState extends State<BlogPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success']) {
+          final blogs = data['data'] as List;
+          final categoriesSet = {'All'};
+          for (var blog in blogs) {
+            if (blog['category'] != null && blog['category'].toString().isNotEmpty) {
+              categoriesSet.add(blog['category']);
+            }
+          }
+          
           setState(() {
-            _blogs = data['data'];
+            _blogs = blogs;
+            _categories = categoriesSet.toList();
           });
         }
       }
@@ -217,7 +225,7 @@ class _BlogPageState extends State<BlogPage> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: categories.map((cat) {
+        children: _categories.map((cat) {
           bool isActive = cat == _selectedCategory;
           return Padding(
             padding: const EdgeInsets.only(right: 12),
