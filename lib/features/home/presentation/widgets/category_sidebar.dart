@@ -113,7 +113,11 @@ class CategorySidebar extends StatelessWidget {
                           ),
                           trailing: const Icon(Icons.chevron_right, size: 16, color: Colors.grey),
                           onTap: () {
-                            // TODO: Navigate to category products page
+                            Navigator.pushNamed(
+                              context, 
+                              '/shop', 
+                              arguments: {'category': title, 'subcategory': 'All'}
+                            );
                           },
                           dense: true,
                           hoverColor: AppColors.bgSecondaryLight,
@@ -145,7 +149,11 @@ class CategorySidebar extends StatelessWidget {
                               ),
                             ),
                             onTap: () {
-                              // TODO: Navigate to subcategory products page
+                              Navigator.pushNamed(
+                                context, 
+                                '/shop', 
+                                arguments: {'category': title, 'subcategory': sub['name'] ?? ''}
+                              );
                             },
                             dense: true,
                             visualDensity: VisualDensity.compact,

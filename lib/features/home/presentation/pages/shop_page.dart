@@ -9,7 +9,14 @@ import 'package:ojas_user/core/controllers/wishlist_controller.dart';
 import 'package:provider/provider.dart';
 
 class ShopPage extends StatefulWidget {
-  const ShopPage({super.key});
+  final String? initialCategory;
+  final String? initialSubCategory;
+
+  const ShopPage({
+    super.key,
+    this.initialCategory,
+    this.initialSubCategory,
+  });
 
   @override
   State<ShopPage> createState() => _ShopPageState();
@@ -17,17 +24,34 @@ class ShopPage extends StatefulWidget {
 
 class _ShopPageState extends State<ShopPage> {
   String _selectedCategory = 'All';
+  String _selectedSubCategory = 'All';
   String _selectedBrand = 'All';
   String _selectedPrice = 'All';
   bool _inStockOnly = false;
   String _sortBy = 'Featured';
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialCategory != null) {
+      _selectedCategory = widget.initialCategory!;
+    }
+    if (widget.initialSubCategory != null) {
+      _selectedSubCategory = widget.initialSubCategory!;
+    }
+  }
 
   List<dynamic> get _shopProducts {
     var list = HomeController.instance.shopProducts.toList();
     
     // 1. Filtering by Category
     if (_selectedCategory != 'All') {
-      list = list.where((p) => (p['category'] ?? p['subCategory'] ?? '') == _selectedCategory).toList();
+      list = list.where((p) => (p['category'] ?? '') == _selectedCategory).toList();
+    }
+
+    // 1.1 Filtering by SubCategory
+    if (_selectedSubCategory != 'All') {
+      list = list.where((p) => (p['subCategory'] ?? '') == _selectedSubCategory).toList();
     }
 
     // 2. Filtering by Brand
@@ -333,8 +357,34 @@ class _ShopPageState extends State<ShopPage> {
           _radioGroup(
             ['All', ...HomeController.instance.categories.map((c) => (c['name'] ?? '').toString()).where((n) => n.isNotEmpty)], 
             _selectedCategory, 
-            (v) => setState(() => _selectedCategory = v!)
+            (v) {
+              setState(() {
+                _selectedCategory = v!;
+                _selectedSubCategory = 'All'; // Reset subcategory when category changes
+              });
+            }
           ),
+          
+          if (_selectedCategory != 'All') ...[
+            const SizedBox(height: 20),
+            _sidebarTitle('Subcategories'),
+            Builder(
+              builder: (context) {
+                final cat = HomeController.instance.categories.firstWhere(
+                  (c) => c['name'] == _selectedCategory,
+                  orElse: () => {},
+                );
+                final List<dynamic> subs = cat['subcategories'] ?? [];
+                if (subs.isEmpty) return const SizedBox.shrink();
+                
+                return _radioGroup(
+                  ['All', ...subs.map((s) => s['name'].toString())],
+                  _selectedSubCategory,
+                  (v) => setState(() => _selectedSubCategory = v!)
+                );
+              },
+            ),
+          ],
           
           const SizedBox(height: 24),
           _sidebarTitle('Brands'),

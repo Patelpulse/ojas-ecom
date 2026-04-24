@@ -13,8 +13,8 @@ class TermsConditionsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isMobile = Responsive.isMobile(context);
-    final settings = context.watch<SettingsController>().settings;
-    final String customContent = settings.termsConditions;
+    final settings = SettingsController.instance.settings;
+    final String customContent = settings.termsConditions.trim();
 
     return OjasLayout(
       activeTitle: 'TERMS & CONDITIONS',
@@ -312,7 +312,10 @@ class TermsConditionsPage extends StatelessWidget {
     ];
 
     if (isMobile) return Column(children: children);
-    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: children);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start, 
+      children: children.map((c) => c is SizedBox ? c : Expanded(child: c)).toList(),
+    );
   }
 
   Widget _columnCard(String title, String subtitle, IconData icon, Color color, List<String> items, bool isMobile) {
@@ -443,9 +446,11 @@ class TermsConditionsPage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _contactCard(Icons.email_outlined, 'Email', settings.contactEmail, isMobile),
-              _contactCard(Icons.phone_outlined, 'Phone', settings.contactPhone, isMobile),
-              _contactCard(Icons.location_on_outlined, 'Address', settings.contactAddress, isMobile),
+              Expanded(child: _contactCard(Icons.email_outlined, 'Email', settings.contactEmail, isMobile)),
+              const SizedBox(width: 20),
+              Expanded(child: _contactCard(Icons.phone_outlined, 'Phone', settings.contactPhone, isMobile)),
+              const SizedBox(width: 20),
+              Expanded(child: _contactCard(Icons.location_on_outlined, 'Address', settings.contactAddress, isMobile)),
             ],
           ),
       ],
@@ -454,7 +459,6 @@ class TermsConditionsPage extends StatelessWidget {
 
   Widget _contactCard(IconData icon, String title, String value, bool isMobile) {
     return Container(
-      width: isMobile ? double.infinity : 300,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
       child: Column(

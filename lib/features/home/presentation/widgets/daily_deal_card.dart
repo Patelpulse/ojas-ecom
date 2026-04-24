@@ -34,7 +34,7 @@ class DailyDealCard extends StatelessWidget {
             ],
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // 1. Image & Badge
               Stack(
@@ -124,7 +124,7 @@ class DailyDealCard extends StatelessWidget {
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Text(
@@ -147,14 +147,14 @@ class DailyDealCard extends StatelessWidget {
                           ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Text(
                       'They key to have more time is to them well, but we love them anyway. Premium quality guaranteed.',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(color: Colors.grey, fontSize: 13),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     
                     // Progress Bar
                     Row(
@@ -174,7 +174,7 @@ class DailyDealCard extends StatelessWidget {
                         minHeight: 6,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     
                     // Buttons
                     Row(

@@ -64,10 +64,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // Force redirect to home page on initial load/refresh
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _navigatorKey.currentState?.pushReplacementNamed('/');
-    });
   }
 
   @override
@@ -91,7 +87,16 @@ class _MyAppState extends State<MyApp> {
             '/': (context) => const HomePage(),
             '/features': (context) => const FeaturesPage(),
             '/deals': (context) => const DealsPage(),
-            '/shop': (context) => const ShopPage(),
+            '/shop': (context) {
+              final args = ModalRoute.of(context)?.settings.arguments;
+              if (args is Map<String, dynamic>) {
+                return ShopPage(
+                  initialCategory: args['category'],
+                  initialSubCategory: args['subcategory'],
+                );
+              }
+              return const ShopPage();
+            },
             '/become-vendor': (context) => const BecomeVendorPage(),
             '/wishlist': (context) => const WishlistPage(),
             '/blog': (context) => const BlogPage(),

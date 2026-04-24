@@ -34,7 +34,7 @@ class LatestProductsSection extends StatelessWidget {
                   ),
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () => Navigator.pushNamed(context, '/shop'),
                   child: Text(
                     'View all',
                     style: GoogleFonts.inter(
@@ -86,7 +86,7 @@ class LatestProductsSection extends StatelessWidget {
                     crossAxisCount: isMobile ? 2 : 5,
                     crossAxisSpacing: isMobile ? 12 : 16,
                     mainAxisSpacing: isMobile ? 12 : 16,
-                    childAspectRatio: isMobile ? 0.60 : 0.62,
+                    childAspectRatio: isMobile ? 0.72 : 0.78,
                   ),
                   itemBuilder: (context, index) {
                     final p = backendProducts[index];

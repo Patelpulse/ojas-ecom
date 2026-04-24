@@ -15,6 +15,11 @@ class AppSettings {
   final String returnRefundPolicy;
   final String termsConditions;
   final String privacyPolicy;
+  final String facebookLink;
+  final String instagramLink;
+  final String twitterLink;
+  final String youtubeLink;
+  final String linkedinLink;
 
   AppSettings({
     required this.marketplaceName,
@@ -33,6 +38,11 @@ class AppSettings {
     required this.returnRefundPolicy,
     required this.termsConditions,
     required this.privacyPolicy,
+    required this.facebookLink,
+    required this.instagramLink,
+    required this.twitterLink,
+    required this.youtubeLink,
+    required this.linkedinLink,
   });
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
@@ -53,6 +63,11 @@ class AppSettings {
       returnRefundPolicy: json['returnRefundPolicy'] ?? '',
       termsConditions: json['termsConditions'] ?? '',
       privacyPolicy: json['privacyPolicy'] ?? '',
+      facebookLink: json['facebookLink'] ?? '',
+      instagramLink: json['instagramLink'] ?? '',
+      twitterLink: json['twitterLink'] ?? '',
+      youtubeLink: json['youtubeLink'] ?? '',
+      linkedinLink: json['linkedinLink'] ?? '',
     );
   }
 
@@ -74,6 +89,11 @@ class AppSettings {
       returnRefundPolicy: '',
       termsConditions: '',
       privacyPolicy: '',
+      facebookLink: '',
+      instagramLink: '',
+      twitterLink: '',
+      youtubeLink: '',
+      linkedinLink: '',
     );
   }
 }

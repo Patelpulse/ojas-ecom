@@ -4,6 +4,8 @@ import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
 import 'package:ojas_user/core/controllers/settings_controller.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:ionicons/ionicons.dart';
 
 class OjasFooter extends StatelessWidget {
   const OjasFooter({super.key});
@@ -46,10 +48,26 @@ class OjasFooter extends StatelessWidget {
                       const SizedBox(height: 24),
                       Row(
                         children: [
-                          _socialIcon(Icons.facebook),
-                          _socialIcon(Icons.camera_alt),
-                          _socialIcon(Icons.share),
-                          _socialIcon(Icons.play_circle_outline),
+                          _socialIcon(
+                            Ionicons.logo_facebook, 
+                            onTap: settings.facebookLink.isNotEmpty ? () => _launchURL(settings.facebookLink) : null
+                          ),
+                          _socialIcon(
+                            Ionicons.logo_instagram, 
+                            onTap: settings.instagramLink.isNotEmpty ? () => _launchURL(settings.instagramLink) : null
+                          ),
+                          _socialIcon(
+                            Ionicons.logo_twitter, 
+                            onTap: settings.twitterLink.isNotEmpty ? () => _launchURL(settings.twitterLink) : null
+                          ),
+                          _socialIcon(
+                            Ionicons.logo_youtube, 
+                            onTap: settings.youtubeLink.isNotEmpty ? () => _launchURL(settings.youtubeLink) : null
+                          ),
+                          _socialIcon(
+                            Ionicons.logo_linkedin, 
+                            onTap: settings.linkedinLink.isNotEmpty ? () => _launchURL(settings.linkedinLink) : null
+                          ),
                         ],
                       )
                     ],
@@ -134,6 +152,13 @@ class OjasFooter extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      debugPrint('Could not launch $urlString');
+    }
   }
 
   Widget _buildLogo(String name) {
@@ -262,10 +287,19 @@ class OjasFooter extends StatelessWidget {
     );
   }
 
-  Widget _socialIcon(IconData icon) {
-    return Container(
-      margin: const EdgeInsets.only(right: 12),
-      child: Icon(icon, color: Colors.white70, size: 20),
+  Widget _socialIcon(IconData icon, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      onHover: (hovering) {}, // Optional: Add hover effect if needed
+      child: Container(
+        margin: const EdgeInsets.only(right: 16),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: Colors.white70, size: 18),
+      ),
     );
   }
   

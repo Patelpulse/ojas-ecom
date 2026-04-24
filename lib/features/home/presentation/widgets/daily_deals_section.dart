@@ -89,7 +89,7 @@ class _DailyDealsSectionState extends State<DailyDealsSection> {
                   carouselController: _carouselController,
                   itemCount: (dailyDeals.length / itemsPerPage).ceil(),
                   options: CarouselOptions(
-                    height: isMobile ? 420 : 450,
+                    height: isMobile ? 350 : 280,
                     viewportFraction: 1.0,
                     autoPlay: true,
                     autoPlayInterval: const Duration(seconds: 7),

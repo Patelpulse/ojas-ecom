@@ -64,7 +64,7 @@ class _LatestProductCardState extends State<LatestProductCard> {
                       ClipRRect(
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
                         child: SizedBox(
-                          height: 180,
+                          height: 150,
                           width: double.infinity,
                           child: Image.network(
                             widget.imageUrl,
@@ -134,7 +134,7 @@ class _LatestProductCardState extends State<LatestProductCard> {
 
                   // Details
                   Padding(
-                    padding: const EdgeInsets.all(12.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -148,7 +148,7 @@ class _LatestProductCardState extends State<LatestProductCard> {
                             color: const Color(0xFF0F172A),
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         Row(
                           children: [
                             Text(
@@ -170,9 +170,9 @@ class _LatestProductCardState extends State<LatestProductCard> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         _StarRating(rating: widget.rating),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 6),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
