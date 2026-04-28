@@ -95,7 +95,7 @@ class _BlogPageState extends State<BlogPage> {
         child: _isLoading 
           ? const Center(child: CircularProgressIndicator(color: Color(0xFFF01B6B)))
           : CenteredContent(
-          horizontalPadding: isMobile ? 12 : 20,
+          horizontalPadding: isMobile ? 16 : 40,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

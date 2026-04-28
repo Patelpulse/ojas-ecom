@@ -6,6 +6,7 @@ import 'package:ojas_user/core/utils/responsive.dart';
 import 'package:ojas_user/core/controllers/home_controller.dart';
 import 'package:ojas_user/features/cart/application/cart_controller.dart';
 import 'package:ojas_user/core/services/api_service.dart';
+import 'package:ojas_user/features/home/domain/models/product_model.dart';
 
 class LatestProductsSection extends StatelessWidget {
   const LatestProductsSection({super.key});
@@ -86,7 +87,7 @@ class LatestProductsSection extends StatelessWidget {
                     crossAxisCount: isMobile ? 2 : 5,
                     crossAxisSpacing: isMobile ? 12 : 16,
                     mainAxisSpacing: isMobile ? 12 : 16,
-                    childAspectRatio: isMobile ? 0.72 : 0.78,
+                    mainAxisExtent: 340,
                   ),
                   itemBuilder: (context, index) {
                     final p = backendProducts[index];
@@ -99,15 +100,13 @@ class LatestProductsSection extends StatelessWidget {
                     final discountPrice = (p['discountPrice'] ?? 0).toDouble();
                     final price = (p['price'] ?? 0).toDouble();
                     
+                    final productModel = ProductModel.fromMap(p);
+                    
                     return LatestProductCard(
-                      productId: id,
-                      imageUrl: imageUrl,
-                      title: p['name']?.toString() ?? 'Product',
-                      price: discountPrice > 0 ? discountPrice : price,
-                      oldPrice: discountPrice > 0 ? price : price * 1.2,
+                      product: productModel,
                       rating: 4.0,
                       onAddToCart: () async {
-                        final success = await CartController.instance.addToCart(id);
+                        final success = await CartController.instance.addToCart(id, moq: productModel.moq);
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             content: Text(success ? 'Added to cart!' : 'Failed. Please login.'),

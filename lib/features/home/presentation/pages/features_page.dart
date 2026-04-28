@@ -20,7 +20,7 @@ class FeaturesPage extends StatelessWidget {
     return OjasLayout(
       activeTitle: 'FEATURES',
       child: CenteredContent(
-        horizontalPadding: isMobile ? 12 : 20,
+        horizontalPadding: isMobile ? 16 : 40,
         child: ListenableBuilder(
           listenable: HomeController.instance,
           builder: (context, _) {

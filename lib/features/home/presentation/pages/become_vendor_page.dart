@@ -344,7 +344,7 @@ class _BecomeVendorPageState extends State<BecomeVendorPage> {
         color: const Color(0xFFF8FAFC),
         padding: EdgeInsets.symmetric(vertical: isMobile ? 32 : 80),
         child: CenteredContent(
-          horizontalPadding: isMobile ? 12 : 24,
+          horizontalPadding: isMobile ? 16 : 40,
           child: Column(
             children: [
               if (!_isLogin)

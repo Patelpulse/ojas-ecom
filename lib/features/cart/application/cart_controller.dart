@@ -10,7 +10,15 @@ class CartController extends ChangeNotifier {
   static CartController get instance => _instance;
 
   CartController._internal() {
-    _loadLocalCart();
+    _initCart();
+  }
+
+  Future<void> _initCart() async {
+    await _loadLocalCart();
+    final token = await _getToken();
+    if (token != null) {
+      await loadCart();
+    }
   }
 
   Future<String?> _getToken() async {
@@ -64,7 +72,18 @@ class CartController extends ChangeNotifier {
         double price = (product['discountPrice'] != null && product['discountPrice'] > 0 
             ? product['discountPrice'] 
             : (product['price'] ?? 0)).toDouble();
-        total += price * (item['quantity'] ?? 1);
+            
+        int quantity = item['quantity'] ?? 1;
+        int moq = product['moq'] ?? 1;
+        double moqDiscount = (product['moqDiscount'] ?? 0).toDouble();
+
+        if (quantity >= moq && moqDiscount > 0) {
+          price = price - (price * (moqDiscount / 100));
+        }
+        
+        price = price.roundToDouble();
+            
+        total += price * quantity;
       }
     }
     return total;
@@ -74,13 +93,25 @@ class CartController extends ChangeNotifier {
     double saved = 0;
     for (var item in _items) {
       final product = item['product'];
-      if (product != null && product is Map && 
-          product['discountPrice'] != null && 
-          product['discountPrice'] > 0 && 
-          product['price'] != null) {
-        double diff = (product['price'] - product['discountPrice']).toDouble();
+      if (product != null && product is Map && product['price'] != null) {
+        double originalPrice = (product['price']).toDouble();
+        double currentPrice = (product['discountPrice'] != null && product['discountPrice'] > 0 
+            ? product['discountPrice'] 
+            : originalPrice).toDouble();
+
+        int quantity = item['quantity'] ?? 1;
+        int moq = product['moq'] ?? 1;
+        double moqDiscount = (product['moqDiscount'] ?? 0).toDouble();
+
+        if (quantity >= moq && moqDiscount > 0) {
+          currentPrice = currentPrice - (currentPrice * (moqDiscount / 100));
+        }
+        
+        currentPrice = currentPrice.roundToDouble();
+
+        double diff = originalPrice - currentPrice;
         if (diff > 0) {
-          saved += diff * (item['quantity'] ?? 1);
+          saved += diff * quantity;
         }
       }
     }
@@ -107,11 +138,22 @@ class CartController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> addToCart(String productId, {int quantity = 1}) async {
+  Future<bool> addToCart(String productId, {int quantity = 1, int? moq}) async {
     final token = await _getToken();
     if (token == null) return false;
     
-    final success = await _cartService.addToCart(productId, quantity: quantity);
+    int qtyToAdd = quantity;
+    if (moq != null && moq > 1 && quantity == 1) {
+      bool exists = _items.any((item) {
+        final p = item['product'];
+        return p != null && (p['_id'] == productId || p['id'] == productId);
+      });
+      if (!exists) {
+        qtyToAdd = moq;
+      }
+    }
+
+    final success = await _cartService.addToCart(productId, quantity: qtyToAdd);
     if (success) {
       await loadCart();
       return true;

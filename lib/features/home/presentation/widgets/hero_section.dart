@@ -78,17 +78,17 @@ class _HeroSectionState extends State<HeroSection> {
                   )
                 else
                   SizedBox(
-                    height: 600,
+                    height: 420,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const CategorySidebar(),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 24),
                         Expanded(
-                          flex: 4,
-                          child: _buildCarousel(displayBanners, 600),
+                          flex: 2,
+                          child: _buildCarousel(displayBanners, 420),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 24),
                         Expanded(
                           flex: 1,
                           child: Column(
@@ -102,7 +102,7 @@ class _HeroSectionState extends State<HeroSection> {
                                   badgeColor: const Color(0xFFF01B6B),
                                 ),
                               ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 16),
                               Expanded(
                                 child: HeroSideBanner(
                                   title: sideBottom.title,
@@ -152,9 +152,10 @@ class _HeroSectionState extends State<HeroSection> {
         // Dots indicator
         Positioned(
           bottom: 40,
-          left: 40,
+          left: 0,
+          right: 0,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: items.asMap().entries.map((entry) {
               bool isActive = _currentBannerIndex == entry.key;
               return GestureDetector(

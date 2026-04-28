@@ -115,7 +115,7 @@ class TrendingItemsSection extends StatelessWidget {
                 )
               else
                 SizedBox(
-                  height: 380,
+                  height: 580,
                   child: Row(
                     children: [
                       Expanded(
@@ -124,7 +124,7 @@ class TrendingItemsSection extends StatelessWidget {
                           crossAxisCount: 2,
                           mainAxisSpacing: 16,
                           crossAxisSpacing: 16,
-                          childAspectRatio: 1.4,
+                          childAspectRatio: 1.3,
                           physics: const NeverScrollableScrollPhysics(),
                           children: const [
                             ServiceCard(

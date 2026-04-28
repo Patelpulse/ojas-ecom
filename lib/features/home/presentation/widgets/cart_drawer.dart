@@ -140,6 +140,23 @@ class _CartDrawerState extends State<CartDrawer> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () async {
+                            for (var item in items) {
+                              final p = item['product'];
+                              final qty = item['quantity'] ?? 1;
+                              final moq = p['moq'] ?? 1;
+                              if (qty < moq) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('${p['name']} requires a minimum order quantity of $moq'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                                return;
+                              }
+                            }
+
                             final success = await controller.checkout(
                               shippingAddress: {
                                 'street': 'Main Street 123',
@@ -198,11 +215,22 @@ class _CartDrawerState extends State<CartDrawer> {
     if (product == null) return const SizedBox();
 
     final String name = product['name'] ?? 'Product';
-    final double price = (product['discountPrice'] ?? product['price'] ?? 0).toDouble();
+    double price = (product['discountPrice'] != null && product['discountPrice'] > 0 
+        ? product['discountPrice'] 
+        : (product['price'] ?? 0)).toDouble();
     final double oldPrice = (product['price'] ?? 0).toDouble();
-    final int discount = oldPrice > 0 && oldPrice > price ? (((oldPrice - price) / oldPrice) * 100).toInt() : 0;
     final String imageUrl = product['image'] ?? 'https://via.placeholder.com/150';
     final int quantity = item['quantity'] ?? 1;
+
+    final int moq = product['moq'] ?? 1;
+    final double moqDiscount = (product['moqDiscount'] ?? 0).toDouble();
+
+    if (quantity >= moq && moqDiscount > 0) {
+      price = price - (price * (moqDiscount / 100));
+    }
+    price = price.roundToDouble();
+
+    final int discount = oldPrice > 0 && oldPrice > price ? (((oldPrice - price) / oldPrice) * 100).toInt() : 0;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -288,6 +316,25 @@ class _CartDrawerState extends State<CartDrawer> {
                     ],
                   ],
                 ),
+                if (quantity >= moq && moqDiscount > 0) ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8F5E9),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: const Color(0xFFC8E6C9)),
+                    ),
+                    child: Text(
+                      'Includes ${moqDiscount.toInt()}% MOQ Discount',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF2E7D32),
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 // Quantity and Delete row
                 Row(
@@ -300,8 +347,16 @@ class _CartDrawerState extends State<CartDrawer> {
                       child: Row(
                         children: [
                           _quantityButton(Icons.remove, () {
-                            if (quantity > 1) {
+                            final int moq = product['moq'] ?? 1;
+                            if (quantity > moq) {
                               CartController.instance.addToCart(product['_id'], quantity: -1);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Minimum order quantity is $moq'),
+                                  duration: const Duration(seconds: 1),
+                                ),
+                              );
                             }
                           }),
                           Padding(

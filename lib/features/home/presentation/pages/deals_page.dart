@@ -57,7 +57,7 @@ class _DealsPageState extends State<DealsPage> {
             child: Column(
               children: [
                 CenteredContent(
-                  horizontalPadding: isMobile ? 12 : 24,
+                  horizontalPadding: isMobile ? 16 : 40,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

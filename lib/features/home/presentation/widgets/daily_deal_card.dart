@@ -125,27 +125,30 @@ class DailyDealCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Text(
-                          '₹${product.price.toStringAsFixed(2)}',
-                          style: GoogleFonts.inter(
-                            color: const Color(0xFFF01B6B),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        if (product.oldPrice != null)
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
                           Text(
-                            '₹${product.oldPrice!.toStringAsFixed(2)}',
+                            '₹${product.price.toStringAsFixed(2)}',
                             style: GoogleFonts.inter(
-                              color: Colors.grey,
-                              decoration: TextDecoration.lineThrough,
-                              fontSize: 14,
+                              color: const Color(0xFFF01B6B),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
                             ),
                           ),
-                      ],
+                          const SizedBox(width: 12),
+                          if (product.oldPrice != null)
+                            Text(
+                              '₹${product.oldPrice!.toStringAsFixed(2)}',
+                              style: GoogleFonts.inter(
+                                color: Colors.grey,
+                                decoration: TextDecoration.lineThrough,
+                                fontSize: 14,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -160,8 +163,9 @@ class DailyDealCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Available: ${product.available}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                        Text('Sold: ${product.sold}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFFF01B6B))),
+                        Flexible(child: Text('Available: ${product.available}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
+                        const SizedBox(width: 8),
+                        Flexible(child: Text('Sold: ${product.sold}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFFF01B6B)), overflow: TextOverflow.ellipsis)),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -204,10 +208,16 @@ class DailyDealCard extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFF01B6B),
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12), // Adjusted vertical padding
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            minimumSize: const Size(80, 40),
                           ),
-                          child: const Text('Add to Cart', style: TextStyle(fontWeight: FontWeight.bold)),
+                          child: const FittedBox(
+                            child: Text(
+                              'Add to Cart', 
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                          ),
                         ),
                       ],
                     ),

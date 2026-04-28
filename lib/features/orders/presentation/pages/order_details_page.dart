@@ -23,7 +23,7 @@ class OrderDetailsPage extends StatelessWidget {
         color: const Color(0xFFF8F9FA),
         padding: EdgeInsets.symmetric(vertical: isMobile ? 32 : 60),
         child: CenteredContent(
-          horizontalPadding: isMobile ? 12 : 24,
+          horizontalPadding: isMobile ? 16 : 40,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

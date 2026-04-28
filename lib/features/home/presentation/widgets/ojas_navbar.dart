@@ -29,7 +29,7 @@ class OjasNavbar extends StatelessWidget implements PreferredSizeWidget {
             height: 40,
             color: AppColors.primaryIndigo.withOpacity(0.95),
             child: const CenteredContent(
-              horizontalPadding: 20,
+              horizontalPadding: 40,
               child: _TopInfoBarContent(),
             ),
           ),
@@ -39,7 +39,7 @@ class OjasNavbar extends StatelessWidget implements PreferredSizeWidget {
             height: 70,
             color: AppColors.primaryIndigo,
             child: CenteredContent(
-              horizontalPadding: 20,
+              horizontalPadding: 40,
               child: _MainNavBarContent(activeTitle: activeTitle),
             ),
           ),
@@ -49,7 +49,7 @@ class OjasNavbar extends StatelessWidget implements PreferredSizeWidget {
             height: 70,
             color: AppColors.primaryIndigo.withOpacity(0.98),
             child: const CenteredContent(
-              horizontalPadding: 20,
+              horizontalPadding: 40,
               child: _SearchBarRowContent(),
             ),
           ),

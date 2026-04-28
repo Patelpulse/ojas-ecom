@@ -12,6 +12,9 @@ class ProductModel {
   final int? available;
   final int? sold;
 
+  final double? gst;
+  final String? hsnCode;
+
   ProductModel({
     required this.id,
     required this.name,
@@ -22,6 +25,10 @@ class ProductModel {
     this.isFlashDeal = false,
     this.available,
     this.sold,
+    this.relatedProducts = const [],
+    this.gst,
+    this.hsnCode,
+    this.moq = 1,
   });
 
   factory ProductModel.fromMap(Map<String, dynamic> p) {
@@ -46,10 +53,18 @@ class ProductModel {
       imageUrl: ApiService.formatImageUrl(imageUrl),
       discount: disc,
       isFlashDeal: disc > 20,
-      available: p['stock'] ?? 10,
+      available: p['stock'] ?? 0,
       sold: 5, // Mocked sold count
+      relatedProducts: (p['relatedProducts'] as List?)?.map((e) => e.toString()).toList() ?? [],
+      gst: (p['gst'] ?? 0).toDouble(),
+      hsnCode: p['hsnCode'],
+      moq: p['moq'] ?? 1,
     );
   }
+
+  final int moq;
+
+  final List<String> relatedProducts;
 
   static List<ProductModel> get dummyProducts {
     return HomeController.instance.products.map((p) => ProductModel.fromMap(p)).toList();

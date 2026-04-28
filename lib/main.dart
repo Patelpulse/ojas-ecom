@@ -12,6 +12,8 @@ import 'package:ojas_user/features/home/presentation/pages/deals_page.dart';
 import 'package:ojas_user/features/home/presentation/pages/shop_page.dart';
 import 'package:ojas_user/features/home/presentation/pages/blog_page.dart';
 import 'package:ojas_user/features/home/presentation/pages/become_vendor_page.dart';
+import 'package:ojas_user/features/home/presentation/pages/product_detail_page.dart';
+import 'package:ojas_user/features/home/domain/models/product_model.dart';
 import 'package:ojas_user/features/auth/presentation/pages/auth_screen.dart';
 import 'package:ojas_user/features/auth/presentation/pages/profile_screen.dart';
 import 'package:ojas_user/features/auth/presentation/pages/welcome_screen.dart';
@@ -96,6 +98,10 @@ class _MyAppState extends State<MyApp> {
                 );
               }
               return const ShopPage();
+            },
+            '/product-detail': (context) {
+              final product = ModalRoute.of(context)?.settings.arguments as ProductModel;
+              return ProductDetailPage(product: product);
             },
             '/become-vendor': (context) => const BecomeVendorPage(),
             '/wishlist': (context) => const WishlistPage(),

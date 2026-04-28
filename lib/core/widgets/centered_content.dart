@@ -8,7 +8,7 @@ class CenteredContent extends StatelessWidget {
   const CenteredContent({
     super.key,
     required this.child,
-    this.maxWidth = 1400,
+    this.maxWidth = 1350,
     this.horizontalPadding = 40,
   });
 

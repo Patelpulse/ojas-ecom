@@ -6,6 +6,7 @@ import 'package:ojas_user/core/utils/responsive.dart';
 import 'package:ojas_user/core/controllers/home_controller.dart';
 import 'package:ojas_user/features/cart/application/cart_controller.dart';
 import 'package:ojas_user/core/controllers/wishlist_controller.dart';
+import 'package:ojas_user/features/home/domain/models/product_model.dart';
 import 'package:provider/provider.dart';
 
 class ShopPage extends StatefulWidget {
@@ -124,7 +125,7 @@ class _ShopPageState extends State<ShopPage> {
         child: Container(
           color: const Color(0xFFF8FAFC),
           child: CenteredContent(
-            horizontalPadding: isMobile ? 12 : 20,
+            horizontalPadding: isMobile ? 16 : 40,
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: isMobile ? 20 : 40),
               child: Row(
@@ -518,8 +519,10 @@ class _ShopProductCard extends StatelessWidget {
       builder: (context, _) {
         final bool isWishlisted = WishlistController.instance.isWishlisted(id);
         
-        return Container(
-          decoration: BoxDecoration(
+        return GestureDetector(
+          onTap: () => Navigator.pushNamed(context, '/product-detail', arguments: ProductModel.fromMap(product)),
+          child: Container(
+            decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: const Color(0xFFE2E8F0)),
@@ -536,9 +539,9 @@ class _ShopProductCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Image Box
-              SizedBox(
-                height: Responsive.isMobile(context) ? 180 : 200,
+              Expanded(
                 child: Stack(
+                  fit: StackFit.expand,
                   children: [
                     Container(
                       color: Colors.white,
@@ -623,12 +626,51 @@ class _ShopProductCard extends StatelessWidget {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          size: 13,
+                          color: (product['stock'] ?? 0) > 0 ? Colors.green.shade600 : Colors.red.shade600,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          (product['stock'] ?? 0) > 0 ? 'In Stock (${product['stock']})' : 'Out of Stock',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: (product['stock'] ?? 0) > 0 ? Colors.green.shade600 : Colors.red.shade600,
+                          ),
+                        ),
+                        if ((product['moq'] ?? 1) > 1) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.blue.shade200),
+                            ),
+                            child: Text(
+                              'MOQ: ${product['moq']}',
+                              style: GoogleFonts.inter(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: () async {
-                          final success = await CartController.instance.addToCart(id);
+                          final int moq = product['moq'] ?? 1;
+                          final success = await CartController.instance.addToCart(id, moq: moq);
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -661,6 +703,7 @@ class _ShopProductCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
         );
       },
     );

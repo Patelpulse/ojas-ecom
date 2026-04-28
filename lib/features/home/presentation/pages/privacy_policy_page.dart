@@ -22,7 +22,7 @@ class PrivacyPolicyPage extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: isMobile ? 32 : 60),
         color: const Color(0xFFF8F9FA),
         child: CenteredContent(
-          horizontalPadding: isMobile ? 12 : 24,
+          horizontalPadding: isMobile ? 16 : 40,
           child: Column(
             children: [
               // 1. Header

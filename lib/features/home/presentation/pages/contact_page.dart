@@ -146,7 +146,7 @@ class _ContactPageState extends State<ContactPage> {
         color: const Color(0xFFF8FAFC),
         padding: EdgeInsets.symmetric(vertical: isMobile ? 32 : 60),
         child: CenteredContent(
-          horizontalPadding: isMobile ? 12 : 24,
+          horizontalPadding: isMobile ? 16 : 40,
           child: Column(
             children: [
               // 1. Header
