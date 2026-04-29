@@ -6,6 +6,7 @@ import 'package:ojas_user/core/widgets/ojas_layout.dart';
 import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
+import 'package:ojas_user/core/services/invoice_service.dart';
 import '../../domain/models/order_model.dart';
 
 class OrderDetailsPage extends StatelessWidget {
@@ -131,6 +132,38 @@ class OrderDetailsPage extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: order.status == 'Delivered'
+                  ? () async {
+                      await InvoiceService.generateAndDownloadInvoice(order.toJson());
+                    }
+                  : null,
+              icon: const Icon(Icons.download_outlined, size: 18),
+              label: const Text('Download Invoice'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFF01B6B),
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: Colors.grey.shade200,
+                disabledForegroundColor: Colors.grey.shade500,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
+              ),
+            ),
+          ),
+          if (order.status != 'Delivered')
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Center(
+                child: Text(
+                  'Invoice will be available after delivery',
+                  style: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade600, fontStyle: FontStyle.italic),
+                ),
+              ),
+            ),
         ],
       ),
     );

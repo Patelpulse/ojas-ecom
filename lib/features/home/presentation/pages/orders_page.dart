@@ -7,6 +7,7 @@ import 'package:ojas_user/core/widgets/centered_content.dart';
 import 'package:ojas_user/core/constants/app_colors.dart';
 import 'package:ojas_user/core/utils/responsive.dart';
 import 'package:ojas_user/features/orders/data/services/order_service.dart';
+import 'package:ojas_user/core/services/invoice_service.dart';
 import 'package:ojas_user/features/orders/domain/models/order_model.dart';
 import 'package:ojas_user/features/orders/presentation/pages/order_details_page.dart';
 
@@ -338,27 +339,50 @@ class _OrdersPageState extends State<OrdersPage> {
                     style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[500]),
                   ),
                   const SizedBox(height: 12),
-                  SizedBox(
-                    width: isMobile ? double.infinity : null,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => OrderDetailsPage(order: order),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OrderDetailsPage(order: order),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.open_in_new, size: 14),
+                          label: const Text('View Details'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFF01B6B),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.open_in_new, size: 14),
-                      label: const Text('View Details'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFF01B6B),
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 12),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: order.status == 'Delivered' ? Colors.blue.shade50 : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconButton(
+                          onPressed: order.status == 'Delivered'
+                              ? () async {
+                                  await InvoiceService.generateAndDownloadInvoice(order.toJson());
+                                }
+                              : null,
+                          icon: Icon(
+                            Icons.download_outlined,
+                            size: 20,
+                            color: order.status == 'Delivered' ? Colors.blue : Colors.grey.shade400,
+                          ),
+                          tooltip: order.status == 'Delivered' ? 'Download Invoice' : 'Invoice available after delivery',
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

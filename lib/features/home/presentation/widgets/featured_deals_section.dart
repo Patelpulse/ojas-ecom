@@ -46,28 +46,31 @@ class FeaturedDealsSection extends StatelessWidget {
                 ),
               )
             else
-              Row(
-                children: [
-                  for (var i = 0; i < featuredProducts.length; i++) ...[
-                    Expanded(
-                      child: ProductCard(
-                        product: featuredProducts[i],
-                        onAddToCart: () async {
-                          final success = await CartController.instance.addToCart(featuredProducts[i].id);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(success ? '${featuredProducts[i].name} added to cart!' : 'Failed. Please login.'),
-                              backgroundColor: success ? Colors.green : Colors.red,
-                              behavior: SnackBarBehavior.floating,
-                              duration: const Duration(seconds: 2),
-                            ));
-                          }
-                        },
+              SizedBox(
+                height: 420,
+                child: Row(
+                  children: [
+                    for (var i = 0; i < featuredProducts.length; i++) ...[
+                      Expanded(
+                        child: ProductCard(
+                          product: featuredProducts[i],
+                          onAddToCart: () async {
+                            final success = await CartController.instance.addToCart(featuredProducts[i].id);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(success ? '${featuredProducts[i].name} added to cart!' : 'Failed. Please login.'),
+                                backgroundColor: success ? Colors.green : Colors.red,
+                                behavior: SnackBarBehavior.floating,
+                                duration: const Duration(seconds: 2),
+                              ));
+                            }
+                          },
+                        ),
                       ),
-                    ),
-                    if (i < featuredProducts.length - 1) const SizedBox(width: 24),
+                      if (i < featuredProducts.length - 1) const SizedBox(width: 24),
+                    ],
                   ],
-                ],
+                ),
               ),
           ],
         ),

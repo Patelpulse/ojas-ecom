@@ -87,7 +87,7 @@ class LatestProductsSection extends StatelessWidget {
                     crossAxisCount: isMobile ? 2 : 5,
                     crossAxisSpacing: isMobile ? 12 : 16,
                     mainAxisSpacing: isMobile ? 12 : 16,
-                    mainAxisExtent: 340,
+                    mainAxisExtent: 380,
                   ),
                   itemBuilder: (context, index) {
                     final p = backendProducts[index];

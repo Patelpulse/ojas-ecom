@@ -31,6 +31,19 @@ class OrderModel {
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'orderId': orderId,
+      'status': status,
+      'totalAmount': totalAmount,
+      'paymentStatus': paymentStatus,
+      'items': items.map((i) => i.toJson()).toList(),
+      'shippingAddress': shippingAddress.toJson(),
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
 }
 
 class OrderItem {
@@ -57,6 +70,16 @@ class OrderItem {
       image: json['image'] ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'product': productId,
+      'name': name,
+      'quantity': quantity,
+      'price': price,
+      'image': image,
+    };
+  }
 }
 
 class ShippingAddress {
@@ -79,6 +102,15 @@ class ShippingAddress {
       state: json['state'] ?? '',
       zipCode: json['zipCode'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'street': street,
+      'city': city,
+      'state': state,
+      'zipCode': zipCode,
+    };
   }
 
   @override

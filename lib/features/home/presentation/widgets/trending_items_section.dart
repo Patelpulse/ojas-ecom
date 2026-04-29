@@ -194,7 +194,7 @@ class TrendingItemsSection extends StatelessWidget {
                     crossAxisCount: isMobile ? 2 : 5,
                     mainAxisSpacing: isMobile ? 12 : 24,
                     crossAxisSpacing: isMobile ? 12 : 24,
-                    childAspectRatio: isMobile ? 0.65 : 0.62,
+                    mainAxisExtent: isMobile ? 380 : 420,
                   ),
                   itemBuilder: (context, index) {
                     final product = ProductModel.fromMap(products[index]);

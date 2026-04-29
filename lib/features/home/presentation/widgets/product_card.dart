@@ -54,19 +54,17 @@ class _ProductCardState extends State<ProductCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Image Stack
-                  Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                        child: AspectRatio(
-                          aspectRatio: 1,
+                  Expanded(
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                           child: Image.network(
                             widget.product.imageUrl,
                             fit: BoxFit.cover,
                           ),
                         ),
-                      ),
                       if (widget.product.discount > 0)
                         Positioned(
                           top: 12,
@@ -118,6 +116,7 @@ class _ProductCardState extends State<ProductCard> {
                       ),
                     ],
                   ),
+                ),
                   
                   // Content
                   Padding(

@@ -168,7 +168,7 @@ class _ShopPageState extends State<ShopPage> {
                               crossAxisCount: isMobile ? 2 : (isTablet ? 2 : 3),
                               crossAxisSpacing: isMobile ? 12 : 20,
                               mainAxisSpacing: isMobile ? 12 : 20,
-                              mainAxisExtent: isMobile ? 350 : 360,
+                              mainAxisExtent: isMobile ? 380 : 420,
                             ),
                             itemBuilder: (context, index) {
                               return _ShopProductCard(product: _shopProducts[index]);
